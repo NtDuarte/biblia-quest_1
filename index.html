@@ -7,11 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #ffffff; --text: #3c3c3c; }
-        body { font-family: 'Nunito', sans-serif; background-color: #f7f7f7; margin: 0; display: flex; justify-content: center; }
+        body { font-family: 'Nunito', sans-serif; background-color: #f7f7f7; margin: 0; display: flex; justify-content: center; color: var(--text); }
         #app { width: 100%; max-width: 480px; background: white; min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; }
         .hidden { display: none !important; }
         .card { border: 2px solid #e5e5e5; border-bottom: 6px solid #e5e5e5; border-radius: 20px; padding: 20px; margin: 15px 0; background: white; }
         .header-stats { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
+        .stat-item { display: flex; align-items: center; gap: 8px; font-weight: 900; }
         .btn-duo { width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 18px; font-weight: 900; text-transform: uppercase; cursor: pointer; background: var(--primary); color: white; border-bottom: 6px solid #46a302; margin-top: 10px; }
         .btn-duo:active { transform: translateY(4px); border-bottom: 2px solid #46a302; }
         .btn-blue { background: var(--blue); border-bottom: 6px solid #1899d6; }
@@ -34,8 +35,11 @@
 
     <div id="main-screen" class="hidden">
         <div class="header-stats">
-            <span id="user-display" style="font-weight: 900; color: var(--primary);">USUÁRIO</span>
-            <div style="display: flex; gap: 20px;">
+            <div>
+                <span id="user-display" style="font-weight: 900; color: var(--primary);">USUÁRIO</span>
+                <div style="font-size: 0.8rem; color: #afafaf;">NÍVEL <b id="level-val" style="color: var(--primary);">1</b></div>
+            </div>
+            <div style="display: flex; gap: 15px;">
                 <div class="stat-item">🔥 <b id="streak-val">0</b></div>
                 <div class="stat-item" style="color:var(--blue)">💎 <b id="xp-val">0</b></div>
             </div>
@@ -72,7 +76,6 @@
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // SUAS CREDENCIAIS INTEGRADAS
   const firebaseConfig = {
     apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
     authDomain: "bibliaquest-fbc44.firebaseapp.com",
@@ -87,7 +90,6 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // --- LÓGICA DE TELAS ---
   window.showTab = (t) => {
     document.getElementById('study-content').classList.toggle('hidden', t !== 'home');
     document.getElementById('ranking-area').classList.toggle('hidden', t === 'home');
@@ -96,14 +98,12 @@
     if(t === 'rank') loadRanking();
   };
 
-  // --- AUTENTICAÇÃO ---
   window.handleAuth = async (type) => {
     const e = document.getElementById('login-email').value;
     const p = document.getElementById('login-pass').value;
     try {
         if (type === 'signup') {
             const res = await createUserWithEmailAndPassword(auth, e, p);
-            // Cria o documento inicial para evitar erro de "documento não encontrado"
             await setDoc(doc(db, "users", res.user.uid), { xp: 0, streak: 1, name: e.split('@')[0] });
         } else { await signInWithEmailAndPassword(auth, e, p); }
     } catch (err) { alert("Erro: " + err.message); }
@@ -125,14 +125,17 @@
   async function loadUserData(uid) {
     const s = await getDoc(doc(db, "users", uid));
     if (s.exists()) {
-        document.getElementById('xp-val').innerText = s.data().xp || 0;
+        const xp = s.data().xp || 0;
+        document.getElementById('xp-val').innerText = xp;
         document.getElementById('streak-val').innerText = s.data().streak || 0;
+        // CÁLCULO DE NÍVEL: 1 nivel a cada 100 XP
+        document.getElementById('level-val').innerText = Math.floor(xp / 100) + 1;
     }
   }
 
-  // --- BÍBLIA ---
   async function fetchVerse() {
     try {
+        // ENDPOINT RANDOM: Garante que a cada refresh ou conclusão venha algo novo
         const r = await fetch('https://bible-api.com/random?translation=almeida');
         const d = await r.json();
         window.currentVerse = d.text;
@@ -144,9 +147,8 @@
     }
   }
 
-  // --- IA (GROQ PROTEGIDO) ---
   window.generateStudy = async () => {
-    let key = localStorage.getItem("groq_key") || prompt("Insira sua chave do Groq (Isso evita bloqueio do GitHub):");
+    let key = localStorage.getItem("groq_key") || prompt("Insira sua chave do Groq:");
     if(!key) return;
     localStorage.setItem("groq_key", key);
 
@@ -177,19 +179,17 @@
     }
   };
 
-  // --- SALVAR XP (AQUI ESTAVA O ERRO) ---
   window.finishTask = async () => {
     const b = document.getElementById('btn-finish');
     b.innerText = "SALVANDO...";
     b.disabled = true;
     try {
         const userRef = doc(db, "users", auth.currentUser.uid);
-        // Usamos setDoc com merge:true para garantir que o documento exista antes de incrementar
         await setDoc(userRef, { xp: increment(10) }, { merge: true });
         alert("Boa! +10 XP na conta.");
-        location.reload();
+        location.reload(); // Recarrega para gerar um novo versículo aleatório
     } catch (e) {
-        alert("Erro ao salvar: Verifique se você publicou as Regras no Console do Firebase.");
+        alert("Erro ao salvar.");
         b.disabled = false;
         b.innerText = "CONCLUIR TAREFA (+10 XP)";
     }
