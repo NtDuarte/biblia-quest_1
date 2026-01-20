@@ -90,7 +90,7 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let GROQ_API_KEY = "";
+  let GROQ_API_KEY = ""; // Será preenchida automaticamente pelo Firebase
 
   window.showTab = (t) => {
     document.getElementById('study-content').classList.toggle('hidden', t !== 'home');
@@ -117,16 +117,17 @@
     document.getElementById('auth-screen').classList.toggle('hidden', isLogged);
     document.getElementById('main-screen').classList.toggle('hidden', !isLogged);
     document.getElementById('nav').classList.toggle('hidden', !isLogged);
+    
     if(u) {
         document.getElementById('user-display').innerText = u.email.split('@')[0].toUpperCase();
         
-        // --- BUSCA CHAVE NO FIREBASE AUTOMATICAMENTE ---
+        // --- BUSCA CHAVE NO FIREBASE (IMPEDE BLOQUEIO DO GITHUB) ---
         try {
             const configSnap = await getDoc(doc(db, "config", "keys"));
             if (configSnap.exists()) {
                 GROQ_API_KEY = configSnap.data().groq;
             }
-        } catch (e) { console.error("Configuração de IA pendente."); }
+        } catch (e) { console.error("Erro ao buscar chave da IA."); }
 
         loadUserData(u.uid);
         fetchVerse();
@@ -147,8 +148,6 @@
   async function fetchVerse() {
     const textEl = document.getElementById('verse-text');
     const refEl = document.getElementById('verse-ref');
-    textEl.innerText = "Buscando uma nova revelação...";
-    refEl.innerText = "";
     try {
         const timestamp = new Date().getTime();
         const res = await fetch(`https://bible-api.com/random?translation=almeida&t=${timestamp}`);
@@ -183,9 +182,12 @@
             document.getElementById('study-area').classList.remove('hidden');
             document.getElementById('ai-response').innerText = d.choices[0].message.content;
             b.innerText = "ESTUDO PRONTO!";
+        } else {
+            // Caso a chave tenha sido bloqueada por segurança
+            throw new Error("Resposta da IA vazia.");
         }
-    } catch {
-        alert("Erro na conexão com a IA.");
+    } catch (err) {
+        alert("Erro na IA: " + err.message);
         b.disabled = false;
         b.innerText = "TENTAR NOVAMENTE";
     }
@@ -197,12 +199,14 @@
     b.disabled = true;
     try {
         const userRef = doc(db, "users", auth.currentUser.uid);
+        // setDoc com merge garante que o documento seja criado/atualizado sem erro
         await setDoc(userRef, { xp: increment(10) }, { merge: true });
         alert("Boa! +10 XP na conta.");
         location.reload(); 
     } catch (e) {
-        alert("Erro ao salvar pontos.");
+        alert("Erro ao salvar pontos no Firestore.");
         b.disabled = false;
+        b.innerText = "CONCLUIR TAREFA (+10 XP)";
     }
   };
 
