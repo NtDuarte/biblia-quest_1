@@ -133,17 +133,42 @@
     }
   }
 
+  // --- BUSCA VERSÍCULO REALMENTE ALEATÓRIO ---
   async function fetchVerse() {
+    const textEl = document.getElementById('verse-text');
+    const refEl = document.getElementById('verse-ref');
+    
+    textEl.innerText = "Buscando uma nova revelação...";
+    refEl.innerText = "";
+
     try {
-        // ENDPOINT RANDOM: Garante que a cada refresh ou conclusão venha algo novo
-        const r = await fetch('https://bible-api.com/random?translation=almeida');
-        const d = await r.json();
-        window.currentVerse = d.text;
-        document.getElementById('verse-text').innerText = `"${d.text.trim()}"`;
-        document.getElementById('verse-ref').innerText = d.reference.toUpperCase();
-    } catch {
-        document.getElementById('verse-text').innerText = "O Senhor é o meu pastor, nada me faltará.";
-        document.getElementById('verse-ref').innerText = "SALMOS 23:1";
+        // Adicionamos o timestamp (&t=...) para forçar o navegador a buscar um resultado novo sempre
+        const timestamp = new Date().getTime();
+        const res = await fetch(`https://bible-api.com/random?translation=almeida&t=${timestamp}`);
+        
+        if (!res.ok) throw new Error();
+
+        const data = await res.json();
+        
+        // Salvamos no window para a IA poder ler depois
+        window.currentVerse = data.text;
+        
+        // Atualizamos a tela
+        textEl.innerText = `"${data.text.trim()}"`;
+        refEl.innerText = data.reference.toUpperCase();
+        
+    } catch (e) {
+        console.error("Erro na API da Bíblia:", e);
+        // Fallback caso a API falhe
+        const fallbacks = [
+            {t: "O Senhor é o meu pastor, nada me faltará.", r: "SALMOS 23:1"},
+            {t: "Tudo posso naquele que me fortalece.", r: "FILIPENSES 4:13"},
+            {t: "Onde houver dois ou três reunidos em meu nome, ali estou.", r: "MATEUS 18:20"}
+        ];
+        const f = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+        textEl.innerText = f.t;
+        refEl.innerText = f.r;
+        window.currentVerse = f.t;
     }
   }
 
