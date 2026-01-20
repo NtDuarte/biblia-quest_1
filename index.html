@@ -9,99 +9,88 @@
 
 <style>
 :root {
-  --primary: #58cc02;
-  --blue: #1cb0f6;
-  --bg: #ffffff;
-  --text: #3c3c3c;
+  --primary:#58cc02;
+  --blue:#1cb0f6;
+  --text:#3c3c3c;
 }
 
 body {
-  font-family: 'Nunito', sans-serif;
-  background: #f7f7f7;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  color: var(--text);
+  margin:0;
+  background:#f7f7f7;
+  display:flex;
+  justify-content:center;
+  font-family:'Nunito',sans-serif;
 }
 
 #app {
-  width: 100%;
-  max-width: 480px;
-  background: white;
-  min-height: 100vh;
-  padding: 25px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+  width:100%;
+  max-width:480px;
+  min-height:100vh;
+  background:white;
+  padding:20px;
+  box-sizing:border-box;
 }
 
-.hidden { display: none; }
+.hidden { display:none; }
 
 .card {
-  border: 2px solid #e5e5e5;
-  border-bottom: 6px solid #e5e5e5;
-  border-radius: 20px;
-  padding: 20px;
-  margin: 15px 0;
+  border:2px solid #e5e5e5;
+  border-bottom:6px solid #e5e5e5;
+  border-radius:20px;
+  padding:18px;
+  margin:15px 0;
 }
 
-.btn-duo {
-  width: 100%;
-  padding: 16px;
-  border: none;
-  border-radius: 16px;
-  font-size: 16px;
-  font-weight: 900;
-  text-transform: uppercase;
-  cursor: pointer;
-  background: var(--primary);
-  color: white;
-  border-bottom: 6px solid #46a302;
-  margin-top: 10px;
+.btn {
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:16px;
+  font-weight:900;
+  text-transform:uppercase;
+  background:var(--primary);
+  color:white;
+  cursor:pointer;
+  margin-top:10px;
 }
 
-.btn-blue {
-  background: var(--blue);
-  border-bottom: 6px solid #1899d6;
+.btn.blue {
+  background:var(--blue);
 }
 
 input {
-  width: 100%;
-  padding: 14px;
-  margin: 10px 0;
-  border-radius: 14px;
-  border: 2px solid #e5e5e5;
-  background: #f7f7f7;
+  width:100%;
+  padding:14px;
+  margin:10px 0;
+  border-radius:14px;
+  border:2px solid #e5e5e5;
+  background:#f7f7f7;
 }
 
-.nav-bar {
-  display: flex;
-  justify-content: space-around;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  max-width: 480px;
-  background: white;
-  border-top: 2px solid #e5e5e5;
-  padding: 12px;
+.nav {
+  position:fixed;
+  bottom:0;
+  width:100%;
+  max-width:480px;
+  display:flex;
+  justify-content:space-around;
+  background:white;
+  border-top:2px solid #e5e5e5;
+  padding:12px;
 }
 
-.nav-item {
-  font-weight: 900;
-  cursor: pointer;
-  color: #aaa;
+.nav span {
+  font-weight:900;
+  cursor:pointer;
+  color:#aaa;
 }
 
-.nav-active { color: var(--blue); }
+.nav .active {
+  color:var(--blue);
+}
 
 #ai-response {
-  white-space: pre-wrap;
-  animation: fade 0.4s ease-in;
-}
-
-@keyframes fade {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  white-space:pre-wrap;
 }
 </style>
 </head>
@@ -110,35 +99,46 @@ input {
 <div id="app">
 
 <!-- LOGIN -->
-<div id="auth-screen">
+<div id="auth">
   <h1 style="text-align:center;color:var(--primary)">BibliaQuest</h1>
-  <input id="login-email" type="email" placeholder="E-mail">
-  <input id="login-pass" type="password" placeholder="Senha">
-  <button class="btn-duo" onclick="handleAuth('login')">Entrar</button>
-  <button class="btn-duo btn-blue" onclick="handleAuth('signup')">Criar conta</button>
+  <input id="email" placeholder="E-mail">
+  <input id="pass" type="password" placeholder="Senha">
+  <button class="btn" onclick="authUser('login')">Entrar</button>
+  <button class="btn blue" onclick="authUser('signup')">Criar conta</button>
 </div>
 
 <!-- APP -->
-<div id="main-screen" class="hidden">
+<div id="main" class="hidden">
+
+<div class="card">
+  <b id="userName"></b><br>
+  Nível <b id="level">1</b> • 🔥 <span id="streak">0</span> • 💎 <span id="xp">0</span>
+</div>
 
 <div class="card">
   <h3>📖 Palavra do Dia</h3>
-  <p id="verse-text">Carregando...</p>
-  <small id="verse-ref"></small>
+  <p id="verse">Carregando...</p>
+  <small id="ref"></small>
 </div>
 
-<button class="btn-duo" id="btn-study" onclick="generateStudy()">Gerar Estudo</button>
+<button class="btn" onclick="generateStudy()">Gerar Estudo</button>
 
-<div id="study-area" class="hidden">
+<div id="study" class="hidden">
   <div class="card" id="ai-response"></div>
-  <button class="btn-duo btn-blue" onclick="finishTask()">Concluir (+10 XP)</button>
+  <button class="btn blue" onclick="finishStudy()">Concluir (+10 XP)</button>
+</div>
+
+<div id="ranking" class="hidden">
+  <h3>🏆 Ranking</h3>
+  <div class="card" id="rankList"></div>
 </div>
 
 </div>
 
-<div class="nav-bar hidden" id="nav">
-  <div class="nav-item nav-active">Estudo</div>
-  <div class="nav-item" onclick="logout()" style="color:#ff4b4b">Sair</div>
+<div class="nav hidden" id="nav">
+  <span class="active" onclick="showTab('study')">Estudo</span>
+  <span onclick="showTab('rank')">Ranking</span>
+  <span style="color:#ff4b4b" onclick="logout()">Sair</span>
 </div>
 
 </div>
@@ -146,76 +146,98 @@ input {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
-  authDomain: "bibliaquest-fbc44.firebaseapp.com",
-  projectId: "bibliaquest-fbc44",
+  apiKey:"AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
+  authDomain:"bibliaquest-fbc44.firebaseapp.com",
+  projectId:"bibliaquest-fbc44"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-window.handleAuth = async (type) => {
-  const e = login-email.value;
-  const p = login-pass.value;
+window.authUser = async (type) => {
   try {
-    if(type === "signup") {
-      const r = await createUserWithEmailAndPassword(auth, e, p);
-      await setDoc(doc(db, "users", r.user.uid), { xp: 0 });
+    if(type==="signup"){
+      const r = await createUserWithEmailAndPassword(auth,email.value,pass.value);
+      await setDoc(doc(db,"users",r.user.uid),{xp:0,streak:1,name:email.value.split("@")[0]});
     } else {
-      await signInWithEmailAndPassword(auth, e, p);
+      await signInWithEmailAndPassword(auth,email.value,pass.value);
     }
-  } catch(err) { alert(err.message); }
+  } catch(e){ alert(e.message); }
 };
 
 window.logout = () => signOut(auth);
 
-onAuthStateChanged(auth, (u) => {
-  auth-screen.classList.toggle("hidden", !!u);
-  main-screen.classList.toggle("hidden", !u);
-  nav.classList.toggle("hidden", !u);
-  if(u) fetchVerse();
+onAuthStateChanged(auth, async (u)=>{
+  auth.classList.toggle("hidden",!!u);
+  main.classList.toggle("hidden",!u);
+  nav.classList.toggle("hidden",!u);
+  if(u){
+    userName.innerText = u.email.split("@")[0];
+    loadUser();
+    fetchVerse();
+  }
 });
 
-async function fetchVerse() {
-  try {
-    const r = await fetch("https://bible-api.com/random?translation=almeida");
-    const d = await r.json();
-    window.currentVerse = d.text;
-    verse-text.innerText = d.text;
-    verse-ref.innerText = d.reference;
-  } catch {
-    verse-text.innerText = "O Senhor é meu pastor; nada me faltará.";
-    verse-ref.innerText = "Salmos 23:1";
-    window.currentVerse = verse-text.innerText;
+async function loadUser(){
+  const s = await getDoc(doc(db,"users",auth.currentUser.uid));
+  if(s.exists()){
+    xp.innerText = s.data().xp;
+    streak.innerText = s.data().streak;
+    level.innerText = Math.floor(s.data().xp/100)+1;
   }
 }
 
-window.generateStudy = async () => {
-  btn-study.innerText = "Gerando...";
-  btn-study.disabled = true;
-  study-area.classList.remove("hidden");
+async function fetchVerse(){
+  try{
+    const r = await fetch("https://bible-api.com/random?translation=almeida");
+    const d = await r.json();
+    verse.innerText = d.text;
+    ref.innerText = d.reference;
+    window.currentVerse = d.text;
+  }catch{
+    verse.innerText = "O Senhor é o meu pastor; nada me faltará.";
+    ref.innerText = "Salmos 23:1";
+    window.currentVerse = verse.innerText;
+  }
+}
 
+window.generateStudy = () => {
+  study.classList.remove("hidden");
   ai-response.innerText = `
-📖 Reflexão
+📖 Estudo Guiado
 
-Leia este versículo com calma.
-O que ele revela sobre Deus?
-O que ele pede de você hoje?
+Versículo:
+"${window.currentVerse}"
 
-A Palavra não falha.
+Reflexão:
+Este texto nos chama à confiança, à obediência e à fé prática no dia a dia.
+
+Pergunta:
+O que essa Palavra está te convidando a mudar hoje?
 `;
-
-  btn-study.innerText = "Estudo pronto";
 };
 
-window.finishTask = async () => {
-  await setDoc(doc(db,"users",auth.currentUser.uid),{xp:increment(10)},{merge:true});
+window.finishStudy = async () => {
+  await updateDoc(doc(db,"users",auth.currentUser.uid),{xp:increment(10)});
   alert("Parabéns! +10 XP");
   location.reload();
+};
+
+window.showTab = async (t) => {
+  study.classList.toggle("hidden",t!=="study");
+  ranking.classList.toggle("hidden",t!=="rank");
+  if(t==="rank"){
+    const q = query(collection(db,"users"),orderBy("xp","desc"),limit(5));
+    const s = await getDocs(q);
+    rankList.innerHTML="";
+    s.forEach((d,i)=>{
+      rankList.innerHTML+=`<div>${i+1}º ${d.data().name} — ${d.data().xp} XP</div>`;
+    });
+  }
 };
 </script>
 
