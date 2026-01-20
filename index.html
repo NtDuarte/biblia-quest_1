@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BibliaQuest - Estudo Diário</title>
+    <style>
+        :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #f7f7f7; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; }
+        #app { width: 100%; max-width: 500px; background: white; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .hidden { display: none; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e5e5e5; border-radius: 12px; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .card { border: 2px solid #e5e5e5; border-radius: 15px; padding: 15px; margin: 20px 0; }
+        .progress-bar { height: 10px; background: #e5e5e5; border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.3s; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="auth-screen">
+        <h2>BibliaQuest</h2>
+        <p>Aprenda a Palavra todo dia.</p>
+        <input type="email" id="login-email" placeholder="E-mail">
+        <input type="password" id="login-pass" placeholder="Senha">
+        <button onclick="handleAuth('login')">Entrar</button>
+        <button style="background: var(--blue)" onclick="handleAuth('signup')">Criar Conta</button>
+    </div>
+
+    <div id="main-screen" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="user-display">Duarte</span>
+            <span>🔥 <b id="streak-val">0</b> | XP: <b id="xp-val">0</b></span>
+        </div>
+        
+        <div class="card">
+            <h3>📖 Palavra do Dia</h3>
+            <p id="verse-text">Buscando versículo...</p>
+            <small id="verse-ref"></small>
+        </div>
+
+        <button id="btn-study" onclick="generateStudy()">Gerar Estudo com IA</button>
+
+        <div id="study-area" class="hidden">
+            <div class="card" id="ai-study-content" style="background: #f0f9ff;">
+                </div>
+            <div id="quiz-area"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // 1. CONFIGURAÇÃO (COLE AS SUAS CHAVES AQUI)
+  const firebaseConfig = {
+    apiKey: "REPLACE_ME",
+    authDomain: "REPLACE_ME",
+    projectId: "REPLACE_ME",
+    storageBucket: "REPLACE_ME",
+    messagingSenderId: "REPLACE_ME",
+    appId: "REPLACE_ME"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const GEMINI_API_KEY = "REPLACE_ME";
+
+  // 2. LÓGICA DE AUTENTICAÇÃO
+  window.handleAuth = async (type) => {
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
+    try {
+        if (type === 'signup') {
+            const res = await createUserWithEmailAndPassword(auth, email, pass);
+            await setDoc(doc(db, "users", res.user.uid), { xp: 0, streak: 1, name: email.split('@')[0] });
+        } else {
+            await signInWithEmailAndPassword(auth, email, pass);
+        }
+    } catch (e) { alert("Erro: " + e.message); }
+  };
+
+  // 3. MONITORAR USUÁRIO
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-screen').classList.remove('hidden');
+        loadUserData(user.uid);
+        fetchVerse();
+    }
+  });
+
+  async function loadUserData(uid) {
+    const snap = await getDoc(doc(db, "users", uid));
+    if (snap.exists()) {
+        document.getElementById('xp-val').innerText = snap.data().xp;
+        document.getElementById('streak-val').innerText = snap.data().streak;
+    }
+  }
+
+  // 4. API DA BÍBLIA (BIBLE-API)
+  async function fetchVerse() {
+    const res = await fetch('https://bible-api.com/random?translation=almeida');
+    const data = await res.json();
+    document.getElementById('verse-text').innerText = `"${data.text.trim()}"`;
+    document.getElementById('verse-ref').innerText = data.reference;
+    window.currentVerse = data.text; // Salva para o Gemini usar
+  }
+
+  // 5. INTEGRAÇÃO COM GEMINI (O TUTOR)
+  window.generateStudy = async () => {
+    const btn = document.getElementById('btn-study');
+    btn.innerText = "IA pensando...";
+    btn.disabled = true;
+
+    const prompt = `Com base no versículo "${window.currentVerse}", faça um estudo devocional de 2 parágrafos. Depois, crie uma pergunta de múltipla escolha para testar o entendimento, com 3 opções sendo apenas uma correta. Retorne apenas o texto do estudo e a pergunta no final.`;
+
+    try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        const textoIA = data.candidates[0].content.parts[0].text;
+        
+        document.getElementById('study-area').classList.remove('hidden');
+        document.getElementById('ai-study-content').innerText = textoIA;
+        btn.innerText = "Estudo Concluído";
+    } catch (e) { 
+        alert("Erro na IA: " + e.message); 
+        btn.disabled = false;
+    }
+  };
+</script>
+
+</body>
+</html>
