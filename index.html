@@ -1,245 +1,219 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BibliaQuest | Duarte</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
-
-<style>
-:root {
-  --primary:#58cc02;
-  --blue:#1cb0f6;
-  --text:#3c3c3c;
-}
-
-body {
-  margin:0;
-  background:#f7f7f7;
-  display:flex;
-  justify-content:center;
-  font-family:'Nunito',sans-serif;
-}
-
-#app {
-  width:100%;
-  max-width:480px;
-  min-height:100vh;
-  background:white;
-  padding:20px;
-  box-sizing:border-box;
-}
-
-.hidden { display:none; }
-
-.card {
-  border:2px solid #e5e5e5;
-  border-bottom:6px solid #e5e5e5;
-  border-radius:20px;
-  padding:18px;
-  margin:15px 0;
-}
-
-.btn {
-  width:100%;
-  padding:16px;
-  border:none;
-  border-radius:16px;
-  font-weight:900;
-  text-transform:uppercase;
-  background:var(--primary);
-  color:white;
-  cursor:pointer;
-  margin-top:10px;
-}
-
-.btn.blue {
-  background:var(--blue);
-}
-
-input {
-  width:100%;
-  padding:14px;
-  margin:10px 0;
-  border-radius:14px;
-  border:2px solid #e5e5e5;
-  background:#f7f7f7;
-}
-
-.nav {
-  position:fixed;
-  bottom:0;
-  width:100%;
-  max-width:480px;
-  display:flex;
-  justify-content:space-around;
-  background:white;
-  border-top:2px solid #e5e5e5;
-  padding:12px;
-}
-
-.nav span {
-  font-weight:900;
-  cursor:pointer;
-  color:#aaa;
-}
-
-.nav .active {
-  color:var(--blue);
-}
-
-#ai-response {
-  white-space:pre-wrap;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BibliaQuest | Duarte</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #ffffff; --text: #3c3c3c; }
+        body { font-family: 'Nunito', sans-serif; background-color: #f7f7f7; margin: 0; display: flex; justify-content: center; color: var(--text); }
+        #app { width: 100%; max-width: 480px; background: white; min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; }
+        .hidden { display: none !important; }
+        .card { border: 2px solid #e5e5e5; border-bottom: 6px solid #e5e5e5; border-radius: 20px; padding: 20px; margin: 15px 0; background: white; }
+        .header-stats { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
+        .btn-duo { width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 18px; font-weight: 900; text-transform: uppercase; cursor: pointer; background: var(--primary); color: white; border-bottom: 6px solid #46a302; margin-top: 10px; }
+        .btn-duo:active { transform: translateY(4px); border-bottom: 2px solid #46a302; }
+        .btn-blue { background: var(--blue); border-bottom: 6px solid #1899d6; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #e5e5e5; border-radius: 16px; background: #f7f7f7; font-size: 16px; box-sizing: border-box; }
+        .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #e5e5e5; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; }
+        .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; }
+        .nav-active { color: var(--blue); }
+    </style>
 </head>
-
 <body>
+
 <div id="app">
+    <div id="auth-screen">
+        <h1 style="text-align:center; color: var(--primary);">BibliaQuest</h1>
+        <input type="email" id="login-email" placeholder="E-MAIL">
+        <input type="password" id="login-pass" placeholder="SENHA">
+        <button class="btn-duo" onclick="handleAuth('login')">ENTRAR</button>
+        <button class="btn-duo btn-blue" onclick="handleAuth('signup')">CRIAR CONTA</button>
+    </div>
 
-<!-- LOGIN -->
-<div id="auth">
-  <h1 style="text-align:center;color:var(--primary)">BibliaQuest</h1>
-  <input id="email" placeholder="E-mail">
-  <input id="pass" type="password" placeholder="Senha">
-  <button class="btn" onclick="authUser('login')">Entrar</button>
-  <button class="btn blue" onclick="authUser('signup')">Criar conta</button>
-</div>
+    <div id="main-screen" class="hidden">
+        <div class="header-stats">
+            <div>
+                <span id="user-display" style="font-weight: 900; color: var(--primary);">USUÁRIO</span>
+                <div style="font-size: 0.8rem; color: #afafaf;">NÍVEL <b id="level-val" style="color: var(--primary);">1</b></div>
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <div class="stat-item">🔥 <b id="streak-val">0</b></div>
+                <div class="stat-item" style="color:var(--blue)">💎 <b id="xp-val">0</b></div>
+            </div>
+        </div>
+        
+        <div id="tab-home">
+            <div class="card">
+                <h3 style="color: var(--blue); margin-top:0">📖 PALAVRA DO DIA</h3>
+                <p id="verse-text" style="font-weight: 700;">Buscando luz...</p>
+                <div id="verse-ref" style="color: #afafaf; font-weight: 900; font-size: 0.8rem;"></div>
+            </div>
+            <button id="btn-study" class="btn-duo" onclick="generateStudy()">GERAR ESTUDO COM IA</button>
+            <div id="study-area" class="hidden">
+                <div class="card" id="ai-response" style="background: #f0fbff; white-space: pre-wrap; font-size: 0.95rem;"></div>
+                <button id="btn-finish" class="btn-duo btn-blue" onclick="finishTask()">CONCLUIR TAREFA (+10 XP)</button>
+            </div>
+        </div>
 
-<!-- APP -->
-<div id="main" class="hidden">
+        <div id="tab-rank" class="hidden">
+            <h2 style="text-align:center; color: var(--blue);">🏆 RANKING GERAL</h2>
+            <div id="ranking-list" class="card" style="padding:0"></div>
+        </div>
 
-<div class="card">
-  <b id="userName"></b><br>
-  Nível <b id="level">1</b> • 🔥 <span id="streak">0</span> • 💎 <span id="xp">0</span>
-</div>
+        <div id="tab-config" class="hidden">
+            <h2 style="text-align:center; color: #afafaf;">CONFIGURAÇÕES</h2>
+            <div class="card">
+                <p style="font-weight: 700;">Chave da IA (Gemini):</p>
+                <input type="password" id="gemini-key-input" placeholder="Cole sua chave AIzaSy...">
+                <button class="btn-duo" onclick="saveKey()">SALVAR CHAVE</button>
+                <p style="font-size: 0.7rem; color: #afafaf; margin-top: 10px;">A chave fica salva apenas neste navegador. O GitHub não pode vê-la.</p>
+            </div>
+        </div>
+    </div>
 
-<div class="card">
-  <h3>📖 Palavra do Dia</h3>
-  <p id="verse">Carregando...</p>
-  <small id="ref"></small>
-</div>
-
-<button class="btn" onclick="generateStudy()">Gerar Estudo</button>
-
-<div id="study" class="hidden">
-  <div class="card" id="ai-response"></div>
-  <button class="btn blue" onclick="finishStudy()">Concluir (+10 XP)</button>
-</div>
-
-<div id="ranking" class="hidden">
-  <h3>🏆 Ranking</h3>
-  <div class="card" id="rankList"></div>
-</div>
-
-</div>
-
-<div class="nav hidden" id="nav">
-  <span class="active" onclick="showTab('study')">Estudo</span>
-  <span onclick="showTab('rank')">Ranking</span>
-  <span style="color:#ff4b4b" onclick="logout()">Sair</span>
-</div>
-
+    <div id="nav" class="nav-bar hidden">
+        <div class="nav-item nav-active" id="nav-home" onclick="showTab('home')">ESTUDO</div>
+        <div class="nav-item" id="nav-rank" onclick="showTab('rank')">RANKING</div>
+        <div class="nav-item" id="nav-config" onclick="showTab('config')">⚙️</div>
+        <div class="nav-item" onclick="logout()" style="color:#ff4b4b">SAIR</div>
+    </div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey:"AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
-  authDomain:"bibliaquest-fbc44.firebaseapp.com",
-  projectId:"bibliaquest-fbc44"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
+    authDomain: "bibliaquest-fbc44.firebaseapp.com",
+    projectId: "bibliaquest-fbc44",
+    storageBucket: "bibliaquest-fbc44.firebasestorage.app",
+    messagingSenderId: "670585434397",
+    appId: "1:670585434397:web:6d699582986e8dcbc6f1f4",
+    measurementId: "G-H0Z7T8LCPE"
+  };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-window.authUser = async (type) => {
-  try {
-    if(type==="signup"){
-      const r = await createUserWithEmailAndPassword(auth,email.value,pass.value);
-      await setDoc(doc(db,"users",r.user.uid),{xp:0,streak:1,name:email.value.split("@")[0]});
-    } else {
-      await signInWithEmailAndPassword(auth,email.value,pass.value);
+  // --- NAVEGAÇÃO ---
+  window.showTab = (t) => {
+    ['home', 'rank', 'config'].forEach(tab => {
+        document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t);
+        document.getElementById(`nav-${tab}`).classList.toggle('nav-active', tab === t);
+    });
+    if(t === 'rank') loadRanking();
+  };
+
+  // --- SALVAR CHAVE ---
+  window.saveKey = () => {
+    const k = document.getElementById('gemini-key-input').value;
+    if(k) {
+        localStorage.setItem("gemini_api_key", k);
+        alert("Chave salva! Agora a IA vai funcionar sem bloqueios.");
+        location.reload();
     }
-  } catch(e){ alert(e.message); }
-};
+  };
 
-window.logout = () => signOut(auth);
+  // --- AUTH ---
+  window.handleAuth = async (type) => {
+    const e = document.getElementById('login-email').value;
+    const p = document.getElementById('login-pass').value;
+    try {
+        if (type === 'signup') {
+            const res = await createUserWithEmailAndPassword(auth, e, p);
+            await setDoc(doc(db, "users", res.user.uid), { xp: 0, streak: 1, name: e.split('@')[0] });
+        } else { await signInWithEmailAndPassword(auth, e, p); }
+    } catch (err) { alert("Erro: " + err.message); }
+  };
+  window.logout = () => signOut(auth);
 
-onAuthStateChanged(auth, async (u)=>{
-  auth.classList.toggle("hidden",!!u);
-  main.classList.toggle("hidden",!u);
-  nav.classList.toggle("hidden",!u);
-  if(u){
-    userName.innerText = u.email.split("@")[0];
-    loadUser();
-    fetchVerse();
+  onAuthStateChanged(auth, (u) => {
+    const isLogged = !!u;
+    document.getElementById('auth-screen').classList.toggle('hidden', isLogged);
+    document.getElementById('main-screen').classList.toggle('hidden', !isLogged);
+    document.getElementById('nav').classList.toggle('hidden', !isLogged);
+    if(u) {
+        document.getElementById('user-display').innerText = u.email.split('@')[0].toUpperCase();
+        loadUserData(u.uid);
+        fetchVerse();
+    }
+  });
+
+  async function loadUserData(uid) {
+    const s = await getDoc(doc(db, "users", uid));
+    if (s.exists()) {
+        const xp = s.data().xp || 0;
+        document.getElementById('xp-val').innerText = xp;
+        document.getElementById('streak-val').innerText = s.data().streak || 0;
+        document.getElementById('level-val').innerText = Math.floor(xp / 100) + 1;
+    }
   }
-});
 
-async function loadUser(){
-  const s = await getDoc(doc(db,"users",auth.currentUser.uid));
-  if(s.exists()){
-    xp.innerText = s.data().xp;
-    streak.innerText = s.data().streak;
-    level.innerText = Math.floor(s.data().xp/100)+1;
+  // --- BUSCA VERSÍCULO COM DESTRUIDOR DE CACHE (Duarte, isso resolve a palavra que não muda!) ---
+  async function fetchVerse() {
+    const textEl = document.getElementById('verse-text');
+    const refEl = document.getElementById('verse-ref');
+    try {
+        // O timestamp (Date.now()) cria uma URL única toda vez, forçando a busca de um novo versículo
+        const res = await fetch(`https://bible-api.com/random?translation=almeida&cb=${Date.now()}`);
+        const data = await res.json();
+        window.currentVerse = data.text;
+        textEl.innerText = `"${data.text.trim()}"`;
+        refEl.innerText = data.reference.toUpperCase();
+    } catch (e) {
+        textEl.innerText = "O Senhor é o meu pastor, nada me faltará.";
+        refEl.innerText = "SALMOS 23:1";
+        window.currentVerse = textEl.innerText;
+    }
   }
-}
 
-async function fetchVerse(){
-  try{
-    const r = await fetch("https://bible-api.com/random?translation=almeida");
-    const d = await r.json();
-    verse.innerText = d.text;
-    ref.innerText = d.reference;
-    window.currentVerse = d.text;
-  }catch{
-    verse.innerText = "O Senhor é o meu pastor; nada me faltará.";
-    ref.innerText = "Salmos 23:1";
-    window.currentVerse = verse.innerText;
-  }
-}
+  // --- IA GEMINI (BUSCANDO A CHAVE SALVA NO NAVEGADOR) ---
+  window.generateStudy = async () => {
+    const key = localStorage.getItem("gemini_api_key");
+    if(!key) return alert("Clique na engrenagem (Configurações) e insira sua chave do Gemini primeiro!");
 
-window.generateStudy = () => {
-  study.classList.remove("hidden");
-  ai-response.innerText = `
-📖 Estudo Guiado
+    const b = document.getElementById('btn-study');
+    b.innerText = "IA PENSANDO...";
+    b.disabled = true;
 
-Versículo:
-"${window.currentVerse}"
+    try {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: `Aja como um tutor bíblico. Estude o versículo: ${window.currentVerse}` }] }] })
+        });
+        const d = await r.json();
+        if(d.candidates) {
+            document.getElementById('study-area').classList.remove('hidden');
+            document.getElementById('ai-response').innerText = d.candidates[0].content.parts[0].text;
+            b.innerText = "ESTUDO PRONTO!";
+        } else { throw new Error(); }
+    } catch {
+        alert("Erro na IA. Verifique se sua chave está correta nas configurações.");
+        b.disabled = false; b.innerText = "TENTAR NOVAMENTE";
+    }
+  };
 
-Reflexão:
-Este texto nos chama à confiança, à obediência e à fé prática no dia a dia.
+  window.finishTask = async () => {
+    await setDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(10) }, { merge: true });
+    alert("Boa, Duarte! +10 XP!");
+    location.reload(); 
+  };
 
-Pergunta:
-O que essa Palavra está te convidando a mudar hoje?
-`;
-};
-
-window.finishStudy = async () => {
-  await updateDoc(doc(db,"users",auth.currentUser.uid),{xp:increment(10)});
-  alert("Parabéns! +10 XP");
-  location.reload();
-};
-
-window.showTab = async (t) => {
-  study.classList.toggle("hidden",t!=="study");
-  ranking.classList.toggle("hidden",t!=="rank");
-  if(t==="rank"){
-    const q = query(collection(db,"users"),orderBy("xp","desc"),limit(5));
+  async function loadRanking() {
+    const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(5));
     const s = await getDocs(q);
-    rankList.innerHTML="";
-    s.forEach((d,i)=>{
-      rankList.innerHTML+=`<div>${i+1}º ${d.data().name} — ${d.data().xp} XP</div>`;
+    const l = document.getElementById('ranking-list');
+    l.innerHTML = "";
+    s.forEach((d, i) => {
+        l.innerHTML += `<div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee;"><span>${i+1}º ${d.data().name.toUpperCase()}</span><b>${d.data().xp} XP</b></div>`;
     });
   }
-};
 </script>
-
 </body>
 </html>
