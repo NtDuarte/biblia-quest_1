@@ -90,6 +90,8 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  let GROQ_API_KEY = "";
+
   window.showTab = (t) => {
     document.getElementById('study-content').classList.toggle('hidden', t !== 'home');
     document.getElementById('ranking-area').classList.toggle('hidden', t === 'home');
@@ -110,13 +112,22 @@
   };
   window.logout = () => signOut(auth);
 
-  onAuthStateChanged(auth, (u) => {
+  onAuthStateChanged(auth, async (u) => {
     const isLogged = !!u;
     document.getElementById('auth-screen').classList.toggle('hidden', isLogged);
     document.getElementById('main-screen').classList.toggle('hidden', !isLogged);
     document.getElementById('nav').classList.toggle('hidden', !isLogged);
     if(u) {
         document.getElementById('user-display').innerText = u.email.split('@')[0].toUpperCase();
+        
+        // --- BUSCA CHAVE NO FIREBASE AUTOMATICAMENTE ---
+        try {
+            const configSnap = await getDoc(doc(db, "config", "keys"));
+            if (configSnap.exists()) {
+                GROQ_API_KEY = configSnap.data().groq;
+            }
+        } catch (e) { console.error("Configuração de IA pendente."); }
+
         loadUserData(u.uid);
         fetchVerse();
     }
@@ -128,63 +139,40 @@
         const xp = s.data().xp || 0;
         document.getElementById('xp-val').innerText = xp;
         document.getElementById('streak-val').innerText = s.data().streak || 0;
-        // CÁLCULO DE NÍVEL: 1 nivel a cada 100 XP
+        // NÍVEL AUTOMÁTICO (1 nivel a cada 100 XP)
         document.getElementById('level-val').innerText = Math.floor(xp / 100) + 1;
     }
   }
 
-  // --- BUSCA VERSÍCULO REALMENTE ALEATÓRIO ---
   async function fetchVerse() {
     const textEl = document.getElementById('verse-text');
     const refEl = document.getElementById('verse-ref');
-    
     textEl.innerText = "Buscando uma nova revelação...";
     refEl.innerText = "";
-
     try {
-        // Adicionamos o timestamp (&t=...) para forçar o navegador a buscar um resultado novo sempre
         const timestamp = new Date().getTime();
         const res = await fetch(`https://bible-api.com/random?translation=almeida&t=${timestamp}`);
-        
         if (!res.ok) throw new Error();
-
         const data = await res.json();
-        
-        // Salvamos no window para a IA poder ler depois
         window.currentVerse = data.text;
-        
-        // Atualizamos a tela
         textEl.innerText = `"${data.text.trim()}"`;
         refEl.innerText = data.reference.toUpperCase();
-        
     } catch (e) {
-        console.error("Erro na API da Bíblia:", e);
-        // Fallback caso a API falhe
-        const fallbacks = [
-            {t: "O Senhor é o meu pastor, nada me faltará.", r: "SALMOS 23:1"},
-            {t: "Tudo posso naquele que me fortalece.", r: "FILIPENSES 4:13"},
-            {t: "Onde houver dois ou três reunidos em meu nome, ali estou.", r: "MATEUS 18:20"}
-        ];
-        const f = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-        textEl.innerText = f.t;
-        refEl.innerText = f.r;
-        window.currentVerse = f.t;
+        textEl.innerText = "O Senhor é o meu pastor, nada me faltará.";
+        refEl.innerText = "SALMOS 23:1";
+        window.currentVerse = textEl.innerText;
     }
   }
 
   window.generateStudy = async () => {
-    let key = localStorage.getItem("groq_key") || prompt("Insira sua chave do Groq:");
-    if(!key) return;
-    localStorage.setItem("groq_key", key);
-
+    if(!GROQ_API_KEY) return alert("IA carregando ou chave não configurada no Firebase.");
     const b = document.getElementById('btn-study');
-    b.innerText = "PENSANDO...";
+    b.innerText = "IA PENSANDO...";
     b.disabled = true;
-
     try {
         const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
-            headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+            headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({
                 model: "llama-3.3-70b-versatile",
                 messages: [{role: "system", content: "Responda em PT-BR. Gere um devocional curto."}, {role: "user", content: `Estude: ${window.currentVerse}`}]
@@ -197,8 +185,7 @@
             b.innerText = "ESTUDO PRONTO!";
         }
     } catch {
-        alert("Erro na IA. Verifique sua chave.");
-        localStorage.removeItem("groq_key");
+        alert("Erro na conexão com a IA.");
         b.disabled = false;
         b.innerText = "TENTAR NOVAMENTE";
     }
@@ -212,11 +199,10 @@
         const userRef = doc(db, "users", auth.currentUser.uid);
         await setDoc(userRef, { xp: increment(10) }, { merge: true });
         alert("Boa! +10 XP na conta.");
-        location.reload(); // Recarrega para gerar um novo versículo aleatório
+        location.reload(); 
     } catch (e) {
-        alert("Erro ao salvar.");
+        alert("Erro ao salvar pontos.");
         b.disabled = false;
-        b.innerText = "CONCLUIR TAREFA (+10 XP)";
     }
   };
 
