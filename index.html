@@ -10,14 +10,12 @@
         body { font-family: 'Nunito', sans-serif; background-color: #f7f7f7; margin: 0; display: flex; justify-content: center; color: var(--text); }
         #app { width: 100%; max-width: 480px; background: white; min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; }
         .hidden { display: none !important; }
-        /* Cards Duolingo-style */
         .card { border: 2px solid #e5e5e5; border-bottom: 6px solid #e5e5e5; border-radius: 20px; padding: 20px; margin: 15px 0; background: white; }
         .header-stats { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
         .btn-duo { width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 18px; font-weight: 900; text-transform: uppercase; cursor: pointer; background: var(--primary); color: white; border-bottom: 6px solid #46a302; margin-top: 10px; }
         .btn-duo:active { transform: translateY(4px); border-bottom: 2px solid #46a302; }
         .btn-blue { background: var(--blue); border-bottom: 6px solid #1899d6; }
         input { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #e5e5e5; border-radius: 16px; background: #f7f7f7; font-size: 16px; box-sizing: border-box; }
-        /* Navigation */
         .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #e5e5e5; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; }
         .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; }
         .nav-active { color: var(--blue); }
@@ -49,7 +47,7 @@
         <div id="tab-home">
             <div class="card">
                 <h3 style="color: var(--blue); margin-top:0">📖 PALAVRA DO DIA</h3>
-                <p id="verse-text" style="font-weight: 700;">Buscando uma nova revelação...</p>
+                <p id="verse-text" style="font-weight: 700;">Buscando revelação...</p>
                 <div id="verse-ref" style="color: #afafaf; font-weight: 900; font-size: 0.8rem;"></div>
             </div>
             <button id="btn-study" class="btn-duo" onclick="generateStudy()">GERAR ESTUDO COM IA</button>
@@ -67,10 +65,10 @@
         <div id="tab-config" class="hidden">
             <h2 style="text-align:center; color: #afafaf;">CONFIGURAÇÕES</h2>
             <div class="card">
-                <p style="font-weight: 700;">Chave da IA (Gemini):</p>
-                <input type="password" id="gemini-key-input" placeholder="Cole sua chave AIzaSy...">
+                <p style="font-weight: 700;">Chave da IA (Groq):</p>
+                <input type="password" id="ai-key-input" placeholder="Cole sua API Key da Groq...">
                 <button class="btn-duo" onclick="saveKey()">SALVAR CHAVE</button>
-                <p style="font-size: 0.7rem; color: #afafaf; margin-top: 10px;">A chave salva no seu navegador evita o bloqueio automático do GitHub.</p>
+                <p style="font-size: 0.7rem; color: #afafaf; margin-top: 10px;">Crie sua chave em: console.groq.com</p>
             </div>
         </div>
     </div>
@@ -84,144 +82,153 @@
 </div>
 
 <script type="module">
-  // IMPORTAÇÕES FIREBASE
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
-    authDomain: "bibliaquest-fbc44.firebaseapp.com",
-    projectId: "bibliaquest-fbc44",
-    storageBucket: "bibliaquest-fbc44.firebasestorage.app",
-    messagingSenderId: "670585434397",
-    appId: "1:670585434397:web:6d699582986e8dcbc6f1f4",
-    measurementId: "G-H0Z7T8LCPE"
-  };
+    const firebaseConfig = {
+        apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
+        authDomain: "bibliaquest-fbc44.firebaseapp.com",
+        projectId: "bibliaquest-fbc44",
+        storageBucket: "bibliaquest-fbc44.firebasestorage.app",
+        messagingSenderId: "670585434397",
+        appId: "1:670585434397:web:6d699582986e8dcbc6f1f4",
+        measurementId: "G-H0Z7T8LCPE"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  // 1. LÓGICA DE NAVEGAÇÃO ENTRE ABAS
-  window.showTab = (t) => {
-    ['home', 'rank', 'config'].forEach(tab => {
-        document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t);
-        document.getElementById(`nav-${tab}`).classList.toggle('nav-active', tab === t);
-    });
-    if(t === 'rank') loadRanking();
-  };
-
-  // 2. SALVAR CHAVE DO GEMINI NO LOCAL STORAGE (FIM DO BLOQUEIO GITHUB)
-  window.saveKey = () => {
-    const k = document.getElementById('gemini-key-input').value;
-    if(k) {
-        localStorage.setItem("gemini_api_key", k);
-        alert("Chave configurada! A IA agora está liberada.");
-        location.reload();
-    }
-  };
-
-  // 3. AUTENTICAÇÃO
-  window.handleAuth = async (type) => {
-    const e = document.getElementById('login-email').value;
-    const p = document.getElementById('login-pass').value;
-    try {
-        if (type === 'signup') {
-            const res = await createUserWithEmailAndPassword(auth, e, p);
-            await setDoc(doc(db, "users", res.user.uid), { xp: 0, streak: 1, name: e.split('@')[0] });
-        } else { await signInWithEmailAndPassword(auth, e, p); }
-    } catch (err) { alert("Erro: " + err.message); }
-  };
-  window.logout = () => signOut(auth);
-
-  onAuthStateChanged(auth, (u) => {
-    const isLogged = !!u;
-    document.getElementById('auth-screen').classList.toggle('hidden', isLogged);
-    document.getElementById('main-screen').classList.toggle('hidden', !isLogged);
-    document.getElementById('nav').classList.toggle('hidden', !isLogged);
-    if(u) {
-        document.getElementById('user-display').innerText = u.email.split('@')[0].toUpperCase();
-        loadUserData(u.uid);
-        fetchVerse();
-    }
-  });
-
-  // 4. CARREGAR DADOS E NÍVEL (1 NÍVEL A CADA 100 XP)
-  async function loadUserData(uid) {
-    const s = await getDoc(doc(db, "users", uid));
-    if (s.exists()) {
-        const xp = s.data().xp || 0;
-        document.getElementById('xp-val').innerText = xp;
-        document.getElementById('streak-val').innerText = s.data().streak || 0;
-        document.getElementById('level-val').innerText = Math.floor(xp / 100) + 1;
-    }
-  }
-
-  // 5. BUSCA VERSÍCULO COM CACHE BUSTER (RESOLVE O PROBLEMA DE NÃO MUDAR)
-  async function fetchVerse() {
-    const textEl = document.getElementById('verse-text');
-    const refEl = document.getElementById('verse-ref');
-    try {
-        // O parâmetro 'cb' (cache buster) com o tempo atual garante um versículo novo
-        const res = await fetch(`https://bible-api.com/random?translation=almeida&cb=${Date.now()}`);
-        const data = await res.json();
-        window.currentVerse = data.text;
-        textEl.innerText = `"${data.text.trim()}"`;
-        refEl.innerText = data.reference.toUpperCase();
-    } catch (e) {
-        textEl.innerText = "O Senhor é o meu pastor, nada me faltará.";
-        refEl.innerText = "SALMOS 23:1";
-        window.currentVerse = textEl.innerText;
-    }
-  }
-
-  // 6. IA GEMINI (PEGA A CHAVE SALVA NO NAVEGADOR)
-  window.generateStudy = async () => {
-    const key = localStorage.getItem("gemini_api_key");
-    if(!key) return alert("Vá em Configurações (⚙️) e insira sua chave do Gemini primeiro!");
-
-    const b = document.getElementById('btn-study');
-    b.innerText = "IA PENSANDO...";
-    b.disabled = true;
-
-    try {
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: `Aja como um tutor bíblico. Gere um devocional curto sobre: ${window.currentVerse}` }] }] })
+    // 1. NAVEGAÇÃO
+    window.showTab = (t) => {
+        ['home', 'rank', 'config'].forEach(tab => {
+            document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t);
+            if(document.getElementById(`nav-${tab}`)) document.getElementById(`nav-${tab}`).classList.toggle('nav-active', tab === t);
         });
-        const d = await r.json();
-        if(d.candidates && d.candidates[0].content) {
-            document.getElementById('study-area').classList.remove('hidden');
-            document.getElementById('ai-response').innerText = d.candidates[0].content.parts[0].text;
-            b.innerText = "ESTUDO PRONTO!";
-        } else { throw new Error(); }
-    } catch {
-        alert("Erro na IA. Verifique sua chave nas configurações.");
-        b.disabled = false; b.innerText = "TENTAR NOVAMENTE";
-    }
-  };
+        if(t === 'rank') loadRanking();
+    };
 
-  // 7. CONCLUIR TAREFA E RESETAR
-  window.finishTask = async () => {
-    const b = document.getElementById('btn-finish');
-    b.innerText = "SALVANDO...";
-    await setDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(10) }, { merge: true });
-    alert("Boa, Duarte! +10 XP na conta.");
-    location.reload(); // Recarrega para buscar um novo versículo imediatamente
-  };
+    // 2. CONFIGURAÇÃO DA CHAVE
+    window.saveKey = () => {
+        const k = document.getElementById('ai-key-input').value;
+        if(k) {
+            localStorage.setItem("groq_api_key", k);
+            alert("Chave salva! Reiniciando...");
+            location.reload();
+        }
+    };
 
-  // 8. RANKING
-  async function loadRanking() {
-    const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(5));
-    const s = await getDocs(q);
-    const l = document.getElementById('ranking-list');
-    l.innerHTML = "";
-    s.forEach((d, i) => {
-        l.innerHTML += `<div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee;"><span>${i+1}º ${d.data().name.toUpperCase()}</span><b>${d.data().xp} XP</b></div>`;
+    // 3. AUTH
+    window.handleAuth = async (type) => {
+        const e = document.getElementById('login-email').value;
+        const p = document.getElementById('login-pass').value;
+        try {
+            if (type === 'signup') {
+                const res = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", res.user.uid), { xp: 0, streak: 1, name: e.split('@')[0] });
+            } else { await signInWithEmailAndPassword(auth, e, p); }
+        } catch (err) { alert("Erro: " + err.message); }
+    };
+    window.logout = () => signOut(auth);
+
+    onAuthStateChanged(auth, (u) => {
+        const isLogged = !!u;
+        document.getElementById('auth-screen').classList.toggle('hidden', isLogged);
+        document.getElementById('main-screen').classList.toggle('hidden', !isLogged);
+        document.getElementById('nav').classList.toggle('hidden', !isLogged);
+        if(u) {
+            document.getElementById('user-display').innerText = u.email.split('@')[0].toUpperCase();
+            loadUserData(u.uid);
+            fetchVerse();
+        }
     });
-  }
+
+    // 4. CARREGAR DADOS (Nível a cada 100 XP)
+    async function loadUserData(uid) {
+        const s = await getDoc(doc(db, "users", uid));
+        if (s.exists()) {
+            const xp = s.data().xp || 0;
+            document.getElementById('xp-val').innerText = xp;
+            document.getElementById('streak-val').innerText = s.data().streak || 0;
+            document.getElementById('level-val').innerText = Math.floor(xp / 100) + 1;
+        }
+    }
+
+    // 5. BUSCA VERSÍCULO (Lógica de sorteio para evitar o Salmo 23 fixo)
+    async function fetchVerse() {
+        const textEl = document.getElementById('verse-text');
+        const refEl = document.getElementById('verse-ref');
+        
+        // Array de referências famosas para garantir que a API sempre traga algo novo
+        const refs = ["Joao 3:16", "Salmos 23:1", "Galatas 5:22", "Filipenses 4:13", "Isaias 41:10", "Jeremias 29:11", "Romanos 8:28", "Mateus 6:33", "Salmos 91:1", "1 Corintios 13:4"];
+        const randomRef = refs[Math.floor(Math.random() * refs.length)];
+
+        try {
+            const res = await fetch(`https://bible-api.com/${randomRef}?translation=almeida`);
+            const data = await res.json();
+            window.currentVerse = data.text;
+            textEl.innerText = `"${data.text.trim()}"`;
+            refEl.innerText = data.reference.toUpperCase();
+        } catch (e) {
+            textEl.innerText = "Tudo posso naquele que me fortalece.";
+            refEl.innerText = "FILIPENSES 4:13";
+            window.currentVerse = textEl.innerText;
+        }
+    }
+
+    // 6. IA GROQ (Mais estável que Gemini no navegador)
+    window.generateStudy = async () => {
+        const key = localStorage.getItem("groq_api_key");
+        if(!key) return alert("Vá nas configurações e insira sua chave da Groq!");
+
+        const b = document.getElementById('btn-study');
+        b.innerText = "IA PROCESSANDO...";
+        b.disabled = true;
+
+        try {
+            const r = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${key}`
+                },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [{ role: "user", content: `Aja como um tutor bíblico. Gere um devocional curto em português sobre o versículo: ${window.currentVerse}` }]
+                })
+            });
+            const d = await r.json();
+            if(d.choices && d.choices[0]) {
+                document.getElementById('study-area').classList.remove('hidden');
+                document.getElementById('ai-response').innerText = d.choices[0].message.content;
+                b.innerText = "ESTUDO PRONTO!";
+            } else { throw new Error(); }
+        } catch {
+            alert("Erro na IA. Verifique sua chave Groq.");
+            b.disabled = false; b.innerText = "TENTAR NOVAMENTE";
+        }
+    };
+
+    // 7. FINALIZAR
+    window.finishTask = async () => {
+        const b = document.getElementById('btn-finish');
+        b.innerText = "SALVANDO...";
+        await setDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(10) }, { merge: true });
+        alert("Boa, Duarte! +10 XP na conta.");
+        location.reload();
+    };
+
+    // 8. RANKING
+    async function loadRanking() {
+        const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(5));
+        const s = await getDocs(q);
+        const l = document.getElementById('ranking-list');
+        l.innerHTML = "";
+        s.forEach((d, i) => {
+            l.innerHTML += `<div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee;"><span>${i+1}º ${d.data().name.toUpperCase()}</span><b>${d.data().xp} XP</b></div>`;
+        });
+    }
 </script>
 </body>
 </html>
