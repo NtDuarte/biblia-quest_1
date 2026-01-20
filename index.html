@@ -51,9 +51,9 @@
                 <p id="verse-text" style="font-weight: 700;">Buscando luz...</p>
                 <div id="verse-ref" style="color: #afafaf; font-weight: 900; font-size: 0.8rem;"></div>
             </div>
-            <button id="btn-study" class="btn-duo" onclick="generateStudy()">GERAR ESTUDO COM IA</button>
+            <button id="btn-study" class="btn-duo" onclick="generateStudy()">GERAR ESTUDO COM GEMINI</button>
             <div id="study-area" class="hidden">
-                <div class="card" id="ai-response" style="background: #f0fbff; white-space: pre-wrap;"></div>
+                <div class="card" id="ai-response" style="background: #f0fbff; white-space: pre-wrap; font-size: 0.9rem;"></div>
                 <button id="btn-finish" class="btn-duo btn-blue" onclick="finishTask()">CONCLUIR TAREFA (+10 XP)</button>
             </div>
         </div>
@@ -90,7 +90,8 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let GROQ_API_KEY = ""; // Busca automática do Firebase
+  // CHAVE DO GEMINI REINTEGRADA CONFORME SOLICITADO
+  const GEMINI_API_KEY = "AIzaSyDz9q3SsfdD4BO91sETPTbqd21ijXIw8xo";
 
   window.showTab = (t) => {
     document.getElementById('study-content').classList.toggle('hidden', t !== 'home');
@@ -112,22 +113,13 @@
   };
   window.logout = () => signOut(auth);
 
-  onAuthStateChanged(auth, async (u) => {
+  onAuthStateChanged(auth, (u) => {
     const isLogged = !!u;
     document.getElementById('auth-screen').classList.toggle('hidden', isLogged);
     document.getElementById('main-screen').classList.toggle('hidden', !isLogged);
     document.getElementById('nav').classList.toggle('hidden', !isLogged);
     if(u) {
         document.getElementById('user-display').innerText = u.email.split('@')[0].toUpperCase();
-        
-        // --- BUSCA CHAVE NO FIREBASE (TOTALMENTE AUTOMÁTICO) ---
-        try {
-            const configSnap = await getDoc(doc(db, "config", "keys"));
-            if (configSnap.exists()) {
-                GROQ_API_KEY = configSnap.data().groq;
-            }
-        } catch (e) { console.error("Chave não configurada no Firebase."); }
-
         loadUserData(u.uid);
         fetchVerse();
     }
@@ -139,20 +131,17 @@
         const xp = s.data().xp || 0;
         document.getElementById('xp-val').innerText = xp;
         document.getElementById('streak-val').innerText = s.data().streak || 0;
-        // Nível Progressivo: 1 nível a cada 100 XP
+        // NÍVEL: 1 nivel a cada 100 XP
         document.getElementById('level-val').innerText = Math.floor(xp / 100) + 1;
     }
   }
 
-  // --- BUSCA VERSÍCULO SEM CACHE (REFRESCADO) ---
+  // --- BUSCA VERSÍCULO COM CACHE BUSTER PARA SER SEMPRE NOVO ---
   async function fetchVerse() {
     const textEl = document.getElementById('verse-text');
     const refEl = document.getElementById('verse-ref');
-    textEl.innerText = "Buscando uma nova revelação...";
-    refEl.innerText = "";
     try {
-        // Timestamp e Random juntos para destruir o cache do navegador
-        const res = await fetch(`https://bible-api.com/random?translation=almeida&t=${Date.now()}&r=${Math.random()}`);
+        const res = await fetch(`https://bible-api.com/random?translation=almeida&cb=${Date.now()}`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         window.currentVerse = data.text;
@@ -165,29 +154,35 @@
     }
   }
 
-  // --- IA AUTOMATIZADA ---
+  // --- INTEGRAÇÃO COM GEMINI 1.5 FLASH ---
   window.generateStudy = async () => {
-    if(!GROQ_API_KEY) return alert("Erro: Configure a chave 'groq' na coleção 'config/keys' do seu Firebase.");
     const b = document.getElementById('btn-study');
+    const responseCard = document.getElementById('ai-response');
+    
     b.innerText = "IA PENSANDO...";
     b.disabled = true;
+
+    const prompt = `Aja como um tutor bíblico. Com base no versículo "${window.currentVerse}", gere um devocional curto em Português (PT-BR). Termine com uma pergunta de reflexão.`;
+
     try {
-        const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
-                messages: [{role: "system", content: "Responda em PT-BR. Gere um devocional curto."}, {role: "user", content: `Estude: ${window.currentVerse}`}]
+                contents: [{ parts: [{ text: prompt }] }]
             })
         });
-        const d = await r.json();
-        if(d?.choices?.[0]) {
+
+        const data = await response.json();
+        if (data.candidates && data.candidates[0].content) {
             document.getElementById('study-area').classList.remove('hidden');
-            document.getElementById('ai-response').innerText = d.choices[0].message.content;
-            b.innerText = "ESTUDO PRONTO!";
+            responseCard.innerText = data.candidates[0].content.parts[0].text;
+            b.innerText = "ESTUDO CONCLUÍDO!";
+        } else {
+            throw new Error("Chave do Gemini pode ter sido bloqueada pelo GitHub.");
         }
-    } catch {
-        alert("Erro na conexão com a IA. Verifique se a chave no Firebase é válida.");
+    } catch (err) {
+        alert("Erro na IA: " + err.message);
         b.disabled = false;
         b.innerText = "TENTAR NOVAMENTE";
     }
@@ -196,15 +191,14 @@
   window.finishTask = async () => {
     const b = document.getElementById('btn-finish');
     b.innerText = "SALVANDO...";
-    b.disabled = true;
     try {
         const userRef = doc(db, "users", auth.currentUser.uid);
         await setDoc(userRef, { xp: increment(10) }, { merge: true });
-        alert("Boa, Duarte! +10 XP na conta.");
+        alert("Excelente Duarte! +10 XP na conta.");
         location.reload(); 
     } catch (e) {
         alert("Erro ao salvar pontos.");
-        b.disabled = false;
+        b.innerText = "CONCLUIR TAREFA (+10 XP)";
     }
   };
 
@@ -214,7 +208,7 @@
     const l = document.getElementById('ranking-list');
     l.innerHTML = "";
     s.forEach((d, i) => {
-        l.innerHTML += `<div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee;"><span>${i+1}º ${d.data().name}</span><b>${d.data().xp} XP</b></div>`;
+        l.innerHTML += `<div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee;"><span>${i+1}º ${d.data().name.toUpperCase()}</span><b>${d.data().xp} XP</b></div>`;
     });
   }
 </script>
