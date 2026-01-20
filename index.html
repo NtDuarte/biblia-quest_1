@@ -6,14 +6,11 @@
     <title>BibliaQuest - Duarte & Maria Clara</title>
     <style>
         :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #f7f7f7; --text: #4b4b4b; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; color: var(--text); }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; color: var(--text); }
         #app { width: 100%; max-width: 500px; background: white; min-height: 100vh; padding: 20px; box-sizing: border-box; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
         .hidden { display: none; }
-        h2 { color: var(--primary); text-align: center; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e5e5e5; border-radius: 12px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: filter 0.2s; }
-        button:disabled { background: #ccc; }
-        button:hover { filter: brightness(0.9); }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .card { border: 2px solid #e5e5e5; border-radius: 15px; padding: 15px; margin: 20px 0; background: white; }
         .header-stats { display: flex; justify-content: space-between; align-items: center; font-weight: bold; padding-bottom: 15px; border-bottom: 2px solid #f1f1f1; }
         #verse-text { font-style: italic; font-size: 1.1rem; line-height: 1.5; margin: 10px 0; }
@@ -24,35 +21,32 @@
 
 <div id="app">
     <div id="auth-screen">
-        <h2>BibliaQuest</h2>
-        <p style="text-align:center">Seu estudo bíblico gamificado</p>
+        <h2 style="color:var(--primary); text-align:center">BibliaQuest</h2>
         <input type="email" id="login-email" placeholder="E-mail">
         <input type="password" id="login-pass" placeholder="Senha">
         <button onclick="handleAuth('login')">Entrar</button>
-        <button style="background: var(--blue)" onclick="handleAuth('signup')">Criar minha conta</button>
+        <button style="background: var(--blue)" onclick="handleAuth('signup')">Criar Conta</button>
     </div>
 
     <div id="main-screen" class="hidden">
         <div class="header-stats">
-            <span id="user-display">Duarte</span>
+            <span id="user-display">Usuário</span>
             <span>🔥 <b id="streak-val">0</b> | XP: <b id="xp-val">0</b></span>
         </div>
         
         <div class="card">
-            <h3 style="margin-top:0">📖 Palavra do Dia</h3>
-            <p id="verse-text">Buscando versículo em português...</p>
+            <h3>📖 Palavra do Dia</h3>
+            <p id="verse-text">Carregando mensagem especial...</p>
             <small id="verse-ref" style="color: var(--blue); font-weight:bold"></small>
         </div>
 
         <button id="btn-study" onclick="generateStudy()">Gerar Estudo com IA</button>
 
         <div id="study-area" class="hidden">
-            <div class="card" id="ai-study-content" style="background: #f0f9ff; border-color: var(--blue);">
-                </div>
-            <div id="quiz-area"></div>
+            <div class="card" id="ai-study-content" style="background: #f0f9ff; border-color: var(--blue);"></div>
         </div>
         
-        <button style="background: #ff4b4b; margin-top: 40px; font-size: 0.8rem; padding: 10px;" onclick="auth.signOut()">Sair da conta</button>
+        <button style="background: #ff4b4b; margin-top: 20px; padding: 8px;" onclick="location.reload()">Sair / Recarregar</button>
     </div>
 </div>
 
@@ -61,37 +55,27 @@
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // 1. CONFIGURAÇÃO FIREBASE (SUAS CHAVES REVALIDADAS)
+  // CONFIGURAÇÃO FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
     authDomain: "bibliaquest-fbc44.firebaseapp.com",
     projectId: "bibliaquest-fbc44",
     storageBucket: "bibliaquest-fbc44.firebasestorage.app",
     messagingSenderId: "670585434397",
-    appId: "1:670585434397:web:6d699582986e8dcbc6f1f4",
-    measurementId: "G-H0Z7T8LCPE"
+    appId: "1:670585434397:web:6d699582986e8dcbc6f1f4"
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
- // 2. CONFIGURAÇÃO GROQ (SEGURA PARA GITHUB)
-let GROQ_API_KEY = localStorage.getItem("groq_key");
+  // PROTEÇÃO CONTRA BLOQUEIO DO GITHUB
+  let GROQ_API_KEY = localStorage.getItem("groq_key");
 
-if (!GROQ_API_KEY) {
-    GROQ_API_KEY = prompt("Para usar o BibliaQuest, insira sua chave API do Groq (isso só será pedido uma vez):");
-    if (GROQ_API_KEY) {
-        localStorage.setItem("groq_key", GROQ_API_KEY);
-    }
-}
-
-  // 3. LÓGICA DE AUTENTICAÇÃO
+  // LÓGICA DE LOGIN
   window.handleAuth = async (type) => {
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-pass').value;
-    if(!email || !pass) return alert("Preencha todos os campos");
-
     try {
         if (type === 'signup') {
             const res = await createUserWithEmailAndPassword(auth, email, pass);
@@ -99,20 +83,23 @@ if (!GROQ_API_KEY) {
         } else {
             await signInWithEmailAndPassword(auth, email, pass);
         }
-    } catch (e) { alert("Erro na autenticação: " + e.message); }
+    } catch (e) { alert("Erro: " + e.message); }
   };
 
-  // 4. MONITORAMENTO DE LOGIN
   onAuthStateChanged(auth, async (user) => {
     if (user) {
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
         document.getElementById('user-display').innerText = user.email.split('@')[0];
+        
+        // Se não tiver a chave salva, pede agora
+        if (!GROQ_API_KEY) {
+            GROQ_API_KEY = prompt("Insira sua NOVA chave do Groq (Isso evita bloqueio do GitHub):");
+            if (GROQ_API_KEY) localStorage.setItem("groq_key", GROQ_API_KEY);
+        }
+
         loadUserData(user.uid);
         fetchVerse();
-    } else {
-        document.getElementById('auth-screen').classList.remove('hidden');
-        document.getElementById('main-screen').classList.add('hidden');
     }
   });
 
@@ -124,27 +111,28 @@ if (!GROQ_API_KEY) {
     }
   }
 
-  // 5. BUSCA VERSÍCULO (ALMEIDA - PORTUGUÊS)
+  // BUSCA VERSÍCULO (MÉTODO MAIS ESTÁVEL)
   async function fetchVerse() {
     try {
-        const res = await fetch('https://bible-api.com/random?translation=almeida');
+        // Buscamos João 3:16 como teste inicial para garantir que a conexão funciona
+        const res = await fetch('https://bible-api.com/john+3:16?translation=almeida');
         const data = await res.json();
         document.getElementById('verse-text').innerText = `"${data.text.trim()}"`;
         document.getElementById('verse-ref').innerText = data.reference;
-        window.currentVerse = data.text; 
+        window.currentVerse = data.text;
     } catch (e) {
-        document.getElementById('verse-text').innerText = "Erro ao buscar a Palavra. Verifique sua conexão.";
+        document.getElementById('verse-text').innerText = "Erro ao buscar a Palavra. Verifique sua internet.";
     }
   }
 
-  // 6. GERAR ESTUDO COM IA (GROQ)
+  // IA COM GROQ
   window.generateStudy = async () => {
     const btn = document.getElementById('btn-study');
     const studyContent = document.getElementById('ai-study-content');
     
-    if (!window.currentVerse) return alert("Aguarde o carregamento do versículo.");
+    if (!GROQ_API_KEY) return alert("Por favor, recarregue e insira uma chave válida.");
 
-    btn.innerText = "IA preparando seu estudo...";
+    btn.innerText = "Pensando...";
     btn.disabled = true;
 
     try {
@@ -156,29 +144,23 @@ if (!GROQ_API_KEY) {
             },
             body: JSON.stringify({
                 model: "llama-3.3-70b-versatile",
-                messages: [
-                    {
-                        role: "system",
-                        content: "Você é um tutor bíblico. Responda ESTRITAMENTE em Português (PT-BR). Gere um estudo curto de 2 parágrafos e uma pergunta de múltipla escolha com 3 opções (A, B, C)."
-                    },
-                    {
-                        role: "user",
-                        content: `Estude este versículo: "${window.currentVerse}"`
-                    }
-                ]
+                messages: [{ role: "system", content: "Você é um tutor bíblico. Responda em Português." },
+                           { role: "user", content: `Faça um devocional para: ${window.currentVerse}` }]
             })
         });
 
         const data = await response.json();
-        if (data.choices && data.choices[0].message) {
+        if (data.choices) {
             document.getElementById('study-area').classList.remove('hidden');
             studyContent.innerText = data.choices[0].message.content;
-            btn.innerText = "Estudo Gerado com Sucesso!";
+            btn.innerText = "Concluído!";
+        } else {
+            alert("Sua chave do Groq parece inválida ou foi bloqueada.");
+            localStorage.removeItem("groq_key");
         }
     } catch (e) {
-        alert("Erro ao conectar com a IA. Tente novamente.");
+        alert("Erro na IA. Tente novamente.");
         btn.disabled = false;
-        btn.innerText = "Tentar Novamente";
     }
   };
 </script>
