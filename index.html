@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BibliaQuest - Estudo Diário</title>
+    <title>BibliaQuest - Duarte & Maria Clara</title>
     <style>
-        :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #f7f7f7; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; }
-        #app { width: 100%; max-width: 500px; background: white; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #f7f7f7; --text: #4b4b4b; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; color: var(--text); }
+        #app { width: 100%; max-width: 500px; background: white; min-height: 100vh; padding: 20px; box-sizing: border-box; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
         .hidden { display: none; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e5e5e5; border-radius: 12px; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .card { border: 2px solid #e5e5e5; border-radius: 15px; padding: 15px; margin: 20px 0; }
-        .progress-bar { height: 10px; background: #e5e5e5; border-radius: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.3s; }
+        h2 { color: var(--primary); text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e5e5e5; border-radius: 12px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: filter 0.2s; }
+        button:disabled { background: #ccc; }
+        button:hover { filter: brightness(0.9); }
+        .card { border: 2px solid #e5e5e5; border-radius: 15px; padding: 15px; margin: 20px 0; background: white; }
+        .header-stats { display: flex; justify-content: space-between; align-items: center; font-weight: bold; padding-bottom: 15px; border-bottom: 2px solid #f1f1f1; }
+        #verse-text { font-style: italic; font-size: 1.1rem; line-height: 1.5; margin: 10px 0; }
+        #ai-study-content { white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem; }
     </style>
 </head>
 <body>
@@ -21,32 +25,34 @@
 <div id="app">
     <div id="auth-screen">
         <h2>BibliaQuest</h2>
-        <p>Aprenda a Palavra todo dia.</p>
+        <p style="text-align:center">Seu estudo bíblico gamificado</p>
         <input type="email" id="login-email" placeholder="E-mail">
         <input type="password" id="login-pass" placeholder="Senha">
         <button onclick="handleAuth('login')">Entrar</button>
-        <button style="background: var(--blue)" onclick="handleAuth('signup')">Criar Conta</button>
+        <button style="background: var(--blue)" onclick="handleAuth('signup')">Criar minha conta</button>
     </div>
 
     <div id="main-screen" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="header-stats">
             <span id="user-display">Duarte</span>
             <span>🔥 <b id="streak-val">0</b> | XP: <b id="xp-val">0</b></span>
         </div>
         
         <div class="card">
-            <h3>📖 Palavra do Dia</h3>
-            <p id="verse-text">Buscando versículo...</p>
-            <small id="verse-ref"></small>
+            <h3 style="margin-top:0">📖 Palavra do Dia</h3>
+            <p id="verse-text">Buscando versículo em português...</p>
+            <small id="verse-ref" style="color: var(--blue); font-weight:bold"></small>
         </div>
 
         <button id="btn-study" onclick="generateStudy()">Gerar Estudo com IA</button>
 
         <div id="study-area" class="hidden">
-            <div class="card" id="ai-study-content" style="background: #f0f9ff;">
+            <div class="card" id="ai-study-content" style="background: #f0f9ff; border-color: var(--blue);">
                 </div>
             <div id="quiz-area"></div>
         </div>
+        
+        <button style="background: #ff4b4b; margin-top: 40px; font-size: 0.8rem; padding: 10px;" onclick="auth.signOut()">Sair da conta</button>
     </div>
 </div>
 
@@ -55,7 +61,7 @@
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // 1. CONFIGURAÇÃO (COLE AS SUAS CHAVES AQUI)
+  // 1. CONFIGURAÇÃO FIREBASE (SUAS CHAVES REVALIDADAS)
   const firebaseConfig = {
     apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
     authDomain: "bibliaquest-fbc44.firebaseapp.com",
@@ -69,12 +75,23 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  const GEMINI_API_KEY = "AIzaSyDz9q3SsfdD4BO91sETPTbqd21ijXIw8xo";
 
-  // 2. LÓGICA DE AUTENTICAÇÃO
+ // 2. CONFIGURAÇÃO GROQ (SEGURA PARA GITHUB)
+let GROQ_API_KEY = localStorage.getItem("groq_key");
+
+if (!GROQ_API_KEY) {
+    GROQ_API_KEY = prompt("Para usar o BibliaQuest, insira sua chave API do Groq (isso só será pedido uma vez):");
+    if (GROQ_API_KEY) {
+        localStorage.setItem("groq_key", GROQ_API_KEY);
+    }
+}
+
+  // 3. LÓGICA DE AUTENTICAÇÃO
   window.handleAuth = async (type) => {
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-pass').value;
+    if(!email || !pass) return alert("Preencha todos os campos");
+
     try {
         if (type === 'signup') {
             const res = await createUserWithEmailAndPassword(auth, email, pass);
@@ -82,16 +99,20 @@
         } else {
             await signInWithEmailAndPassword(auth, email, pass);
         }
-    } catch (e) { alert("Erro: " + e.message); }
+    } catch (e) { alert("Erro na autenticação: " + e.message); }
   };
 
-  // 3. MONITORAR USUÁRIO
+  // 4. MONITORAMENTO DE LOGIN
   onAuthStateChanged(auth, async (user) => {
     if (user) {
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
+        document.getElementById('user-display').innerText = user.email.split('@')[0];
         loadUserData(user.uid);
         fetchVerse();
+    } else {
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('main-screen').classList.add('hidden');
     }
   });
 
@@ -103,63 +124,63 @@
     }
   }
 
-  // 4. API DA BÍBLIA (LABS BIBLE - MAIS ESTÁVEL PARA RANDOM)
+  // 5. BUSCA VERSÍCULO (ALMEIDA - PORTUGUÊS)
   async function fetchVerse() {
     try {
-        // Esta API retorna um versículo aleatório em formato JSON
-        const res = await fetch('https://labs.bible.org/api/?passage=random&type=json');
+        const res = await fetch('https://bible-api.com/random?translation=almeida');
         const data = await res.json();
-        
-        const text = data[0].text;
-        const ref = `${data[0].bookname} ${data[0].chapter}:${data[0].verse}`;
-        
-        document.getElementById('verse-text').innerText = `"${text.trim()}"`;
-        document.getElementById('verse-ref').innerText = ref;
-        window.currentVerse = text; 
+        document.getElementById('verse-text').innerText = `"${data.text.trim()}"`;
+        document.getElementById('verse-ref').innerText = data.reference;
+        window.currentVerse = data.text; 
     } catch (e) {
-        console.error("Erro na Bíblia:", e);
-        document.getElementById('verse-text').innerText = "Erro ao buscar versículo. Tente recarregar.";
+        document.getElementById('verse-text').innerText = "Erro ao buscar a Palavra. Verifique sua conexão.";
     }
   }
 
-  // 5. INTEGRAÇÃO COM GEMINI (AJUSTADA)
+  // 6. GERAR ESTUDO COM IA (GROQ)
   window.generateStudy = async () => {
     const btn = document.getElementById('btn-study');
-    const studyArea = document.getElementById('ai-study-content');
+    const studyContent = document.getElementById('ai-study-content');
     
-    btn.innerText = "IA pensando...";
+    if (!window.currentVerse) return alert("Aguarde o carregamento do versículo.");
+
+    btn.innerText = "IA preparando seu estudo...";
     btn.disabled = true;
 
-    const prompt = `Aja como um tutor bíblico. Com base no versículo "${window.currentVerse}", escreva um breve devocional (máximo 400 caracteres). Depois, crie uma pergunta de múltipla escolha com 3 opções (A, B, C) sobre o texto.`;
-
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    {
+                        role: "system",
+                        content: "Você é um tutor bíblico. Responda ESTRITAMENTE em Português (PT-BR). Gere um estudo curto de 2 parágrafos e uma pergunta de múltipla escolha com 3 opções (A, B, C)."
+                    },
+                    {
+                        role: "user",
+                        content: `Estude este versículo: "${window.currentVerse}"`
+                    }
+                ]
             })
         });
 
         const data = await response.json();
-        
-        // Verifica se a IA retornou o texto corretamente
-        if (data.candidates && data.candidates[0].content) {
-            const textoIA = data.candidates[0].content.parts[0].text;
+        if (data.choices && data.choices[0].message) {
             document.getElementById('study-area').classList.remove('hidden');
-            studyArea.innerText = textoIA;
-            btn.innerText = "Estudo Concluído";
-        } else {
-            throw new Error("Resposta da IA vazia ou erro na chave.");
+            studyContent.innerText = data.choices[0].message.content;
+            btn.innerText = "Estudo Gerado com Sucesso!";
         }
-    } catch (e) { 
-        console.error("Erro Gemini:", e);
-        alert("Erro na IA: Verifique se sua API KEY está correta e ativa.");
-        btn.innerText = "Tentar Novamente";
+    } catch (e) {
+        alert("Erro ao conectar com a IA. Tente novamente.");
         btn.disabled = false;
+        btn.innerText = "Tentar Novamente";
     }
   };
 </script>
-
 </body>
 </html>
