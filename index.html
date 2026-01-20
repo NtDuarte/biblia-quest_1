@@ -90,7 +90,7 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let GROQ_API_KEY = ""; // Será preenchida automaticamente pelo Firebase
+  let GROQ_API_KEY = ""; // Busca automática do Firebase
 
   window.showTab = (t) => {
     document.getElementById('study-content').classList.toggle('hidden', t !== 'home');
@@ -117,17 +117,16 @@
     document.getElementById('auth-screen').classList.toggle('hidden', isLogged);
     document.getElementById('main-screen').classList.toggle('hidden', !isLogged);
     document.getElementById('nav').classList.toggle('hidden', !isLogged);
-    
     if(u) {
         document.getElementById('user-display').innerText = u.email.split('@')[0].toUpperCase();
         
-        // --- BUSCA CHAVE NO FIREBASE (IMPEDE BLOQUEIO DO GITHUB) ---
+        // --- BUSCA CHAVE NO FIREBASE (TOTALMENTE AUTOMÁTICO) ---
         try {
             const configSnap = await getDoc(doc(db, "config", "keys"));
             if (configSnap.exists()) {
                 GROQ_API_KEY = configSnap.data().groq;
             }
-        } catch (e) { console.error("Erro ao buscar chave da IA."); }
+        } catch (e) { console.error("Chave não configurada no Firebase."); }
 
         loadUserData(u.uid);
         fetchVerse();
@@ -140,17 +139,20 @@
         const xp = s.data().xp || 0;
         document.getElementById('xp-val').innerText = xp;
         document.getElementById('streak-val').innerText = s.data().streak || 0;
-        // NÍVEL AUTOMÁTICO (1 nivel a cada 100 XP)
+        // Nível Progressivo: 1 nível a cada 100 XP
         document.getElementById('level-val').innerText = Math.floor(xp / 100) + 1;
     }
   }
 
+  // --- BUSCA VERSÍCULO SEM CACHE (REFRESCADO) ---
   async function fetchVerse() {
     const textEl = document.getElementById('verse-text');
     const refEl = document.getElementById('verse-ref');
+    textEl.innerText = "Buscando uma nova revelação...";
+    refEl.innerText = "";
     try {
-        const timestamp = new Date().getTime();
-        const res = await fetch(`https://bible-api.com/random?translation=almeida&t=${timestamp}`);
+        // Timestamp e Random juntos para destruir o cache do navegador
+        const res = await fetch(`https://bible-api.com/random?translation=almeida&t=${Date.now()}&r=${Math.random()}`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         window.currentVerse = data.text;
@@ -163,8 +165,9 @@
     }
   }
 
+  // --- IA AUTOMATIZADA ---
   window.generateStudy = async () => {
-    if(!GROQ_API_KEY) return alert("IA carregando ou chave não configurada no Firebase.");
+    if(!GROQ_API_KEY) return alert("Erro: Configure a chave 'groq' na coleção 'config/keys' do seu Firebase.");
     const b = document.getElementById('btn-study');
     b.innerText = "IA PENSANDO...";
     b.disabled = true;
@@ -182,12 +185,9 @@
             document.getElementById('study-area').classList.remove('hidden');
             document.getElementById('ai-response').innerText = d.choices[0].message.content;
             b.innerText = "ESTUDO PRONTO!";
-        } else {
-            // Caso a chave tenha sido bloqueada por segurança
-            throw new Error("Resposta da IA vazia.");
         }
-    } catch (err) {
-        alert("Erro na IA: " + err.message);
+    } catch {
+        alert("Erro na conexão com a IA. Verifique se a chave no Firebase é válida.");
         b.disabled = false;
         b.innerText = "TENTAR NOVAMENTE";
     }
@@ -199,14 +199,12 @@
     b.disabled = true;
     try {
         const userRef = doc(db, "users", auth.currentUser.uid);
-        // setDoc com merge garante que o documento seja criado/atualizado sem erro
         await setDoc(userRef, { xp: increment(10) }, { merge: true });
-        alert("Boa! +10 XP na conta.");
+        alert("Boa, Duarte! +10 XP na conta.");
         location.reload(); 
     } catch (e) {
-        alert("Erro ao salvar pontos no Firestore.");
+        alert("Erro ao salvar pontos.");
         b.disabled = false;
-        b.innerText = "CONCLUIR TAREFA (+10 XP)";
     }
   };
 
