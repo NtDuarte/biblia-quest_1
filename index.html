@@ -6,21 +6,21 @@
     <title>BibliaQuest | Duarte</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #ffffff; --text: #3c3c3c; --gold: #ffc107; }
+        :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #ffffff; --text: #3c3c3c; --correct: #d7ffb8; --wrong: #ffd7d7; }
         body { font-family: 'Nunito', sans-serif; background-color: #f7f7f7; margin: 0; display: flex; justify-content: center; color: var(--text); }
         #app { width: 100%; max-width: 480px; background: white; min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 100px; }
         .hidden { display: none !important; }
         .card { border: 2px solid #e5e5e5; border-bottom: 6px solid #e5e5e5; border-radius: 20px; padding: 20px; margin: 15px 0; background: white; }
         .header-stats { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
-        .btn-duo { width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 18px; font-weight: 900; text-transform: uppercase; cursor: pointer; background: var(--primary); color: white; border-bottom: 6px solid #46a302; margin-top: 10px; }
+        .btn-duo { width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 16px; font-weight: 900; text-transform: uppercase; cursor: pointer; background: var(--primary); color: white; border-bottom: 6px solid #46a302; margin-top: 10px; transition: 0.2s; }
         .btn-duo:active { transform: translateY(4px); border-bottom: 2px solid #46a302; }
         .btn-blue { background: var(--blue); border-bottom: 6px solid #1899d6; }
-        input { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #e5e5e5; border-radius: 16px; background: #f7f7f7; font-size: 16px; box-sizing: border-box; }
-        .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #e5e5e5; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; z-index: 100; }
+        .quiz-option { width: 100%; text-align: left; padding: 15px; margin: 8px 0; border: 2px solid #e5e5e5; border-radius: 15px; background: white; cursor: pointer; font-weight: 700; font-family: 'Nunito'; }
+        .quiz-option:hover { background: #f7f7f7; }
+        .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #e5e5e5; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; }
         .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; }
         .nav-active { color: var(--blue); }
-        .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 2px solid #f1f1f1; }
-        .rank-pos { font-weight: 900; width: 30px; color: var(--blue); }
+        .rank-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 2px solid #f1f1f1; align-items: center; }
     </style>
 </head>
 <body>
@@ -28,54 +28,44 @@
 <div id="app">
     <div id="auth-screen">
         <h1 style="text-align:center; color: var(--primary);">BibliaQuest</h1>
-        <p style="text-align:center; font-weight:700">Aprenda a Palavra como um jogo.</p>
-        <input type="email" id="login-email" placeholder="E-MAIL">
-        <input type="password" id="login-pass" placeholder="SENHA">
+        <input type="email" id="login-email" placeholder="E-MAIL" style="width:100%; padding:15px; margin:10px 0; border:2px solid #e5e5e5; border-radius:16px;">
+        <input type="password" id="login-pass" placeholder="SENHA" style="width:100%; padding:15px; margin:10px 0; border:2px solid #e5e5e5; border-radius:16px;">
         <button class="btn-duo" onclick="handleAuth('login')">ENTRAR</button>
-        <button class="btn-duo btn-blue" onclick="handleAuth('signup')">CRIAR MINHA CONTA</button>
+        <button class="btn-duo btn-blue" onclick="handleAuth('signup')">CRIAR CONTA</button>
     </div>
 
     <div id="main-screen" class="hidden">
         <div class="header-stats">
-            <div>
-                <span id="user-display" style="font-weight: 900; color: var(--primary);">USUÁRIO</span>
-                <div style="font-size: 0.8rem; color: #afafaf;">NÍVEL <b id="level-val" style="color: var(--primary);">1</b></div>
-            </div>
-            <div style="display: flex; gap: 15px;">
-                <div class="stat-item" style="font-weight:900">🔥 <b id="streak-val">0</b></div>
-                <div class="stat-item" style="color:var(--blue); font-weight:900">💎 <b id="xp-val">0</b></div>
-            </div>
+            <div><b id="user-display" style="color:var(--primary)">DUARTE</b><br><small>NÍVEL <span id="level-val">1</span></small></div>
+            <div style="display:flex; gap:10px;"><span>🔥 <b id="streak-val">0</b></span><span style="color:var(--blue)">💎 <b id="xp-val">0</b></span></div>
         </div>
         
         <div id="tab-home">
             <div class="card">
-                <h3 style="color: var(--blue); margin-top:0">📖 PASSAGEM DO DIA</h3>
-                <p id="verse-text" style="font-weight: 700; font-size: 1.1rem; line-height: 1.4;">Buscando revelação...</p>
-                <div id="verse-ref" style="color: #afafaf; font-weight: 900; font-size: 0.8rem; margin-top:10px;"></div>
+                <h3 style="color: var(--blue); margin:0">📖 DESAFIO DIÁRIO</h3>
+                <p id="verse-text" style="font-weight: 700; font-size: 1.1rem;">Carregando...</p>
+                <div id="verse-ref" style="color: #afafaf; font-weight: 900; font-size: 0.8rem;"></div>
             </div>
-            <button id="btn-study" class="btn-duo" onclick="generateStudy()">GERAR ESTUDO E PERGUNTAS</button>
+            <button id="btn-study" class="btn-duo" onclick="generateStudy()">INICIAR ESTUDO COM QUIZ</button>
+            
             <div id="study-area" class="hidden">
-                <div class="card" id="ai-response" style="background: #f0fbff; white-space: pre-wrap; font-size: 1rem; border-color: var(--blue);"></div>
-                <p style="font-size: 0.8rem; color: #afafaf; text-align: center;">Reflita sobre o estudo acima antes de concluir.</p>
-                <button id="btn-finish" class="btn-duo btn-blue" onclick="finishTask()">CONCLUIR E GANHAR XP (+10)</button>
+                <div class="card" id="ai-response" style="background: #f0fbff; font-size: 0.95rem;"></div>
+                <div id="quiz-container" class="card">
+                    <h4 style="margin-top:0">TESTE SEU CONHECIMENTO:</h4>
+                    <div id="quiz-options"></div>
+                </div>
             </div>
         </div>
 
         <div id="tab-rank" class="hidden">
-            <h2 style="text-align:center; color: var(--blue);">🏆 RANKING GERAL</h2>
-            <div class="card" style="padding:0" id="ranking-list">
-                <p style="padding:20px; text-align:center;">Carregando líderes...</p>
-            </div>
+            <h2 style="text-align:center; color: var(--blue);">🏆 RANKING GLOBAL</h2>
+            <div id="ranking-list" class="card" style="padding:0"></div>
         </div>
 
         <div id="tab-config" class="hidden">
-            <h2 style="text-align:center; color: #afafaf;">CONFIGURAÇÕES</h2>
-            <div class="card">
-                <p style="font-weight: 700;">Chave da IA (Groq):</p>
-                <input type="password" id="ai-key-input" placeholder="Cole sua API Key do Groq...">
-                <button class="btn-duo" onclick="saveKey()">SALVAR CHAVE</button>
-                <p style="font-size: 0.7rem; color: #afafaf; margin-top: 10px;">Obtenha em: console.groq.com</p>
-            </div>
+            <h2 style="text-align:center; color: #afafaf;">⚙️ AJUSTES</h2>
+            <input type="password" id="ai-key-input" placeholder="Sua Chave Groq" style="width:100%; padding:15px; border:2px solid #e5e5e5; border-radius:16px;">
+            <button class="btn-duo" onclick="saveKey()">SALVAR CHAVE</button>
         </div>
     </div>
 
@@ -83,13 +73,12 @@
         <div class="nav-item nav-active" id="nav-home" onclick="showTab('home')">ESTUDO</div>
         <div class="nav-item" id="nav-rank" onclick="showTab('rank')">RANKING</div>
         <div class="nav-item" id="nav-config" onclick="showTab('config')">⚙️</div>
-        <div class="nav-item" onclick="logout()" style="color:#ff4b4b">SAIR</div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -105,93 +94,68 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // NAVEGAÇÃO
+    let correctAnswer = "";
+
     window.showTab = (t) => {
-        ['home', 'rank', 'config'].forEach(tab => {
-            const screen = document.getElementById(`tab-${tab}`);
-            const nav = document.getElementById(`nav-${tab}`);
-            if(screen) screen.classList.toggle('hidden', tab !== t);
-            if(nav) nav.classList.toggle('nav-active', tab === t);
-        });
+        ['home', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
         if(t === 'rank') loadRanking();
     };
 
-    // SAVE KEY
-    window.saveKey = () => {
-        const k = document.getElementById('ai-key-input').value;
-        if(k) { localStorage.setItem("groq_api_key", k); alert("Chave configurada!"); location.reload(); }
-    };
+    window.saveKey = () => { localStorage.setItem("groq_api_key", document.getElementById('ai-key-input').value); alert("Chave Salva!"); location.reload(); };
 
-    // AUTH
-    window.handleAuth = async (type) => {
+    // AUTH & LOGIC
+    window.handleAuth = async (m) => {
         const e = document.getElementById('login-email').value;
         const p = document.getElementById('login-pass').value;
-        if(!e || !p) return alert("Preencha os campos!");
         try {
-            if (type === 'signup') {
-                const res = await createUserWithEmailAndPassword(auth, e, p);
-                // Inicializa o usuário com XP 0 para aparecer no ranking
-                await setDoc(doc(db, "users", res.user.uid), { 
-                    xp: 0, 
-                    name: e.split('@')[0],
-                    streak: 1 
-                });
+            if(m === 'signup') {
+                const r = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", r.user.uid), { xp: 0, name: e.split('@')[0], streak: 0 });
             } else { await signInWithEmailAndPassword(auth, e, p); }
-        } catch (err) { alert("Erro: " + err.message); }
+        } catch(err) { alert(err.message); }
     };
-    window.logout = () => signOut(auth);
 
-    onAuthStateChanged(auth, (u) => {
+    onAuthStateChanged(auth, u => {
         document.getElementById('auth-screen').classList.toggle('hidden', !!u);
         document.getElementById('main-screen').classList.toggle('hidden', !u);
         document.getElementById('nav').classList.toggle('hidden', !u);
-        if(u) {
-            document.getElementById('user-display').innerText = u.email.split('@')[0].toUpperCase();
-            loadUserData(u.uid);
-            fetchVerse();
-        }
+        if(u) { loadUserData(u.uid); fetchVerse(); }
     });
 
-    // LOAD USER
     async function loadUserData(uid) {
         const s = await getDoc(doc(db, "users", uid));
-        if (s.exists()) {
-            const data = s.data();
-            document.getElementById('xp-val').innerText = data.xp || 0;
-            document.getElementById('streak-val').innerText = data.streak || 0;
-            document.getElementById('level-val').innerText = Math.floor((data.xp || 0) / 100) + 1;
+        if(s.exists()) {
+            const d = s.data();
+            document.getElementById('xp-val').innerText = d.xp;
+            document.getElementById('level-val').innerText = Math.floor(d.xp / 100) + 1;
+            document.getElementById('user-display').innerText = d.name.toUpperCase();
         }
     }
 
-    // LISTA EXPANDIDA DE VERSÍCULOS
+    // GERAÇÃO DE VERSÍCULOS DINÂMICA (EQUIVALENTE A +1000 OPÇÕES)
     async function fetchVerse() {
-        const refs = [
-            "Joao 3:16", "Salmos 23:1", "Galatas 5:22", "Filipenses 4:13", "Isaias 41:10", 
-            "Jeremias 29:11", "Romanos 8:28", "Mateus 6:33", "Salmos 91:1", "1 Corintios 13:4",
-            "Proverbios 3:5", "Josue 1:9", "Mateus 11:28", "Hebreus 11:1", "Romanos 12:2",
-            "Salmos 46:1", "Tiago 1:5", "1 Pedro 5:7", "Mateus 28:19", "Efesios 2:8"
-        ];
-        const randomRef = refs[Math.floor(Math.random() * refs.length)];
+        const books = ["Gênesis", "Êxodo", "Salmos", "Provérbios", "Isaías", "Mateus", "Marcos", "Lucas", "João", "Atos", "Romanos", "Gálatas", "Filipenses"];
+        const book = books[Math.floor(Math.random() * books.length)];
+        const cap = Math.floor(Math.random() * 20) + 1;
+        const ver = Math.floor(Math.random() * 15) + 1;
+        const ref = `${book} ${cap}:${ver}`;
+
         try {
-            const res = await fetch(`https://bible-api.com/${randomRef}?translation=almeida`);
+            const res = await fetch(`https://bible-api.com/${ref}?translation=almeida`);
             const data = await res.json();
             window.currentVerse = data.text;
             document.getElementById('verse-text').innerText = `"${data.text.trim()}"`;
             document.getElementById('verse-ref').innerText = data.reference.toUpperCase();
-        } catch (e) {
-            document.getElementById('verse-text').innerText = "O Senhor é o meu pastor, nada me faltará.";
-            document.getElementById('verse-ref').innerText = "SALMOS 23:1";
-            window.currentVerse = "O Senhor é o meu pastor, nada me faltará.";
-        }
+        } catch { fetchVerse(); } // Tenta de novo se o verso não existir
     }
 
-    // IA COM PERGUNTAS (GROQ)
+    // IA GROQ COM QUIZ DE MÚLTIPLA ESCOLHA
     window.generateStudy = async () => {
         const key = localStorage.getItem("groq_api_key");
-        if(!key) return alert("Configure sua chave da Groq em ⚙️!");
-
+        if(!key) return alert("Coloque a chave nas configurações!");
+        
         const b = document.getElementById('btn-study');
-        b.innerText = "IA ANALISANDO...";
+        b.innerText = "IA PREPARANDO QUIZ...";
         b.disabled = true;
 
         try {
@@ -200,64 +164,73 @@
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [{ 
-                        role: "user", 
-                        content: `Aja como um tutor bíblico. Para o versículo: "${window.currentVerse}", gere:
-                        1. Um devocional curto e inspirador (max 4 parágrafos).
-                        2. Uma seção chamada "❓ DESAFIO DE APRENDIZADO" com 2 perguntas de reflexão baseadas no texto.` 
-                    }]
+                    messages: [{ role: "user", content: `Analise: "${window.currentVerse}". 
+                    1. Gere um resumo de 2 frases. 
+                    2. Crie UMA pergunta de múltipla escolha com 4 opções (A, B, C, D). 
+                    Siga estritamente este formato:
+                    RESUMO: [texto]
+                    PERGUNTA: [pergunta]
+                    A) [opção]
+                    B) [opção]
+                    C) [opção]
+                    D) [opção]
+                    CORRETA: [Letra]` }]
                 })
             });
             const d = await r.json();
-            if(d.choices) {
-                document.getElementById('study-area').classList.remove('hidden');
-                document.getElementById('ai-response').innerText = d.choices[0].message.content;
-                b.innerText = "ESTUDO PRONTO!";
-            }
-        } catch {
-            alert("Erro na IA. Verifique a chave.");
-            b.disabled = false; b.innerText = "TENTAR NOVAMENTE";
-        }
-    };
-
-    // FINISH & XP
-    window.finishTask = async () => {
-        const b = document.getElementById('btn-finish');
-        b.innerText = "SALVANDO...";
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(10) });
-        alert("Excelente estudo! +10 XP");
-        location.reload();
-    };
-
-    // RANKING GERAL (COMPARA TODOS OS USUÁRIOS)
-    async function loadRanking() {
-        const list = document.getElementById('ranking-list');
-        list.innerHTML = `<p style="padding:20px; text-align:center;">Buscando líderes...</p>`;
-        
-        try {
-            // Busca os top 10 usuários com mais XP
-            const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(10));
-            const s = await getDocs(q);
+            const text = d.choices[0].message.content;
             
-            list.innerHTML = "";
-            let i = 1;
-            s.forEach((userDoc) => {
-                const data = userDoc.data();
-                const isMe = userDoc.id === auth.currentUser.uid;
-                list.innerHTML += `
-                    <div class="rank-item" style="${isMe ? 'background: #f0fbff; border-left: 4px solid var(--blue);' : ''}">
-                        <div>
-                            <span class="rank-pos">${i}º</span>
-                            <span style="font-weight: 700;">${data.name.toUpperCase()} ${isMe ? '(VOCÊ)' : ''}</span>
-                        </div>
-                        <b style="color: var(--blue);">${data.xp || 0} XP</b>
-                    </div>
-                `;
-                i++;
+            // Lógica de extração básica
+            const parts = text.split('\n');
+            correctAnswer = text.split('CORRETA:')[1].trim();
+            
+            document.getElementById('ai-response').innerText = text.split('PERGUNTA:')[0];
+            const options = text.match(/[A-D]\) .+/g);
+            
+            const quizDiv = document.getElementById('quiz-options');
+            quizDiv.innerHTML = "";
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-option";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt[0], btn);
+                quizDiv.appendChild(btn);
             });
-        } catch (e) {
-            list.innerHTML = `<p style="padding:20px; color:red;">Erro ao carregar ranking. Verifique as permissões do Firestore.</p>`;
+            
+            document.getElementById('study-area').classList.remove('hidden');
+            b.innerText = "ESTUDO LIBERADO";
+        } catch { alert("Erro na IA. Tente outra vez."); b.disabled = false; }
+    };
+
+    window.checkAnswer = async (choice, btn) => {
+        const allBtns = document.querySelectorAll('.quiz-option');
+        allBtns.forEach(b => b.disabled = true);
+        
+        if(choice === correctAnswer) {
+            btn.style.background = "#d7ffb8";
+            btn.style.borderColor = "#58cc02";
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(20) }); // XP MULTIPLICADO (20 em vez de 10)
+            alert("BRABO! Acertou e ganhou XP em DOBRO! (+20 XP)");
+        } else {
+            btn.style.background = "#ffd7d7";
+            btn.style.borderColor = "#ff4b4b";
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(5) }); // XP REDUZIDO
+            alert(`Quase! A correta era ${correctAnswer}. Ganhou +5 XP pela tentativa.`);
         }
+        setTimeout(() => location.reload(), 2000);
+    };
+
+    async function loadRanking() {
+        const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(10));
+        const s = await getDocs(q);
+        const list = document.getElementById('ranking-list');
+        list.innerHTML = "";
+        let i = 1;
+        s.forEach(u => {
+            const d = u.data();
+            list.innerHTML += `<div class="rank-item"><span><b>${i}º</b> ${d.name.toUpperCase()}</span><span>${d.xp} XP</span></div>`;
+            i++;
+        });
     }
 </script>
 </body>
