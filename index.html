@@ -11,15 +11,26 @@
         #app { width: 100%; max-width: 480px; background: white; min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 100px; }
         .hidden { display: none !important; }
         .card { border: 2px solid #e5e5e5; border-bottom: 6px solid #e5e5e5; border-radius: 20px; padding: 20px; margin: 15px 0; background: white; }
-        .header-stats { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
+        
+        /* CABEÇALHO AJUSTADO */
+        .header-stats { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
+        .user-info-box { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
+        #user-display { color: var(--primary); font-size: 1.1rem; text-transform: uppercase; }
+        .level-text { font-size: 0.8rem; color: #afafaf; font-weight: 900; }
+        
+        /* BARRA DE PROGRESSO NO CABEÇALHO */
+        .header-progress-container { width: 120px; background: #e5e5e5; border-radius: 10px; height: 8px; overflow: hidden; margin-top: 2px; }
+        .header-progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s ease-out; }
+
         .btn-duo { width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 16px; font-weight: 900; text-transform: uppercase; cursor: pointer; background: var(--primary); color: white; border-bottom: 6px solid #46a302; margin-top: 10px; }
         .btn-duo:active { transform: translateY(4px); border-bottom: 2px solid #46a302; }
+        
         .quiz-option { width: 100%; text-align: left; padding: 15px; margin: 8px 0; border: 2px solid #e5e5e5; border-radius: 15px; background: white; cursor: pointer; font-weight: 700; font-family: 'Nunito'; font-size: 1rem; }
         .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #e5e5e5; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; }
         .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; }
         .nav-active { color: var(--blue); }
 
-        /* ESTILOS DO RANKING COM BARRA DE PROGRESSO */
+        /* ESTILOS DO RANKING */
         .rank-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; transition: background 0.2s; }
         .rank-item:nth-child(1) { background-color: #fff9e6; } 
         .rank-item:nth-child(2) { background-color: #f2f2f2; } 
@@ -30,9 +41,7 @@
         .rank-name { font-weight: 700; text-transform: uppercase; font-size: 0.9rem; }
         .rank-xp { font-weight: 900; color: var(--primary); font-size: 0.8rem; }
         .rank-level-tag { font-size: 0.7rem; color: #afafaf; font-weight: 900; margin-left: 5px; }
-
-        /* BARRA DE PROGRESSO ESTILO DUOLINGO */
-        .progress-container { width: 100%; background: #e5e5e5; border-radius: 10px; height: 10px; overflow: hidden; }
+        .progress-container { width: 100%; background: #e5e5e5; border-radius: 10px; height: 8px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--primary); border-radius: 10px; transition: width 0.5s ease-out; }
     </style>
 </head>
@@ -49,9 +58,12 @@
 
     <div id="main-screen" class="hidden">
         <div class="header-stats">
-            <div>
-                <b id="user-display" style="color:var(--primary)">USUÁRIO</b> 
-                <div style="font-size: 0.8rem; color: #afafaf; margin-top: 5px;">NÍVEL <span id="level-val">0</span></div>
+            <div class="user-info-box">
+                <b id="user-display">USUÁRIO</b> 
+                <div class="level-text">NÍVEL <span id="level-val">0</span></div>
+                <div class="header-progress-container">
+                    <div id="progress-fill" class="header-progress-fill"></div>
+                </div>
             </div>
             <div style="display:flex; align-items:center; gap:10px;">
                 <div style="text-align:right">
@@ -87,7 +99,7 @@
         <div id="tab-config" class="hidden">
             <h2 style="text-align:center; color: #afafaf;">⚙️ CONFIGURAÇÕES</h2>
             <div class="card" style="text-align:center">
-                <p>Progresso: Nível 0 (0-99 XP), Nível 1 (100-199 XP)...</p>
+                <p>Nível 0: 0-99 XP | Nível 1: 100-199 XP</p>
                 <button class="btn-duo" onclick="resetVerses()">REINICIAR LISTA DE VERSÍCULOS</button>
             </div>
         </div>
@@ -120,7 +132,7 @@
     const db = getFirestore(app);
     let correctAnswer = "";
 
-    // BASE DE DADOS EXPANDIDA (IDs 1 A 600)
+   // BASE DE DADOS EXPANDIDA (IDs 1 A 600)
     const BIBLE_DATABASE = [
         { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" },
         { id: 2, text: "O Senhor é o meu pastor; nada me faltará.", ref: "Salmos 23:1" },
@@ -759,10 +771,13 @@
         if(s.exists()) {
             const d = s.data();
             const xp = d.xp || 0;
-            const level = Math.floor(xp / 100); // Lógica Duarte: 0-99 = Nvl 0
+            const level = Math.floor(xp / 100);
+            const progress = xp % 100;
+
             document.getElementById('xp-val').innerText = xp;
             document.getElementById('level-val').innerText = level;
             document.getElementById('user-display').innerText = d.name.toUpperCase();
+            document.getElementById('progress-fill').style.width = `${progress}%`;
         }
     }
 
@@ -855,7 +870,7 @@
                 const data = docSnap.data();
                 const xp = data.xp || 0;
                 const level = Math.floor(xp / 100);
-                const progress = xp % 100; // Porcentagem dentro do nível atual
+                const progress = xp % 100;
                 
                 const item = document.createElement('div');
                 item.className = 'rank-item';
