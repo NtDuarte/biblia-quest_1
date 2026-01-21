@@ -20,6 +20,7 @@
         .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; }
         .nav-active { color: var(--blue); }
         .btn-exit { background: #ff4b4b; color: white; border: none; padding: 8px 12px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 0.7rem; }
+        .rank-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -88,24 +89,38 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // Versão 12.8.0 conforme sua configuração
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
-    authDomain: "bibliaquest-fbc44.firebaseapp.com",
-    projectId: "bibliaquest-fbc44",
-    storageBucket: "bibliaquest-fbc44.firebasestorage.app",
-    messagingSenderId: "670585434397",
-    appId: "1:670585434397:web:6d699582986e8dcbc6f1f4",
-    measurementId: "G-H0Z7T8LCPE"
-  };
+        authDomain: "bibliaquest-fbc44.firebaseapp.com",
+        projectId: "bibliaquest-fbc44",
+        storageBucket: "bibliaquest-fbc44.firebasestorage.app",
+        messagingSenderId: "670585434397",
+        appId: "1:670585434397:web:6d699582986e8dcbc6f1f4",
+        measurementId: "G-H0Z7T8LCPE"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     let correctAnswer = "";
+
+    // Base de Dados com placeholder para 200 versículos
+    const BIBLE_DATABASE = [
+        { text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" },
+        { text: "O Senhor é o meu pastor; nada me faltará.", ref: "Salmos 23:1" },
+        { text: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito.", ref: "João 3:16" },
+        { text: "Tudo posso naquele que me fortalece.", ref: "Filipenses 4:13" },
+        { text: "Lâmpada para os meus pés é tua palavra e luz, para o meu caminho.", ref: "Salmos 119:105" },
+        { text: "Não fui eu que lhe ordenei? Seja forte e corajoso!", ref: "Josué 1:9" },
+        { text: "O coração alegre é bom remédio.", ref: "Provérbios 17:22" },
+        { text: "Buscai primeiro o Reino de Deus.", ref: "Mateus 6:33" }
+        // Adicione os demais versículos aqui até completar os 200.
+    ];
 
     window.showTab = (t) => {
         ['home', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
@@ -116,18 +131,25 @@
         if(t === 'rank') loadRanking();
     };
 
-    window.saveKey = () => { localStorage.setItem("groq_api_key", document.getElementById('ai-key-input').value); alert("Chave Salva!"); location.reload(); };
+    window.saveKey = () => { 
+        const key = document.getElementById('ai-key-input').value;
+        localStorage.setItem("groq_api_key", key); 
+        alert("Chave Salva com sucesso!"); 
+        location.reload(); 
+    };
+
     window.logout = () => signOut(auth).then(() => location.reload());
 
     window.handleAuth = async (m) => {
         const e = document.getElementById('login-email').value;
         const p = document.getElementById('login-pass').value;
+        if(!e || !p) return alert("Preencha todos os campos.");
         try {
             if(m === 'signup') {
                 const r = await createUserWithEmailAndPassword(auth, e, p);
                 await setDoc(doc(db, "users", r.user.uid), { xp: 0, name: e.split('@')[0], streak: 0 });
             } else { await signInWithEmailAndPassword(auth, e, p); }
-        } catch(err) { alert("Erro: " + err.message); }
+        } catch(err) { alert("Erro na autenticação: " + err.message); }
     };
 
     onAuthStateChanged(auth, u => {
@@ -147,37 +169,21 @@
         }
     }
 
-    // LISTA DE 500 REFERÊNCIAS SEGURAS (ESTRUTURADA PARA SUCESSO 100%)
-    async function fetchVerse() {
-        const books = [
-            {n: "Mateus", c: 28}, {n: "João", c: 21}, {n: "Salmos", c: 150}, 
-            {n: "Provérbios", c: 31}, {n: "Romanos", c: 16}, {n: "Efésios", c: 6}, 
-            {n: "Gênesis", c: 50}, {n: "Isaías", c: 66}
-        ];
-        const b = books[Math.floor(Math.random() * books.length)];
-        const cap = Math.floor(Math.random() * b.c) + 1;
-        const ref = `${b.n} ${cap}:1`; // Puxar o verso 1 de capítulos aleatórios garante que a API ache o dado.
-
-        try {
-            const res = await fetch(`https://bible-api.com/${ref}?translation=almeida`);
-            const data = await res.json();
-            if(!data.text) throw new Error();
-            window.currentVerse = data.text;
-            document.getElementById('verse-text').innerText = `"${data.text.trim()}"`;
-            document.getElementById('verse-ref').innerText = data.reference.toUpperCase();
-        } catch {
-            window.currentVerse = "O Senhor é o meu pastor, nada me faltará.";
-            document.getElementById('verse-text').innerText = `"${window.currentVerse}"`;
-            document.getElementById('verse-ref').innerText = "SALMOS 23:1";
-        }
+    function fetchVerse() {
+        const index = Math.floor(Math.random() * BIBLE_DATABASE.length);
+        const selected = BIBLE_DATABASE[index];
+        window.currentVerse = selected.text;
+        document.getElementById('verse-text').innerText = `"${selected.text}"`;
+        document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
     }
 
     window.generateStudy = async () => {
         const key = localStorage.getItem("groq_api_key");
-        if(!key) return alert("Configure sua chave Groq!");
-        const b = document.getElementById('btn-study');
-        b.innerText = "PROFESSOR ANALISANDO...";
-        b.disabled = true;
+        if(!key) return alert("Por favor, configure sua chave Groq nas configurações!");
+        
+        const btn = document.getElementById('btn-study');
+        btn.innerText = "PROCESSANDO ESTUDO...";
+        btn.disabled = true;
 
         try {
             const r = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
@@ -185,12 +191,12 @@
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [{ role: "user", content: `Analise o versículo: "${window.currentVerse}". 
-                    1. Forneça uma EXPLICAÇÃO TEOLÓGICA PROFUNDA (3 parágrafos).
-                    2. Gere UMA pergunta de múltipla escolha (A, B, C, D) sobre a explicação.
-                    FORMATO:
+                    messages: [{ role: "user", content: `Analise teologicamente: "${window.currentVerse}". 
+                    1. Explicação profunda em 3 parágrafos.
+                    2. Uma pergunta de múltipla escolha (A, B, C, D).
+                    FORMATO OBRIGATÓRIO:
                     EXPLICAÇÃO: [texto]
-                    PERGUNTA: [pergunta]
+                    PERGUNTA: [texto]
                     A) [opção] B) [opção] C) [opção] D) [opção]
                     CORRETA: [Letra]` }]
                 })
@@ -206,42 +212,48 @@
             const quizDiv = document.getElementById('quiz-options');
             quizDiv.innerHTML = "";
             opts.forEach(o => {
-                const btn = document.createElement('button');
-                btn.className = "quiz-option";
-                btn.innerText = o;
-                btn.onclick = () => checkAnswer(o[0], btn);
-                quizDiv.appendChild(btn);
+                const button = document.createElement('button');
+                button.className = "quiz-option";
+                button.innerText = o;
+                button.onclick = () => checkAnswer(o[0], button);
+                quizDiv.appendChild(button);
             });
             document.getElementById('study-area').classList.remove('hidden');
-        } catch { alert("Erro na IA. Tente carregar novamente."); b.disabled = false; b.innerText = "TENTAR NOVAMENTE"; }
+        } catch (err) { 
+            alert("Erro ao conectar com a IA. Verifique sua chave."); 
+            btn.disabled = false; 
+            btn.innerText = "TENTAR NOVAMENTE"; 
+        }
     };
 
-    async function checkAnswer(c, btn) {
+    async function checkAnswer(choice, btn) {
         document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
-        if(c === correctAnswer) {
+        if(choice === correctAnswer) {
             btn.style.background = "#d7ffb8";
             await updateDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(25) });
-            alert("BRABO! +25 XP na conta.");
+            alert("Correto! Você ganhou 25 XP.");
         } else {
             btn.style.background = "#ffd7d7";
             await updateDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(5) });
-            alert(`A certa era ${correctAnswer}. Ganhou +5 XP pelo esforço.`);
+            alert(`Incorreto. A resposta certa era ${correctAnswer}. Você ganhou 5 XP pelo esforço.`);
         }
-        setTimeout(() => location.reload(), 2500);
+        setTimeout(() => location.reload(), 2000);
     }
 
     async function loadRanking() {
         const list = document.getElementById('ranking-list');
-        list.innerHTML = `<p style="text-align:center; padding:20px;">Carregando líderes...</p>`;
-        const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(10));
-        const s = await getDocs(q);
-        list.innerHTML = "";
-        let i = 1;
-        s.forEach(u => {
-            const d = u.data();
-            list.innerHTML += `<div class="rank-item"><span><b>${i}º</b> ${d.name.toUpperCase()}</span><b>${d.xp || 0} XP</b></div>`;
-            i++;
-        });
+        list.innerHTML = `<p style="text-align:center; padding:20px;">Carregando...</p>`;
+        try {
+            const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(10));
+            const s = await getDocs(q);
+            list.innerHTML = "";
+            let pos = 1;
+            s.forEach(u => {
+                const d = u.data();
+                list.innerHTML += `<div class="rank-item"><span><b>${pos}º</b> ${d.name.toUpperCase()}</span><b>${d.xp || 0} XP</b></div>`;
+                pos++;
+            });
+        } catch (e) { list.innerHTML = "<p>Erro ao carregar ranking.</p>"; }
     }
 </script>
 </body>
