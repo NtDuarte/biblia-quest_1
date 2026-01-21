@@ -20,7 +20,7 @@
         .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; }
         .nav-active { color: var(--blue); }
         .rank-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 2px solid #f1f1f1; align-items: center; }
-        .logout-btn { background: none; border: none; color: var(--error); font-weight: 900; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; }
+        .btn-exit { background: #ff4b4b; color: white; border: none; padding: 5px 10px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 0.7rem; margin-left: 10px; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -38,7 +38,7 @@
         <div class="header-stats">
             <div>
                 <b id="user-display" style="color:var(--primary)">USUÁRIO</b> 
-                <button class="logout-btn" onclick="logout()">[Sair]</button><br>
+                <button class="btn-exit" onclick="logout()">SAIR</button><br>
                 <small>NÍVEL <span id="level-val">1</span></small>
             </div>
             <div style="display:flex; gap:10px;">
@@ -49,16 +49,16 @@
         
         <div id="tab-home">
             <div class="card">
-                <h3 style="color: var(--blue); margin:0">📖 DESAFIO DO DIA</h3>
+                <h3 style="color: var(--blue); margin:0">📖 PASSAGEM DO DIA</h3>
                 <p id="verse-text" style="font-weight: 700; font-size: 1.1rem; line-height: 1.4;">Buscando revelação...</p>
                 <div id="verse-ref" style="color: #afafaf; font-weight: 900; font-size: 0.8rem;"></div>
             </div>
-            <button id="btn-study" class="btn-duo" onclick="generateStudy()">GERAR ESTUDO PROFUNDO</button>
+            <button id="btn-study" class="btn-duo" onclick="generateStudy()">INICIAR ESTUDO PROFUNDO</button>
             
             <div id="study-area" class="hidden">
                 <div class="card" id="ai-response" style="background: #f0fbff; font-size: 1rem; line-height: 1.5; white-space: pre-wrap;"></div>
                 <div id="quiz-container" class="card" style="border-color: var(--blue);">
-                    <h4 style="margin-top:0; color: var(--blue);">TESTE DE APRENDIZADO:</h4>
+                    <h4 id="quiz-question" style="margin-top:0; color: var(--blue);"></h4>
                     <div id="quiz-options"></div>
                 </div>
             </div>
@@ -71,7 +71,7 @@
 
         <div id="tab-config" class="hidden">
             <h2 style="text-align:center; color: #afafaf;">⚙️ CONFIGURAÇÕES</h2>
-            <p style="font-weight:700">Chave da Groq:</p>
+            <p style="font-weight:700">API Key (Groq):</p>
             <input type="password" id="ai-key-input" placeholder="Cole sua chave aqui" style="width:100%; padding:15px; border:2px solid #e5e5e5; border-radius:16px;">
             <button class="btn-duo" onclick="saveKey()">SALVAR CHAVE</button>
         </div>
@@ -109,20 +109,19 @@
         if(t === 'rank') loadRanking();
     };
 
-    window.saveKey = () => { localStorage.setItem("groq_api_key", document.getElementById('ai-key-input').value); alert("Chave salva com sucesso!"); location.reload(); };
+    window.saveKey = () => { localStorage.setItem("groq_api_key", document.getElementById('ai-key-input').value); alert("Chave salva!"); location.reload(); };
 
     window.logout = () => { signOut(auth).then(() => location.reload()); };
 
     window.handleAuth = async (m) => {
         const e = document.getElementById('login-email').value;
         const p = document.getElementById('login-pass').value;
-        if(!e || !p) return alert("Preencha todos os campos!");
         try {
             if(m === 'signup') {
                 const r = await createUserWithEmailAndPassword(auth, e, p);
                 await setDoc(doc(db, "users", r.user.uid), { xp: 0, name: e.split('@')[0], streak: 0 });
             } else { await signInWithEmailAndPassword(auth, e, p); }
-        } catch(err) { alert("Erro: " + err.message); }
+        } catch(err) { alert(err.message); }
     };
 
     onAuthStateChanged(auth, u => {
@@ -142,13 +141,15 @@
         }
     }
 
-    // MOTOR DE VERSÍCULOS (+1000 OPÇÕES DINÂMICAS)
+    // MÁXIMA ESTABILIDADE (SORTEIO COM FALLBACK)
     async function fetchVerse() {
-        const books = ["Gênesis", "Êxodo", "Levítico", "Números", "Deuteronômio", "Josué", "Juízes", "Rute", "1 Samuel", "2 Samuel", "1 Reis", "2 Reis", "Esdras", "Neemias", "Ester", "Jó", "Salmos", "Provérbios", "Eclesiastes", "Isaías", "Jeremias", "Lamentações", "Ezequiel", "Daniel", "Oseias", "Joel", "Amós", "Obadias", "Jonas", "Miqueias", "Naum", "Habacuque", "Sofonias", "Ageu", "Zacarias", "Malaquias", "Mateus", "Marcos", "Lucas", "João", "Atos", "Romanos", "1 Coríntios", "2 Coríntios", "Gálatas", "Efésios", "Filipenses", "Colossenses", "1 Tessalonicenses", "2 Tessalonicenses", "1 Timóteo", "2 Timóteo", "Tito", "Filemom", "Hebreus", "Tiago", "1 Pedro", "2 Pedro", "1 João", "2 João", "3 João", "Judas", "Apocalipse"];
+        const books = [
+            {n:"Gênesis", c:50}, {n:"Salmos", c:150}, {n:"Provérbios", c:31}, {n:"Mateus", c:28}, 
+            {n:"João", c:21}, {n:"Romanos", c:16}, {n:"Filipenses", c:4}, {n:"1 Coríntios", c:16}
+        ];
         const book = books[Math.floor(Math.random() * books.length)];
-        const cap = Math.floor(Math.random() * 20) + 1;
-        const ver = Math.floor(Math.random() * 15) + 1;
-        const ref = `${book} ${cap}:${ver}`;
+        const cap = Math.floor(Math.random() * book.c) + 1;
+        const ref = `${book.n} ${cap}:1`; // Busca sempre o versículo 1 para garantir sucesso
 
         try {
             const res = await fetch(`https://bible-api.com/${ref}?translation=almeida`);
@@ -157,16 +158,20 @@
             window.currentVerse = data.text;
             document.getElementById('verse-text').innerText = `"${data.text.trim()}"`;
             document.getElementById('verse-ref').innerText = data.reference.toUpperCase();
-        } catch { fetchVerse(); }
+        } catch { 
+            // Fallback imediato se falhar
+            window.currentVerse = "Tudo posso naquele que me fortalece.";
+            document.getElementById('verse-text').innerText = `"${window.currentVerse}"`;
+            document.getElementById('verse-ref').innerText = "FILIPENSES 4:13";
+        }
     }
 
-    // IA GROQ COM EXPLICAÇÃO LONGA + QUIZ
     window.generateStudy = async () => {
         const key = localStorage.getItem("groq_api_key");
-        if(!key) return alert("Configure sua chave da Groq nas configurações!");
+        if(!key) return alert("Configure a chave Groq primeiro!");
         
         const b = document.getElementById('btn-study');
-        b.innerText = "IA PREPARANDO AULA...";
+        b.innerText = "IA ENSINANDO...";
         b.disabled = true;
 
         try {
@@ -175,30 +180,32 @@
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [{ role: "user", content: `Aja como um professor de teologia. Analise o versículo: "${window.currentVerse}". 
-                    1. Forneça uma EXPLICAÇÃO PROFUNDA E DETALHADA (mínimo 3 parágrafos).
-                    2. Ao final, crie uma pergunta de múltipla escolha baseada na sua explicação com 4 opções (A, B, C, D).
-                    Siga este formato rigorosamente:
-                    EXPLICAÇÃO: [texto detalhado]
+                    messages: [{ role: "user", content: `Aja como um renomado professor de teologia. 
+                    Analise: "${window.currentVerse}". 
+                    1. Forneça uma EXPLICAÇÃO PROFUNDA (mínimo 3 parágrafos grandes).
+                    2. Crie UMA pergunta de múltipla escolha (A, B, C, D) baseada no texto.
+                    FORMATO OBRIGATÓRIO:
+                    EXPLICAÇÃO: [texto]
                     PERGUNTA: [pergunta]
                     A) [opção]
                     B) [opção]
                     C) [opção]
                     D) [opção]
-                    CORRETA: [A, B, C ou D]` }]
+                    CORRETA: [Letra]` }]
                 })
             });
             const d = await r.json();
             const fullText = d.choices[0].message.content;
             
-            // Parsing da resposta
+            // Parsing seguro
+            const expPart = fullText.split('PERGUNTA:')[0].replace('EXPLICAÇÃO:', '').trim();
+            const quizPart = fullText.split('PERGUNTA:')[1];
             correctAnswer = fullText.split('CORRETA:')[1].trim()[0];
-            const studyText = fullText.split('PERGUNTA:')[0].replace('EXPLICAÇÃO:', '').trim();
-            const questionText = fullText.split('PERGUNTA:')[1].split('A)')[0].trim();
-            const options = fullText.match(/[A-D]\) .+/g);
             
-            document.getElementById('ai-response').innerText = studyText + "\n\n❓ " + questionText;
+            document.getElementById('ai-response').innerText = expPart;
+            document.getElementById('quiz-question').innerText = quizPart.split('A)')[0].trim();
             
+            const options = quizPart.match(/[A-D]\) .+/g);
             const quizDiv = document.getElementById('quiz-options');
             quizDiv.innerHTML = "";
             options.forEach(opt => {
@@ -211,30 +218,29 @@
             
             document.getElementById('study-area').classList.remove('hidden');
             b.innerText = "ESTUDO CONCLUÍDO";
-        } catch { alert("Erro ao gerar estudo. Tente novamente."); b.disabled = false; b.innerText = "TENTAR NOVAMENTE"; }
+        } catch { 
+            alert("Erro na IA. Tente carregar de novo."); 
+            b.disabled = false; b.innerText = "TENTAR NOVAMENTE";
+        }
     };
 
     window.checkAnswer = async (choice, btn) => {
-        const allBtns = document.querySelectorAll('.quiz-option');
-        allBtns.forEach(b => b.disabled = true);
-        
+        document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
         if(choice === correctAnswer) {
             btn.style.background = "#d7ffb8";
-            btn.style.borderColor = "#58cc02";
             await updateDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(25) });
-            alert("BRABO! Explicação dominada. +25 XP!");
+            alert("CERTO! Você é mestre na Palavra! +25 XP");
         } else {
             btn.style.background = "#ffd7d7";
-            btn.style.borderColor = "#ff4b4b";
             await updateDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(5) });
-            alert(`Quase! A resposta certa era a ${correctAnswer}. Ganhou +5 XP pelo esforço.`);
+            alert(`A correta era ${correctAnswer}. Ganhou +5 XP pelo estudo.`);
         }
         setTimeout(() => location.reload(), 2500);
     };
 
     async function loadRanking() {
         const list = document.getElementById('ranking-list');
-        list.innerHTML = `<p style="padding:20px; text-align:center;">Carregando líderes...</p>`;
+        list.innerHTML = `<p style="text-align:center; padding:20px;">Carregando líderes...</p>`;
         const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(10));
         const s = await getDocs(q);
         list.innerHTML = "";
