@@ -20,7 +20,7 @@
         .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; }
         .nav-active { color: var(--blue); }
         .btn-exit { background: #ff4b4b; color: white; border: none; padding: 8px 12px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 0.7rem; }
-        .rank-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; }
+        .rank-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -52,7 +52,7 @@
         <div id="tab-home">
             <div class="card">
                 <h3 style="color: var(--blue); margin:0">📖 DESAFIO DO DIA</h3>
-                <p id="verse-text" style="font-weight: 700; font-size: 1.1rem; line-height: 1.4;">Buscando revelação...</p>
+                <p id="verse-text" style="font-weight: 700; font-size: 1.1rem; line-height: 1.4;">Selecionando versículo...</p>
                 <div id="verse-ref" style="color: #afafaf; font-weight: 900; font-size: 0.8rem;"></div>
             </div>
             <button id="btn-study" class="btn-duo" onclick="generateStudy()">GERAR ESTUDO PROFUNDO</button>
@@ -89,7 +89,6 @@
 </div>
 
 <script type="module">
-    // Versão 12.8.0 conforme sua configuração
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
@@ -109,21 +108,24 @@
     const db = getFirestore(app);
     let correctAnswer = "";
 
-    // Base de Dados com placeholder para 200 versículos
+    // Base de Dados Local: Apenas o que estiver aqui será sorteado.
     const BIBLE_DATABASE = [
         { text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" },
-        { text: "O Senhor é o meu pastor; nada me faltará.", ref: "Salmos 23:1" },
-        { text: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito.", ref: "João 3:16" },
-        { text: "Tudo posso naquele que me fortalece.", ref: "Filipenses 4:13" },
         { text: "Lâmpada para os meus pés é tua palavra e luz, para o meu caminho.", ref: "Salmos 119:105" },
+        { text: "Tudo posso naquele que me fortalece.", ref: "Filipenses 4:13" },
         { text: "Não fui eu que lhe ordenei? Seja forte e corajoso!", ref: "Josué 1:9" },
         { text: "O coração alegre é bom remédio.", ref: "Provérbios 17:22" },
-        { text: "Buscai primeiro o Reino de Deus.", ref: "Mateus 6:33" }
-        // Adicione os demais versículos aqui até completar os 200.
+        { text: "Buscai primeiro o Reino de Deus.", ref: "Mateus 6:33" },
+        { text: "O Senhor é a minha luz e a minha salvação; a quem temerei?", ref: "Salmos 27:1" },
+        { text: "Deem graças ao Senhor, porque ele é bom.", ref: "Salmos 136:1" }
+        // Continue preenchendo até atingir os 200 itens conforme sua necessidade.
     ];
 
     window.showTab = (t) => {
-        ['home', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
+        ['home', 'rank', 'config'].forEach(tab => {
+            const el = document.getElementById(`tab-${tab}`);
+            if(el) el.classList.toggle('hidden', tab !== t);
+        });
         ['home', 'rank', 'config'].forEach(nav => {
            const el = document.getElementById(`nav-${nav}`);
            if(el) el.classList.toggle('nav-active', nav === t);
@@ -132,9 +134,8 @@
     };
 
     window.saveKey = () => { 
-        const key = document.getElementById('ai-key-input').value;
-        localStorage.setItem("groq_api_key", key); 
-        alert("Chave Salva com sucesso!"); 
+        localStorage.setItem("groq_api_key", document.getElementById('ai-key-input').value); 
+        alert("Configuração salva!"); 
         location.reload(); 
     };
 
@@ -143,13 +144,12 @@
     window.handleAuth = async (m) => {
         const e = document.getElementById('login-email').value;
         const p = document.getElementById('login-pass').value;
-        if(!e || !p) return alert("Preencha todos os campos.");
         try {
             if(m === 'signup') {
                 const r = await createUserWithEmailAndPassword(auth, e, p);
                 await setDoc(doc(db, "users", r.user.uid), { xp: 0, name: e.split('@')[0], streak: 0 });
             } else { await signInWithEmailAndPassword(auth, e, p); }
-        } catch(err) { alert("Erro na autenticação: " + err.message); }
+        } catch(err) { alert("Erro: " + err.message); }
     };
 
     onAuthStateChanged(auth, u => {
@@ -169,9 +169,11 @@
         }
     }
 
+    // Lógica 100% aleatória baseada no seu Array
     function fetchVerse() {
-        const index = Math.floor(Math.random() * BIBLE_DATABASE.length);
-        const selected = BIBLE_DATABASE[index];
+        if (BIBLE_DATABASE.length === 0) return;
+        const randomIndex = Math.floor(Math.random() * BIBLE_DATABASE.length);
+        const selected = BIBLE_DATABASE[randomIndex];
         window.currentVerse = selected.text;
         document.getElementById('verse-text').innerText = `"${selected.text}"`;
         document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
@@ -179,11 +181,10 @@
 
     window.generateStudy = async () => {
         const key = localStorage.getItem("groq_api_key");
-        if(!key) return alert("Por favor, configure sua chave Groq nas configurações!");
-        
-        const btn = document.getElementById('btn-study');
-        btn.innerText = "PROCESSANDO ESTUDO...";
-        btn.disabled = true;
+        if(!key) return alert("Configure a chave Groq!");
+        const b = document.getElementById('btn-study');
+        b.innerText = "PROFESSOR ANALISANDO...";
+        b.disabled = true;
 
         try {
             const r = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
@@ -191,14 +192,7 @@
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [{ role: "user", content: `Analise teologicamente: "${window.currentVerse}". 
-                    1. Explicação profunda em 3 parágrafos.
-                    2. Uma pergunta de múltipla escolha (A, B, C, D).
-                    FORMATO OBRIGATÓRIO:
-                    EXPLICAÇÃO: [texto]
-                    PERGUNTA: [texto]
-                    A) [opção] B) [opção] C) [opção] D) [opção]
-                    CORRETA: [Letra]` }]
+                    messages: [{ role: "user", content: `Analise: "${window.currentVerse}". Forneça EXPLICAÇÃO (3 parágrafos) e uma PERGUNTA de múltipla escolha com opções A, B, C, D e a CORRETA no final.` }]
                 })
             });
             const d = await r.json();
@@ -212,48 +206,49 @@
             const quizDiv = document.getElementById('quiz-options');
             quizDiv.innerHTML = "";
             opts.forEach(o => {
-                const button = document.createElement('button');
-                button.className = "quiz-option";
-                button.innerText = o;
-                button.onclick = () => checkAnswer(o[0], button);
-                quizDiv.appendChild(button);
+                const btn = document.createElement('button');
+                btn.className = "quiz-option";
+                btn.innerText = o;
+                btn.onclick = () => checkAnswer(o[0], btn);
+                quizDiv.appendChild(btn);
             });
             document.getElementById('study-area').classList.remove('hidden');
-        } catch (err) { 
-            alert("Erro ao conectar com a IA. Verifique sua chave."); 
-            btn.disabled = false; 
-            btn.innerText = "TENTAR NOVAMENTE"; 
-        }
+        } catch { alert("Erro na IA."); b.disabled = false; b.innerText = "TENTAR NOVAMENTE"; }
     };
 
-    async function checkAnswer(choice, btn) {
+    async function checkAnswer(c, btn) {
         document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
-        if(choice === correctAnswer) {
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        if(c === correctAnswer) {
             btn.style.background = "#d7ffb8";
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(25) });
-            alert("Correto! Você ganhou 25 XP.");
+            await updateDoc(userRef, { xp: increment(25) });
+            alert("Parabéns! +25 XP.");
         } else {
             btn.style.background = "#ffd7d7";
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { xp: increment(5) });
-            alert(`Incorreto. A resposta certa era ${correctAnswer}. Você ganhou 5 XP pelo esforço.`);
+            await updateDoc(userRef, { xp: increment(5) });
+            alert(`A correta era ${correctAnswer}. +5 XP.`);
         }
         setTimeout(() => location.reload(), 2000);
     }
 
+    // Revalidação do Ranking: Busca os top 10 por XP
     async function loadRanking() {
         const list = document.getElementById('ranking-list');
-        list.innerHTML = `<p style="text-align:center; padding:20px;">Carregando...</p>`;
+        list.innerHTML = `<p style="text-align:center; padding:20px;">Carregando líderes...</p>`;
         try {
             const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(10));
             const s = await getDocs(q);
             list.innerHTML = "";
-            let pos = 1;
-            s.forEach(u => {
-                const d = u.data();
-                list.innerHTML += `<div class="rank-item"><span><b>${pos}º</b> ${d.name.toUpperCase()}</span><b>${d.xp || 0} XP</b></div>`;
-                pos++;
+            let i = 1;
+            s.forEach(doc => {
+                const u = doc.data();
+                list.innerHTML += `<div class="rank-item"><span>${i}º ${u.name.toUpperCase()}</span><span>${u.xp || 0} XP</span></div>`;
+                i++;
             });
-        } catch (e) { list.innerHTML = "<p>Erro ao carregar ranking.</p>"; }
+        } catch (e) {
+            console.error(e);
+            list.innerHTML = `<p style="text-align:center; color:red; padding:10px;">Erro ao carregar ranking. Verifique os índices no Firebase.</p>`;
+        }
     }
 </script>
 </body>
