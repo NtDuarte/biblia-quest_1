@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-    // Configurações de cabeçalho para permitir a comunicação
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -9,7 +8,6 @@ export default async function handler(req, res) {
     }
 
     const { verse } = req.body;
-    // Puxa a chave das variáveis de ambiente da Vercel
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
@@ -28,11 +26,27 @@ export default async function handler(req, res) {
                 messages: [
                     { 
                         role: "system", 
-                        content: "Você é um professor de teologia profundo. Responda rigorosamente no formato: EXPLICAÇÃO: [texto curto de 3 parágrafos] PERGUNTA: [texto da pergunta] A) [opção] B) [opção] C) [opção] D) [opção] CORRETA: [Letra]" 
+                        content: `Você é um professor de teologia acadêmico. 
+                        Sua tarefa é analisar versículos e criar um quiz desafiador. 
+                        REGRAS RÍGIDAS:
+                        1. EXPLICAÇÃO: Texto profundo com 3 parágrafos.
+                        2. PERGUNTA: Deve testar a interpretação do texto.
+                        3. OPÇÕES (A, B, C, D): 
+                           - Devem ser COMPLETAMENTE DIFERENTES entre si.
+                           - Proibido repetir conceitos ou palavras-chave entre as opções.
+                           - As opções incorretas (distratores) devem ser plausíveis e baseadas no contexto bíblico, mas erradas conforme a sua explicação.
+                        4. FORMATO: Responda apenas seguindo este padrão:
+                        EXPLICAÇÃO: [texto]
+                        PERGUNTA: [texto]
+                        A) [opção]
+                        B) [opção]
+                        C) [opção]
+                        D) [opção]
+                        CORRETA: [Letra]` 
                     },
                     { role: "user", content: `Analise o versículo: "${verse}".` }
                 ],
-                temperature: 0.4
+                temperature: 0.6 // Aumentado levemente para maior criatividade nos distratores
             })
         });
 
