@@ -18,7 +18,6 @@
         #user-display { color: var(--primary); font-size: 1.1rem; text-transform: uppercase; }
         .level-text { font-size: 0.8rem; color: #afafaf; font-weight: 900; }
         
-        /* BARRA DE PROGRESSO NO CABEÇALHO */
         .header-progress-container { width: 120px; background: #e5e5e5; border-radius: 10px; height: 8px; overflow: hidden; margin-top: 2px; }
         .header-progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s ease-out; }
 
@@ -67,7 +66,7 @@
             </div>
             <div style="display:flex; align-items:center; gap:10px;">
                 <div style="text-align:right">
-                    <span>🔥 <b id="streak-val">0</b></span>
+                    <span title="Ofensiva de dias seguidos">🔥 <b id="streak-val">0</b></span>
                     <span style="color:var(--blue); margin-left:10px;">💎 <b id="xp-val">0</b></span>
                 </div>
                 <button style="background:#ff4b4b; color:white; border:none; padding:8px 12px; border-radius:12px; font-weight:900; cursor:pointer;" onclick="logout()">SAIR</button>
@@ -99,7 +98,7 @@
         <div id="tab-config" class="hidden">
             <h2 style="text-align:center; color: #afafaf;">⚙️ CONFIGURAÇÕES</h2>
             <div class="card" style="text-align:center">
-                <p>Nível 0: 0-99 XP | Nível 1: 100-199 XP</p>
+                <p>Nível 0: 0-99 XP | Ofensiva: Login diário</p>
                 <button class="btn-duo" onclick="resetVerses()">REINICIAR LISTA DE VERSÍCULOS</button>
             </div>
         </div>
@@ -754,7 +753,13 @@
         try {
             if(m === 'signup') {
                 const r = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", r.user.uid), { xp: 0, name: e.split('@')[0] });
+                const todayStr = new Date().toISOString().split('T')[0];
+                await setDoc(doc(db, "users", r.user.uid), { 
+                    xp: 0, 
+                    name: e.split('@')[0],
+                    streak: 1,
+                    lastLoginDate: todayStr
+                });
             } else { await signInWithEmailAndPassword(auth, e, p); }
         } catch(err) { alert("Erro: " + err.message); }
     };
@@ -766,6 +771,29 @@
         if(u) { loadUserData(u.uid); fetchVerse(); }
     });
 
+    // LÓGICA DE OFENSIVA (STREAK)
+    async function updateStreak(uid, currentStreak, lastLoginDate) {
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+
+        if (lastLoginDate === todayStr) return; // Já logou hoje
+
+        const yesterday = new Date();
+        yesterday.setDate(now.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+        let newStreak = 1;
+        if (lastLoginDate === yesterdayStr) {
+            newStreak = currentStreak + 1;
+        }
+
+        await updateDoc(doc(db, "users", uid), {
+            streak: newStreak,
+            lastLoginDate: todayStr
+        });
+        document.getElementById('streak-val').innerText = newStreak;
+    }
+
     async function loadUserData(uid) {
         const s = await getDoc(doc(db, "users", uid));
         if(s.exists()) {
@@ -773,11 +801,17 @@
             const xp = d.xp || 0;
             const level = Math.floor(xp / 100);
             const progress = xp % 100;
+            const streak = d.streak || 0;
+            const lastLogin = d.lastLoginDate || "";
 
             document.getElementById('xp-val').innerText = xp;
             document.getElementById('level-val').innerText = level;
             document.getElementById('user-display').innerText = d.name.toUpperCase();
             document.getElementById('progress-fill').style.width = `${progress}%`;
+            document.getElementById('streak-val').innerText = streak;
+
+            // Executa verificação de ofensiva
+            updateStreak(uid, streak, lastLogin);
         }
     }
 
@@ -797,14 +831,12 @@
         const btn = document.getElementById('btn-study');
         btn.innerText = "PROFESSOR ANALISANDO...";
         btn.disabled = true;
-
         try {
             const response = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ verse: window.currentVerse })
             });
-
             const data = await response.json();
             if (data.error) throw new Error(data.error);
 
@@ -822,7 +854,6 @@
             const opts = fullText.match(/[A-D]\) .+/g);
             const quizDiv = document.getElementById('quiz-options');
             quizDiv.innerHTML = "";
-            
             opts.forEach(o => {
                 const button = document.createElement('button');
                 button.className = "quiz-option";
@@ -830,7 +861,6 @@
                 button.onclick = () => checkAnswer(o[0].toUpperCase(), button);
                 quizDiv.appendChild(button);
             });
-
             document.getElementById('study-area').classList.remove('hidden');
             btn.innerText = "ESTUDO GERADO";
         } catch (err) {
@@ -858,20 +888,16 @@
     async function loadRanking() {
         const list = document.getElementById('ranking-list');
         list.innerHTML = `<p style="text-align:center; padding:20px; color:#afafaf;">Sincronizando líderes...</p>`;
-        
         try {
             const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(10));
             const snapshot = await getDocs(q);
-            
             list.innerHTML = "";
             let position = 1;
-
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
                 const xp = data.xp || 0;
                 const level = Math.floor(xp / 100);
                 const progress = xp % 100;
-                
                 const item = document.createElement('div');
                 item.className = 'rank-item';
                 item.innerHTML = `
@@ -889,9 +915,7 @@
                 list.appendChild(item);
                 position++;
             });
-        } catch (error) {
-            list.innerHTML = `<p style="text-align:center; color:red;">Erro ao carregar ranking.</p>`;
-        }
+        } catch (error) { list.innerHTML = `<p style="text-align:center; color:red;">Erro ao carregar ranking.</p>`; }
     }
 </script>
 </body>
