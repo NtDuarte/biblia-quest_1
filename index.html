@@ -19,7 +19,10 @@
         .logo-text span { color: var(--gold); }
         .mini-logo-svg { width: 45px; height: 45px; margin-right: 12px; }
 
-        /* CABEÇALHO AJUSTADO */
+        /* CAMPOS NOVOS */
+        .signup-section { border-top: 2px solid #eee; margin-top: 20px; padding-top: 20px; }
+        .label-igreja { display: block; margin-top: 10px; font-weight: 900; font-size: 0.85rem; color: var(--blue); text-align: center; }
+
         .header-stats { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
         .user-info-box { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
         #user-display { color: var(--primary); font-size: 1.1rem; text-transform: uppercase; }
@@ -36,7 +39,6 @@
         .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; }
         .nav-active { color: var(--blue); }
 
-        /* ESTILOS DO RANKING */
         .rank-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; transition: background 0.2s; }
         .rank-pos { font-weight: 900; width: 35px; color: var(--blue); font-size: 1.1rem; }
         .rank-info { flex-grow: 1; margin-left: 10px; display: flex; flex-direction: column; }
@@ -66,7 +68,18 @@
         <input type="email" id="login-email" placeholder="E-MAIL" style="width:100%; padding:15px; margin:10px 0; border:2px solid #e5e5e5; border-radius:16px; box-sizing: border-box;">
         <input type="password" id="login-pass" placeholder="SENHA" style="width:100%; padding:15px; margin:10px 0; border:2px solid #e5e5e5; border-radius:16px; box-sizing: border-box;">
         <button class="btn-duo" onclick="handleAuth('login')">ENTRAR</button>
-        <button class="btn-duo" style="background:var(--blue); border-bottom-color:#1899d6" onclick="handleAuth('signup')">CRIAR CONTA</button>
+
+        <div class="signup-section">
+            <h3 style="text-align:center; color: var(--blue); margin-bottom:5px;">NOVO POR AQUI?</h3>
+            <input type="text" id="signup-user" placeholder="NOME DE USUÁRIO" style="width:100%; padding:15px; margin:5px 0; border:2px solid #e5e5e5; border-radius:16px; box-sizing: border-box;">
+            <input type="tel" id="signup-phone" placeholder="TELEFONE" style="width:100%; padding:15px; margin:5px 0; border:2px solid #e5e5e5; border-radius:16px; box-sizing: border-box;">
+            <input type="password" id="signup-pass-repeat" placeholder="REPETIR SENHA" style="width:100%; padding:15px; margin:5px 0; border:2px solid #e5e5e5; border-radius:16px; box-sizing: border-box;">
+            
+            <label class="label-igreja">Já é cristão? então deixe aqui o nome da sua igreja</label>
+            <input type="text" id="signup-church" placeholder="SUA IGREJA" style="width:100%; padding:15px; margin:5px 0; border:2px solid #e5e5e5; border-radius:16px; box-sizing: border-box;">
+            
+            <button class="btn-duo" style="background:var(--blue); border-bottom-color:#1899d6" onclick="handleAuth('signup')">CRIAR MINHA CONTA</button>
+        </div>
     </div>
 
     <div id="main-screen" class="hidden">
@@ -760,6 +773,7 @@
         { id: 599, text: "Serei exaltado entre as nações; serei exaltado sobre a terra.", ref: "Salmos 46:10" },
         { id: 600, text: "O Deus de Jacó é o nosso refúgio.", ref: "Salmos 46:11" }
 ];
+
     window.showTab = (t) => {
         ['home', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
         ['home', 'rank', 'config'].forEach(nav => {
@@ -775,12 +789,26 @@
     window.handleAuth = async (m) => {
         const e = document.getElementById('login-email').value;
         const p = document.getElementById('login-pass').value;
+
         try {
             if(m === 'signup') {
+                const user = document.getElementById('signup-user').value;
+                const phone = document.getElementById('signup-phone').value;
+                const pRepeat = document.getElementById('signup-pass-repeat').value;
+                const church = document.getElementById('signup-church').value;
+
+                if (!user || !phone || !pRepeat) return alert("Preencha todos os campos de cadastro!");
+                if (p !== pRepeat) return alert("As senhas não conferem!");
+
                 const r = await createUserWithEmailAndPassword(auth, e, p);
                 const todayStr = new Date().toISOString().split('T')[0];
                 await setDoc(doc(db, "users", r.user.uid), { 
-                    xp: 0, name: e.split('@')[0], streak: 1, lastLoginDate: todayStr 
+                    xp: 0, 
+                    name: user, 
+                    phone: phone,
+                    church: church,
+                    streak: 1, 
+                    lastLoginDate: todayStr 
                 });
             } else { await signInWithEmailAndPassword(auth, e, p); }
         } catch(err) { alert("Erro: " + err.message); }
@@ -814,7 +842,7 @@
             const progress = xp % 100;
             document.getElementById('xp-val').innerText = xp;
             document.getElementById('level-val').innerText = level;
-            document.getElementById('user-display').innerText = d.name.toUpperCase();
+            document.getElementById('user-display').innerText = (d.name || "").toUpperCase();
             document.getElementById('progress-fill').style.width = `${progress}%`;
             document.getElementById('streak-val').innerText = d.streak || 0;
             updateStreak(uid, d.streak || 0, d.lastLoginDate || "");
@@ -908,7 +936,7 @@
                     <span class="rank-pos">${position}º</span>
                     <div class="rank-info">
                         <div class="rank-meta">
-                            <span class="rank-name">${data.name.toUpperCase()} <span class="rank-level-tag">NV ${level}</span></span>
+                            <span class="rank-name">${(data.name || "").toUpperCase()} <span class="rank-level-tag">NV ${level}</span></span>
                             <span class="rank-xp">${xp} XP</span>
                         </div>
                         <div class="progress-container">
