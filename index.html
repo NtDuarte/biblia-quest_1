@@ -6,7 +6,7 @@
     <title>Trilha VIVA</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #ffffff; --text: #3c3c3c; --error: #ff4b4b; --dark: #00274c; --gold: #c49a4f; --gray: #afafaf; }
+        :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #ffffff; --text: #3c3c3c; --error: #ff4b4b; --dark: #00274c; --gold: #c49a4f; }
         body { font-family: 'Nunito', sans-serif; background-color: #f7f7f7; margin: 0; display: flex; justify-content: center; color: var(--text); }
         #app { width: 100%; max-width: 480px; background: white; min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 100px; }
         .hidden { display: none !important; }
@@ -26,7 +26,7 @@
         .auth-form { display: flex; flex-direction: column; gap: 12px; }
         input, textarea { width: 100%; padding: 16px; border: 2px solid #e5e5e5; border-radius: 16px; box-sizing: border-box; font-family: 'Nunito'; font-weight: 700; font-size: 1rem; outline: none; transition: 0.2s; }
         input:focus, textarea:focus { border-color: var(--blue); }
-        textarea { resize: vertical; min-height: 100px; }
+        textarea { resize: none; height: 100px; }
         
         .label-igreja { display: block; margin-top: 10px; font-weight: 900; font-size: 0.85rem; color: var(--blue); text-align: center; line-height: 1.2; }
 
@@ -43,18 +43,18 @@
 
         /* ELEMENTOS DO APP */
         .card { border: 2px solid #e5e5e5; border-bottom: 6px solid #e5e5e5; border-radius: 20px; padding: 20px; margin: 15px 0; background: white; }
-        .card-title { color: var(--blue); margin-top: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #e5e5e5; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; z-index: 1000; }
+        .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #e5e5e5; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; }
         .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; }
         .nav-active { color: var(--blue); }
 
+        /* RANKING */
         .rank-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
         .rank-pos { font-weight: 900; width: 35px; color: var(--blue); font-size: 1.1rem; }
         .rank-info { flex-grow: 1; margin-left: 10px; }
-        .rank-meta { display: flex; justify-content: space-between; align-items: center; }
+        .rank-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .rank-name { font-weight: 700; text-transform: uppercase; font-size: 0.9rem; }
         .rank-xp { font-weight: 900; color: var(--primary); font-size: 0.8rem; }
+        .rank-sub { font-size: 0.65rem; color: var(--blue); font-weight: 900; }
     </style>
 </head>
 <body>
@@ -77,7 +77,7 @@
             <div class="auth-tab active" id="tab-login" onclick="switchAuth('login')">ENTRAR</div>
             <div class="auth-tab" id="tab-signup" onclick="switchAuth('signup')">CRIAR CONTA</div>
         </div>
-        
+
         <div id="form-login" class="auth-form">
             <input type="email" id="login-email" placeholder="E-MAIL">
             <input type="password" id="login-pass" placeholder="SENHA">
@@ -87,7 +87,7 @@
         <div id="form-signup" class="auth-form hidden">
             <input type="text" id="signup-user" placeholder="NOME DE USUÁRIO">
             <input type="email" id="signup-email-new" placeholder="E-MAIL">
-            <input type="tel" id="signup-phone" placeholder="TELEFONE (DDD)">
+            <input type="tel" id="signup-phone" placeholder="TELEFONE">
             <input type="password" id="signup-pass-new" placeholder="SENHA">
             <input type="password" id="signup-pass-repeat" placeholder="REPETIR SENHA">
             <label class="label-igreja">Já é cristão? então deixe aqui o nome da sua igreja</label>
@@ -107,9 +107,7 @@
                 <div class="user-info-box">
                     <b id="user-display">USUÁRIO</b> 
                     <div class="level-text">NÍVEL <span id="level-val">0</span></div>
-                    <div class="header-progress-container">
-                        <div id="progress-fill" class="header-progress-fill"></div>
-                    </div>
+                    <div class="header-progress-container"><div id="progress-fill" class="header-progress-fill"></div></div>
                 </div>
             </div>
             <div style="display:flex; align-items:center; gap:10px;">
@@ -133,19 +131,19 @@
                 <div class="card" id="ai-response" style="background: #f0fbff; font-size: 1rem; line-height: 1.5; white-space: pre-wrap;"></div>
                 
                 <div class="card" style="border-color: var(--blue);">
-                    <h4 class="card-title">🤔 Ficou com dúvida?</h4>
-                    <input type="text" id="study-doubt" placeholder="Pergunte algo sobre o estudo...">
-                    <button class="btn-duo" style="padding: 10px; font-size: 14px; background: var(--blue); border-bottom-color: #1899d6;" onclick="askProfessor()">Perguntar ao Professor</button>
+                    <h4 style="color: var(--blue); margin-top:0">🤔 Dúvida sobre o estudo?</h4>
+                    <input type="text" id="study-doubt" placeholder="Pergunte algo sobre este trecho...">
+                    <button class="btn-duo" style="padding:10px; font-size:14px; background:var(--blue); border-bottom-color:#1899d6" onclick="askProfessor()">Perguntar ao Professor</button>
                     <p id="ai-doubt-response" style="font-size: 0.9rem; font-style: italic; margin-top: 10px;"></p>
                 </div>
 
                 <div class="card" style="border-color: var(--gold);">
-                    <h4 class="card-title">✍️ Suas Anotações</h4>
-                    <textarea id="study-notes" placeholder="O que você aprendeu hoje?"></textarea>
-                    <button class="btn-duo" style="padding: 10px; font-size: 14px; background: var(--gold); border-bottom-color: #b38a42;" onclick="saveNotes()">Salvar Anotação</button>
+                    <h4 style="color: var(--gold); margin-top:0">✍️ Minhas Anotações</h4>
+                    <textarea id="study-notes" placeholder="O que Deus falou com você hoje?"></textarea>
+                    <button class="btn-duo" style="padding:10px; font-size:14px; background:var(--gold); border-bottom-color:#b38a42" onclick="saveNotes()">Salvar Anotação</button>
                 </div>
 
-                <div id="quiz-container" class="card" style="border-color: var(--primary);">
+                <div id="quiz-container" class="card" style="border-color: var(--blue);">
                     <h4 id="quiz-question" style="margin-top:0; color: var(--blue);"></h4>
                     <div id="quiz-options"></div>
                 </div>
@@ -154,20 +152,24 @@
 
         <div id="tab-rank" class="hidden">
             <h2 style="text-align:center; color: var(--blue);">🏆 RANKING GLOBAL</h2>
+            <div class="auth-tabs" style="margin-bottom:10px;">
+                <div class="auth-tab active" id="rank-tab-users" onclick="loadRanking('users')">INDIVIDUAL</div>
+                <div class="auth-tab" id="rank-tab-church" onclick="loadRanking('churches')">IGREJAS</div>
+            </div>
             <div id="ranking-list" class="card" style="padding:0"></div>
         </div>
 
         <div id="tab-config" class="hidden">
-            <h2 style="text-align:center; color: #afafaf;">CONFIGURAÇÕES</h2>
+            <h2 style="text-align:center; color: #afafaf;">SOBRE</h2>
             <div class="card">
-                <h4 class="card-title">💡 Sugestão para o App</h4>
+                <h4 style="color: var(--blue); margin-top: 0;">💡 Sugestão para o App</h4>
                 <textarea id="app-suggestion" placeholder="Como podemos melhorar o Trilha VIVA?"></textarea>
-                <button class="btn-duo" style="padding: 10px; font-size: 14px;" onclick="sendSuggestion()">Enviar Sugestão</button>
+                <button class="btn-duo" style="padding:10px; font-size:14px;" onclick="sendSuggestion()">Enviar Sugestão</button>
             </div>
             <div class="card" style="text-align:center">
                 <h3 style="color: var(--blue); margin-top: 0;">Idealizador e Criador</h3>
                 <p style="font-weight: 900; font-size: 1.2rem; margin-bottom: 20px;">Northon Duarte</p>
-                <button class="btn-duo" onclick="resetVerses()">REINICIAR LISTA</button>
+                <button class="btn-duo" onclick="resetVerses()">REINICIAR LISTA DE VERSÍCULOS</button>
             </div>
         </div>
 
@@ -184,26 +186,13 @@
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4",
-        authDomain: "bibliaquest-fbc44.firebaseapp.com",
-        projectId: "bibliaquest-fbc44",
-        storageBucket: "bibliaquest-fbc44.firebasestorage.app",
-        messagingSenderId: "670585434397",
-        appId: "1:670585434397:web:6d699582986e8dcbc6f1f4",
-        measurementId: "G-H0Z7T8LCPE"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4", authDomain: "bibliaquest-fbc44.firebaseapp.com", projectId: "bibliaquest-fbc44", storageBucket: "bibliaquest-fbc44.firebasestorage.app", messagingSenderId: "670585434397", appId: "1:670585434397:web:6d699582986e8dcbc6f1f4", measurementId: "G-H0Z7T8LCPE" };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     let correctAnswer = "";
 
-    const BIBLE_DATABASE = [
-        { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" },
-        { id: 10, text: "Eu sou o caminho, e a verdade, e a vida.", ref: "João 14:6" }
-        // ... (adicione os outros versículos aqui)
-    ];
+    const BIBLE_DATABASE = [ { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" } ];
 
     window.switchAuth = (m) => {
         document.getElementById('form-login').classList.toggle('hidden', m !== 'login');
@@ -217,65 +206,60 @@
             if(m === 'signup') {
                 const e = document.getElementById('signup-email-new').value;
                 const p = document.getElementById('signup-pass-new').value;
-                const user = document.getElementById('signup-user').value;
-                const church = document.getElementById('signup-church').value;
                 const p2 = document.getElementById('signup-pass-repeat').value;
+                const user = document.getElementById('signup-user').value;
+                const phone = document.getElementById('signup-phone').value;
+                const church = document.getElementById('signup-church').value || "Independente";
+                if (!user || !e || !p || !p2) return alert("Preencha todos os campos!");
                 if (p !== p2) return alert("As senhas não conferem!");
-
                 const r = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", r.user.uid), { 
-                    xp: 0, name: user, church, streak: 1, lastLoginDate: new Date().toISOString().split('T')[0] 
-                });
+                await setDoc(doc(db, "users", r.user.uid), { xp: 0, name: user, phone: phone, church: church, streak: 1, lastLoginDate: new Date().toISOString().split('T')[0] });
             } else {
                 const e = document.getElementById('login-email').value;
                 const p = document.getElementById('login-pass').value;
-                await signInWithEmailAndPassword(auth, e, p); 
+                await signInWithEmailAndPassword(auth, e, p);
             }
         } catch(err) { alert("Ops! Verifique seu login e senha."); }
     };
 
-    // NOVAS FUNÇÕES: SALVAR ANOTAÇÕES E ENVIAR SUGESTÕES
+    // NOVAS FUNÇÕES
     window.saveNotes = async () => {
         const notes = document.getElementById('study-notes').value;
-        if(!notes) return alert("Escreva algo antes de salvar!");
-        const userRef = doc(db, "users", auth.currentUser.uid);
+        if(!notes) return alert("Escreva algo para salvar.");
         try {
-            await updateDoc(userRef, { lastNote: notes, lastNoteDate: new Date().toISOString() });
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            await updateDoc(userRef, { lastNote: notes, noteDate: new Date().toISOString() });
             alert("Anotação salva com sucesso!");
-        } catch(e) { alert("Erro ao salvar."); }
+        } catch (e) { alert("Erro ao salvar anotação."); }
     };
 
     window.sendSuggestion = async () => {
-        const suggestion = document.getElementById('app-suggestion').value;
-        if(!suggestion) return alert("Escreva sua sugestão!");
+        const text = document.getElementById('app-suggestion').value;
+        if(!text) return alert("Qual a sua sugestão?");
         try {
-            await addDoc(collection(db, "suggestions"), {
-                text: suggestion,
-                user: auth.currentUser.email,
-                date: new Date().toISOString()
-            });
-            alert("Sugestão enviada! Valeu, Duarte.");
+            await addDoc(collection(db, "suggestions"), { text, user: auth.currentUser.email, date: new Date().toISOString() });
+            alert("Valeu pela sugestão! Vamos analisar.");
             document.getElementById('app-suggestion').value = "";
-        } catch(e) { alert("Erro ao enviar."); }
+        } catch (e) { alert("Erro ao enviar sugestão."); }
     };
 
     window.askProfessor = async () => {
-        const doubt = document.getElementById('study-doubt').value;
+        const question = document.getElementById('study-doubt').value;
         const resBox = document.getElementById('ai-doubt-response');
-        if(!doubt) return alert("Qual sua dúvida?");
-        resBox.innerText = "Professor analisando...";
+        if(!question) return alert("Qual a sua dúvida?");
+        resBox.innerText = "Consultando os mestres...";
         try {
-            const response = await fetch('/api/ask', {
+            const response = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ verse: window.currentVerse, question: doubt })
+                body: JSON.stringify({ verse: window.currentVerse, question: question })
             });
             const data = await response.json();
             resBox.innerText = data.choices[0].message.content;
-        } catch(e) { resBox.innerText = "Erro ao conectar com o Professor."; }
+        } catch(e) { resBox.innerText = "Desculpe, o professor está ocupado agora."; }
     };
 
-    // LOGICA DE OFENSIVA, CARREGAR DADOS E ESTUDO (MANTIDAS)
+    // RESTANTE DA LÓGICA (MANTIDA)
     onAuthStateChanged(auth, u => {
         document.getElementById('auth-screen').classList.toggle('hidden', !!u);
         document.getElementById('main-screen').classList.toggle('hidden', !u);
@@ -287,40 +271,69 @@
         const s = await getDoc(doc(db, "users", uid));
         if(s.exists()) {
             const d = s.data();
-            document.getElementById('xp-val').innerText = d.xp || 0;
-            document.getElementById('level-val').innerText = Math.floor((d.xp || 0) / 100);
-            document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
-            document.getElementById('progress-fill').style.width = `${(d.xp || 0) % 100}%`;
+            const xp = d.xp || 0;
+            document.getElementById('xp-val').innerText = xp;
+            document.getElementById('level-val').innerText = Math.floor(xp / 100);
+            document.getElementById('user-display').innerText = (d.name || "").toUpperCase();
+            document.getElementById('progress-fill').style.width = `${xp % 100}%`;
             document.getElementById('streak-val').innerText = d.streak || 0;
             if(d.lastNote) document.getElementById('study-notes').value = d.lastNote;
         }
     }
 
-    function fetchVerse() {
-        const selected = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)];
-        window.currentVerse = selected.text;
-        document.getElementById('verse-text').innerText = `"${selected.text}"`;
-        document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
-    }
+    window.loadRanking = async (type = 'users') => {
+        const list = document.getElementById('ranking-list');
+        list.innerHTML = `<p style="text-align:center; padding:20px; color:#afafaf;">Buscando líderes...</p>`;
+        document.getElementById('rank-tab-users').classList.toggle('active', type === 'users');
+        document.getElementById('rank-tab-church').classList.toggle('active', type === 'churches');
+        try {
+            const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(100));
+            const snapshot = await getDocs(q);
+            list.innerHTML = "";
+            if (type === 'users') {
+                snapshot.forEach((docSnap, i) => {
+                    const d = docSnap.data();
+                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${d.xp} XP</span><b class="rank-name">${(d.name || "").toUpperCase()}</b><span class="rank-sub">${d.church || 'Independente'}</span></div></div>`;
+                });
+            } else {
+                const churchTotals = {};
+                snapshot.forEach(docSnap => {
+                    const d = docSnap.data();
+                    const c = d.church || "Independente";
+                    churchTotals[c] = (churchTotals[c] || 0) + (d.xp || 0);
+                });
+                const sorted = Object.entries(churchTotals).sort((a,b) => b[1] - a[1]);
+                sorted.forEach((item, i) => {
+                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${item[1]} XP</span><b class="rank-name">${item[0].toUpperCase()}</b></div></div>`;
+                });
+            }
+        } catch (e) { list.innerHTML = "Erro ao carregar."; }
+    };
+
+    window.showTab = (t) => {
+        ['home', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
+        ['home', 'rank', 'config'].forEach(nav => {
+            const el = document.getElementById(`nav-${nav}`);
+            if(el) el.classList.toggle('nav-active', nav === t);
+        });
+        if(t === 'rank') loadRanking('users');
+    };
 
     window.generateStudy = async () => {
         const btn = document.getElementById('btn-study');
         btn.innerText = "PROFESSOR ANALISANDO...";
         btn.disabled = true;
         try {
-            const response = await fetch('/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ verse: window.currentVerse })
-            });
+            const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: window.currentVerse }) });
             const data = await response.json();
             const fullText = data.choices[0].message.content;
-            const parts = fullText.split("PERGUNTA:");
-            
-            document.getElementById('ai-response').innerText = parts[0].replace("EXPLICAÇÃO:", "").trim();
-            document.getElementById('quiz-question').innerText = parts[1].split("A)")[0].trim();
-            correctAnswer = fullText.split("CORRETA:")[1].trim()[0].toUpperCase();
-
+            const parts = fullText.split(/PERGUNTA:|Pergunta:/i);
+            const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
+            const quizPart = parts[1];
+            const questionText = quizPart.split(/[A-D]\)/)[0].trim();
+            correctAnswer = fullText.split(/CORRETA:|Correta:/i)[1].trim()[0].toUpperCase();
+            document.getElementById('ai-response').innerText = explanation;
+            document.getElementById('quiz-question').innerText = questionText;
             const opts = fullText.match(/[A-D]\) .+/g);
             const quizDiv = document.getElementById('quiz-options');
             quizDiv.innerHTML = "";
@@ -351,40 +364,15 @@
         setTimeout(() => location.reload(), 2000);
     }
 
-    window.showTab = (t) => {
-        ['home', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
-        ['home', 'rank', 'config'].forEach(nav => {
-            const el = document.getElementById(`nav-${nav}`);
-            if(el) el.classList.toggle('nav-active', nav === t);
-        });
-        if(t === 'rank') loadRanking();
-    };
+    function fetchVerse() {
+        const selected = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)];
+        window.currentVerse = selected.text;
+        document.getElementById('verse-text').innerText = `"${selected.text}"`;
+        document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
+    }
 
     window.logout = () => signOut(auth).then(() => location.reload());
     window.resetVerses = () => { localStorage.removeItem("seen_verses"); alert("Lista reiniciada!"); location.reload(); };
-
-    async function loadRanking() {
-        const list = document.getElementById('ranking-list');
-        list.innerHTML = `<p style="text-align:center; padding:20px; color:#afafaf;">Sincronizando líderes...</p>`;
-        const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(10));
-        const snapshot = await getDocs(q);
-        list.innerHTML = "";
-        let pos = 1;
-        snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            list.innerHTML += `
-                <div class="rank-item">
-                    <span class="rank-pos">${pos}º</span>
-                    <div class="rank-info">
-                        <div class="rank-meta">
-                            <span class="rank-name">${(data.name || "").toUpperCase()}</span>
-                            <span class="rank-xp">${data.xp || 0} XP</span>
-                        </div>
-                    </div>
-                </div>`;
-            pos++;
-        });
-    }
 </script>
 </body>
 </html>
