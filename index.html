@@ -182,7 +182,7 @@
     const db = getFirestore(app);
     let correctAnswer = "";
 
-   // BASE DE DADOS EXPANDIDA (IDs 1 A 600)
+  // BASE DE DADOS EXPANDIDA (IDs 1 A 600)
     const BIBLE_DATABASE = [
         { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" },
         { id: 2, text: "O Senhor é o meu pastor; nada me faltará.", ref: "Salmos 23:1" },
@@ -816,18 +816,23 @@
                 const pRepeat = document.getElementById('signup-pass-repeat').value;
                 const church = document.getElementById('signup-church').value;
 
-                if (!user || !phone || p !== pRepeat) return alert("Verifique os dados e as senhas!");
+                if (!user || !phone || p !== pRepeat) return alert("Ops! Verifique seus dados e as senhas.");
 
                 const r = await createUserWithEmailAndPassword(auth, e, p);
+                const todayStr = new Date().toISOString().split('T')[0];
                 await setDoc(doc(db, "users", r.user.uid), { 
-                    xp: 0, name: user, phone, church, streak: 1, lastLoginDate: new Date().toISOString().split('T')[0] 
+                    xp: 0, name: user, phone, church, streak: 1, lastLoginDate: todayStr 
                 });
             } else {
                 e = document.getElementById('login-email').value;
                 p = document.getElementById('login-pass').value;
                 await signInWithEmailAndPassword(auth, e, p); 
             }
-        } catch(err) { alert("Erro: " + err.message); }
+        } catch(err) { 
+            // AJUSTE SOLICITADO: Mensagem amigável para erro de e-mail ou senha
+            alert("Ops! Verifique seu login e senha."); 
+            console.error("Firebase Auth Error:", err.code, err.message); 
+        }
     };
 
     onAuthStateChanged(auth, u => {
