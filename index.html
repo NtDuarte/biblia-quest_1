@@ -17,9 +17,9 @@
         .logo-text { font-size: 2.2rem; font-weight: 900; color: var(--dark); margin: 0; letter-spacing: -1px; }
         .logo-text span { color: var(--gold); }
 
-        /* AUTH TABS */
+        /* TABS */
         .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; }
-        .auth-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 900; color: var(--gray); transition: 0.3s; }
+        .auth-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 900; color: var(--gray); transition: 0.3s; font-size: 0.9rem; }
         .auth-tab.active { color: var(--blue); border-bottom: 4px solid var(--blue); }
 
         /* INPUTS */
@@ -39,10 +39,11 @@
         .header-progress-container { width: 100px; background: #eee; border-radius: 10px; height: 8px; overflow: hidden; margin-top: 4px; }
         .header-progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.6s; }
 
-        /* CARDS */
+        /* ESTUDO AMPLIADO */
         .card { border: 2px solid #e5e5e5; border-bottom: 6px solid #e5e5e5; border-radius: 24px; padding: 20px; margin: 15px 0; background: white; }
-        #ai-response { background: #f0fbff; font-size: 1.1rem; line-height: 1.6; white-space: pre-wrap; }
-        .quiz-option { width: 100%; text-align: left; padding: 18px; margin: 8px 0; border: 2px solid #e5e5e5; border-bottom-width: 5px; border-radius: 18px; background: white; cursor: pointer; font-weight: 700; font-family: 'Nunito'; }
+        #ai-response { background: #f0fbff; font-size: 1.1rem; line-height: 1.6; white-space: pre-wrap; border-color: var(--blue); }
+        #quiz-question { font-size: 1.2rem; font-weight: 900; color: var(--dark); margin-bottom: 15px; }
+        .quiz-option { width: 100%; text-align: left; padding: 18px; margin: 8px 0; border: 2px solid #e5e5e5; border-bottom-width: 5px; border-radius: 18px; background: white; cursor: pointer; font-weight: 700; font-size: 1rem; font-family: 'Nunito'; }
 
         /* NOTAS */
         .note-card { border: 2px solid #e5e5e5; border-left: 8px solid var(--gold); border-radius: 18px; padding: 18px; margin-bottom: 15px; background: #fffdf9; }
@@ -56,7 +57,7 @@
         .rank-xp { font-weight: 900; color: var(--primary); font-size: 1rem; float: right; }
         .rank-church-tag { font-size: 0.65rem; color: var(--blue); font-weight: 900; background: #eef9ff; padding: 2px 8px; border-radius: 10px; }
 
-        /* NAV */
+        /* NAVBAR */
         .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #e5e5e5; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; z-index: 1000; }
         .nav-item { cursor: pointer; font-weight: 900; color: var(--gray); font-size: 0.75rem; text-align: center; }
         .nav-active { color: var(--blue); }
@@ -70,25 +71,22 @@
             <svg class="logo-svg" viewBox="0 0 500 500"><circle cx="250" cy="230" r="100" fill="none" stroke="#00274c" stroke-width="8"/><path d="M250,145 L275,230 L250,315 L225,230 Z" fill="#c49a4f" stroke="#00274c" stroke-width="2"/><rect x="242" y="170" width="16" height="85" fill="#c49a4f" stroke="#00274c" stroke-width="2"/><rect x="215" y="195" width="70" height="16" fill="#c49a4f" stroke="#00274c" stroke-width="2"/><path d="M235,120 C235,105 265,105 265,120" fill="none" stroke="#00274c" stroke-width="6"/></svg>
             <h1 class="logo-text">TRILHA <span>VIVA</span></h1>
         </div>
-
         <div class="auth-tabs">
             <div class="auth-tab active" id="tab-login-btn" onclick="switchAuth('login')">ENTRAR</div>
             <div class="auth-tab" id="tab-signup-btn" onclick="switchAuth('signup')">CRIAR CONTA</div>
         </div>
-
         <div id="form-login">
             <input type="email" id="login-email" placeholder="E-MAIL">
             <input type="password" id="login-pass" placeholder="SENHA">
             <button class="btn-duo btn-primary" onclick="handleAuth('login')">Entrar na Trilha</button>
         </div>
-
         <div id="form-signup" class="hidden">
             <input type="text" id="signup-user" placeholder="NOME DE USUÁRIO">
             <input type="email" id="signup-email-new" placeholder="E-MAIL">
             <input type="tel" id="signup-phone" placeholder="TELEFONE (DDD)">
             <input type="password" id="signup-pass-new" placeholder="SENHA">
             <input type="password" id="signup-pass-repeat" placeholder="REPETIR SENHA">
-            <label class="label-extra" style="color: var(--blue); font-weight: 900; font-size: 0.8rem; display: block; text-align: center; margin-top: 10px;">Já é cristão? deixe aqui o nome da sua igreja</label>
+            <label style="color: var(--blue); font-weight: 900; font-size: 0.8rem; display: block; text-align: center; margin-top: 10px;">Já é cristão? deixe aqui o nome da sua igreja</label>
             <input type="text" id="signup-church" placeholder="MINHA IGREJA">
             <button class="btn-duo btn-secondary" onclick="handleAuth('signup')">Criar minha Conta</button>
         </div>
@@ -99,7 +97,7 @@
             <div style="display:flex; align-items:center;">
                 <svg class="mini-logo-svg" viewBox="0 0 500 500"><circle cx="250" cy="250" r="140" fill="none" stroke="#00274c" stroke-width="20"/><path d="M250,150 L275,250 L250,350 L225,250 Z" fill="#c49a4f" stroke="#00274c" stroke-width="8"/><path d="M210,210 L290,210 L290,240 L210,240 Z" fill="#c49a4f" stroke="#00274c" stroke-width="8" transform="rotate(90 250 250)"/></svg>
                 <div class="user-info-box">
-                    <b id="user-display">NORTHON</b> 
+                    <b id="user-display">USUÁRIO</b> 
                     <div class="header-progress-container"><div id="progress-fill" class="header-progress-fill"></div></div>
                 </div>
             </div>
@@ -113,24 +111,27 @@
         <div id="tab-home">
             <div class="card">
                 <h3 style="color: var(--blue); margin:0; font-size: 0.9rem;">📖 DESAFIO DO DIA</h3>
-                <p id="verse-text" style="font-weight: 700; font-size: 1.1rem; margin: 10px 0;">Buscando versículo...</p>
+                <p id="verse-text" style="font-weight: 700; font-size: 1.2rem; margin: 15px 0;">Buscando versículo...</p>
                 <div id="verse-ref" style="color: var(--gray); font-weight: 900; font-size: 0.8rem;"></div>
             </div>
             <button id="btn-study" class="btn-duo btn-primary" onclick="generateStudy()">GERAR ESTUDO PROFUNDO</button>
             
             <div id="study-area" class="hidden">
                 <div class="card" id="ai-response"></div>
+                
                 <div class="card" style="border-color: var(--blue);">
-                    <h4 style="color:var(--blue); margin:0 0 10px 0;">🤔 DÚVIDA?</h4>
-                    <textarea id="study-doubt" placeholder="Pergunte ao Professor..."></textarea>
+                    <h4 style="color:var(--blue); margin:0 0 10px 0;">🤔 DÚVIDA SOBRE O VERSÍCULO?</h4>
+                    <textarea id="study-doubt" placeholder="Pergunte ao professor sobre este texto..."></textarea>
                     <button class="btn-duo btn-secondary" style="padding:12px; font-size:14px;" onclick="askProfessor()">Perguntar</button>
-                    <p id="ai-doubt-res" style="font-size:0.95rem; font-style:italic; margin-top:10px;"></p>
+                    <p id="ai-doubt-res" style="font-size:0.95rem; font-style:italic; margin-top:10px; color: var(--dark);"></p>
                 </div>
+
                 <div class="card" style="border-color: var(--gold);">
-                    <h4 style="color:var(--gold); margin:0 0 10px 0;">✍️ MINHAS ANOTAÇÕES</h4>
+                    <h4 style="color:var(--gold); margin:0 0 10px 0;">✍️ MINHA ANOTAÇÃO</h4>
                     <textarea id="study-notes" placeholder="O que você aprendeu hoje?"></textarea>
-                    <button class="btn-duo" style="padding:12px; font-size:14px; background:var(--gold);" onclick="saveNotes()">Salvar Nota</button>
+                    <button class="btn-duo" style="padding:12px; font-size:14px; background:var(--gold); border-bottom-color:#b38a42" onclick="saveNotes()">Salvar Nota</button>
                 </div>
+
                 <div id="quiz-container" class="card" style="border-color: var(--primary);">
                     <h4 id="quiz-question"></h4>
                     <div id="quiz-options"></div>
@@ -184,7 +185,6 @@
     const db = getFirestore(app);
     let correctAnswer = "";
 
-    // Mantenha aqui sua lista completa de 1000 IDs
     const BIBLE_DATABASE = [ { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" } ];
 
     window.switchAuth = (m) => {
@@ -198,14 +198,12 @@
         try {
             if(m === 'signup') {
                 const user = document.getElementById('signup-user').value;
-                const email = document.getElementById('signup-email-new').value; // CORREÇÃO DE ID
-                const p = document.getElementById('signup-pass-new').value;      // CORREÇÃO DE ID
+                const email = document.getElementById('signup-email-new').value;
+                const p = document.getElementById('signup-pass-new').value;
                 const p2 = document.getElementById('signup-pass-repeat').value;
                 const church = document.getElementById('signup-church').value || "Independente";
-                
-                if (!email || !p) return alert("Ops! Verifique seu login e senha.");
+                if (!email || !p) return alert("Preencha e-mail e senha!");
                 if (p !== p2) return alert("As senhas não batem!");
-                
                 const r = await createUserWithEmailAndPassword(auth, email, p);
                 await setDoc(doc(db, "users", r.user.uid), { xp: 0, name: user, church, streak: 1, lastLoginDate: new Date().toISOString().split('T')[0] });
             } else {
@@ -216,39 +214,10 @@
         } catch(err) { alert("Ops! Verifique seu login e senha."); }
     };
 
-    // CORREÇÃO IA: Pegar versículo direto do texto da tela
-    window.generateStudy = async () => {
-        const btn = document.getElementById('btn-study');
-        const vText = document.getElementById('verse-text').innerText;
-        btn.innerText = "ANALISANDO..."; btn.disabled = true;
-        try {
-            const response = await fetch('/api/generate', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ verse: vText }) 
-            });
-            const data = await response.json();
-            const fullText = data.choices[0].message.content;
-            const parts = fullText.split(/PERGUNTA:|Pergunta:/i);
-            const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
-            correctAnswer = fullText.split(/CORRETA:|Correta:/i)[1].trim()[0].toUpperCase();
-            document.getElementById('ai-response').innerText = explanation;
-            document.getElementById('quiz-question').innerText = parts[1].split(/[A-D]\)/)[0].trim();
-            const opts = fullText.match(/[A-D]\) .+/g);
-            const quizDiv = document.getElementById('quiz-options');
-            quizDiv.innerHTML = "";
-            opts.forEach(o => {
-                const b = document.createElement('button'); b.className = "quiz-option"; b.innerText = o;
-                b.onclick = () => checkAnswer(o[0].toUpperCase(), b); quizDiv.appendChild(b);
-            });
-            document.getElementById('study-area').classList.remove('hidden');
-            btn.innerText = "ESTUDO CONCLUÍDO";
-        } catch (err) { btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; }
-    };
-
+    // CORREÇÃO: SALVAR NOTAS (Usando o que está na tela)
     window.saveNotes = async () => {
         const text = document.getElementById('study-notes').value;
-        const vRef = document.getElementById('verse-ref').innerText; // PEGA REF DIRETO DA TELA
+        const vRef = document.getElementById('verse-ref').innerText;
         if(!text) return alert("Escreva algo!");
         try {
             await addDoc(collection(db, "users", auth.currentUser.uid, "notes"), { text, verse: vRef, date: new Date().toISOString() });
@@ -257,12 +226,30 @@
         } catch (e) { alert("Erro ao salvar nota."); }
     };
 
+    // CORREÇÃO: IA DÚVIDA (Enviando o versículo atual)
+    window.askProfessor = async () => {
+        const doubt = document.getElementById('study-doubt').value;
+        const verse = document.getElementById('verse-text').innerText;
+        const resBox = document.getElementById('ai-doubt-res');
+        if(!doubt) return alert("Qual sua dúvida?");
+        resBox.innerText = "Consultando professor...";
+        try {
+            const response = await fetch('/api/generate', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ verse: verse, question: doubt }) 
+            });
+            const data = await response.json();
+            resBox.innerText = data.choices[0].message.content;
+        } catch(e) { resBox.innerText = "Professor indisponível agora."; }
+    };
+
     window.loadUserNotes = async () => {
         const list = document.getElementById('notes-list');
-        list.innerHTML = "<p style='text-align:center'>Carregando diário...</p>";
+        list.innerHTML = "<p style='text-align:center'>Carregando...</p>";
         const q = query(collection(db, "users", auth.currentUser.uid, "notes"), orderBy("date", "desc"));
         const snap = await getDocs(q);
-        list.innerHTML = snap.empty ? "<p style='text-align:center; color:var(--gray)'>Nenhuma nota salva.</p>" : "";
+        list.innerHTML = snap.empty ? "<p style='text-align:center; color:var(--gray)'>Nenhuma nota.</p>" : "";
         snap.forEach(d => {
             const n = d.data();
             list.innerHTML += `<div class="note-card"><div class="note-meta"><span>${new Date(n.date).toLocaleDateString()}</span><span style="color:var(--blue)">${n.verse}</span></div><div>${n.text}</div></div>`;
@@ -271,10 +258,10 @@
 
     window.loadRanking = async (type = 'users') => {
         const list = document.getElementById('ranking-list');
-        list.innerHTML = "<p style='text-align:center'>Buscando...</p>";
+        list.innerHTML = "<p style='text-align:center'>Buscando líderes...</p>";
         document.getElementById('rank-users-btn').classList.toggle('active', type === 'users');
         document.getElementById('rank-church-btn').classList.toggle('active', type === 'churches');
-        const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(50));
+        const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(100));
         const snapshot = await getDocs(q);
         list.innerHTML = "";
         if (type === 'users') {
@@ -331,6 +318,31 @@
         document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
     }
 
+    window.generateStudy = async () => {
+        const btn = document.getElementById('btn-study');
+        const vText = document.getElementById('verse-text').innerText;
+        btn.innerText = "ANALISANDO..."; btn.disabled = true;
+        try {
+            const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: vText }) });
+            const data = await response.json();
+            const fullText = data.choices[0].message.content;
+            const parts = fullText.split(/PERGUNTA:|Pergunta:/i);
+            const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
+            correctAnswer = fullText.split(/CORRETA:|Correta:/i)[1].trim()[0].toUpperCase();
+            document.getElementById('ai-response').innerText = explanation;
+            document.getElementById('quiz-question').innerText = parts[1].split(/[A-D]\)/)[0].trim();
+            const opts = fullText.match(/[A-D]\) .+/g);
+            const quizDiv = document.getElementById('quiz-options');
+            quizDiv.innerHTML = "";
+            opts.forEach(o => {
+                const b = document.createElement('button'); b.className = "quiz-option"; b.innerText = o;
+                b.onclick = () => checkAnswer(o[0].toUpperCase(), b); quizDiv.appendChild(b);
+            });
+            document.getElementById('study-area').classList.remove('hidden');
+            btn.innerText = "ESTUDO CONCLUÍDO";
+        } catch (err) { btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; }
+    };
+
     async function checkAnswer(c, btn) {
         document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
         const userRef = doc(db, "users", auth.currentUser.uid);
@@ -347,6 +359,13 @@
     }
 
     window.logout = () => signOut(auth).then(() => location.reload());
+    window.sendSuggestion = async () => {
+        const text = document.getElementById('app-suggestion').value;
+        if(!text) return alert("Qual a sugestão?");
+        await addDoc(collection(db, "suggestions"), { text, user: auth.currentUser.email, date: new Date().toISOString() });
+        alert("Obrigado! Sugestão enviada.");
+        document.getElementById('app-suggestion').value = "";
+    };
     window.resetVerses = () => { localStorage.removeItem("seen_verses"); location.reload(); };
 </script>
 </body>
