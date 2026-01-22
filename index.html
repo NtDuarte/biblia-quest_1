@@ -6,7 +6,7 @@
     <title>Trilha VIVA</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #ffffff; --text: #3c3c3c; --error: #ff4b4b; --dark: #00274c; --gold: #c49a4f; }
+        :root { --primary: #58cc02; --blue: #1cb0f6; --bg: #ffffff; --text: #3c3c3c; --error: #ff4b4b; --dark: #00274c; --gold: #c49a4f; --gray: #afafaf; }
         body { font-family: 'Nunito', sans-serif; background-color: #f7f7f7; margin: 0; display: flex; justify-content: center; color: var(--text); }
         #app { width: 100%; max-width: 480px; background: white; min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 100px; }
         .hidden { display: none !important; }
@@ -18,43 +18,46 @@
         .logo-text span { color: var(--gold); }
         .mini-logo-svg { width: 45px; height: 45px; margin-right: 12px; }
 
-        /* INTERFACE DE AUTENTICAÇÃO */
+        /* AUTH */
         .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; }
         .auth-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: 900; color: #afafaf; transition: 0.3s; }
         .auth-tab.active { color: var(--blue); border-bottom: 4px solid var(--blue); }
-
         .auth-form { display: flex; flex-direction: column; gap: 12px; }
+
+        /* INPUTS */
         input, textarea { width: 100%; padding: 16px; border: 2px solid #e5e5e5; border-radius: 16px; box-sizing: border-box; font-family: 'Nunito'; font-weight: 700; font-size: 1rem; outline: none; transition: 0.2s; }
         input:focus, textarea:focus { border-color: var(--blue); }
-        textarea { resize: none; height: 100px; }
-        
-        .label-igreja { display: block; margin-top: 10px; font-weight: 900; font-size: 0.85rem; color: var(--blue); text-align: center; line-height: 1.2; }
+        textarea { resize: none; min-height: 120px; }
 
+        /* BOTÕES */
         .btn-duo { width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 16px; font-weight: 900; text-transform: uppercase; cursor: pointer; background: var(--primary); color: white; border-bottom: 6px solid #46a302; margin-top: 10px; }
         .btn-duo:active { transform: translateY(4px); border-bottom-width: 2px; }
 
-        /* DASHBOARD E HEADER */
+        /* HEADER */
         .header-stats { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
         .user-info-box { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
         #user-display { color: var(--primary); font-size: 1.1rem; text-transform: uppercase; font-weight: 900; }
-        .level-text { font-size: 0.8rem; color: #afafaf; font-weight: 900; }
         .header-progress-container { width: 120px; background: #e5e5e5; border-radius: 10px; height: 8px; overflow: hidden; margin-top: 2px; }
-        .header-progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s ease-out; }
+        .header-progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s; }
 
-        /* ELEMENTOS DO APP */
+        /* ÁREA DE ESTUDO AMPLIADA */
+        #ai-response { background: #f0fbff; font-size: 1.15rem; line-height: 1.6; min-height: 150px; }
+        #quiz-question { font-size: 1.2rem; line-height: 1.4; margin-bottom: 15px; color: var(--dark); }
+
+        /* COMPONENTES */
         .card { border: 2px solid #e5e5e5; border-bottom: 6px solid #e5e5e5; border-radius: 20px; padding: 20px; margin: 15px 0; background: white; }
-        .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #e5e5e5; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; }
-        .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; }
-        .nav-active { color: var(--blue); }
+        .quiz-option { width: 100%; text-align: left; padding: 18px; margin: 10px 0; border: 2px solid #e5e5e5; border-radius: 15px; background: white; cursor: pointer; font-weight: 700; font-size: 1rem; font-family: 'Nunito'; }
+        
+        /* ABA DE NOTAS */
+        .saved-note-card { border-left: 6px solid var(--gold); margin-bottom: 15px; padding: 15px; background: #fffdf5; border-radius: 12px; border-right: 1px solid #eee; border-top: 1px solid #eee; border-bottom: 4px solid #eee; }
+        .note-date { font-size: 0.7rem; color: var(--gray); font-weight: 900; text-transform: uppercase; }
+        .note-verse { font-size: 0.8rem; color: var(--blue); font-weight: 900; margin-bottom: 8px; display: block; }
+        .note-content { font-size: 1rem; font-weight: 600; line-height: 1.4; color: var(--text); }
 
-        /* RANKING */
-        .rank-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-        .rank-pos { font-weight: 900; width: 35px; color: var(--blue); font-size: 1.1rem; }
-        .rank-info { flex-grow: 1; margin-left: 10px; }
-        .rank-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .rank-name { font-weight: 700; text-transform: uppercase; font-size: 0.9rem; }
-        .rank-xp { font-weight: 900; color: var(--primary); font-size: 0.8rem; }
-        .rank-sub { font-size: 0.65rem; color: var(--blue); font-weight: 900; }
+        /* NAV */
+        .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #e5e5e5; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; z-index: 1000; }
+        .nav-item { cursor: pointer; font-weight: 900; color: #afafaf; font-size: 0.75rem; text-align: center; }
+        .nav-active { color: var(--blue); }
     </style>
 </head>
 <body>
@@ -62,96 +65,84 @@
 <div id="app">
     <div id="auth-screen">
         <div class="logo-container">
-            <svg class="logo-svg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="250" cy="230" r="100" fill="none" stroke="#00274c" stroke-width="8"/>
-                <circle cx="250" cy="230" r="115" fill="none" stroke="#c49a4f" stroke-width="5" stroke-dasharray="15,10"/>
-                <path d="M250,145 L275,230 L250,315 L225,230 Z" fill="#c49a4f" stroke="#00274c" stroke-width="2"/>
-                <rect x="242" y="170" width="16" height="85" fill="#c49a4f" stroke="#00274c" stroke-width="2"/>
-                <rect x="215" y="195" width="70" height="16" fill="#c49a4f" stroke="#00274c" stroke-width="2"/>
-                <path d="M235,120 C235,105 265,105 265,120" fill="none" stroke="#00274c" stroke-width="6"/>
-            </svg>
+            <svg class="logo-svg" viewBox="0 0 500 500"><circle cx="250" cy="230" r="100" fill="none" stroke="#00274c" stroke-width="8"/><path d="M250,145 L275,230 L250,315 L225,230 Z" fill="#c49a4f" stroke="#00274c" stroke-width="2"/><rect x="242" y="170" width="16" height="85" fill="#c49a4f" stroke="#00274c" stroke-width="2"/><rect x="215" y="195" width="70" height="16" fill="#c49a4f" stroke="#00274c" stroke-width="2"/><path d="M235,120 C235,105 265,105 265,120" fill="none" stroke="#00274c" stroke-width="6"/></svg>
             <h1 class="logo-text">TRILHA <span>VIVA</span></h1>
         </div>
-
         <div class="auth-tabs">
             <div class="auth-tab active" id="tab-login" onclick="switchAuth('login')">ENTRAR</div>
             <div class="auth-tab" id="tab-signup" onclick="switchAuth('signup')">CRIAR CONTA</div>
         </div>
-
         <div id="form-login" class="auth-form">
             <input type="email" id="login-email" placeholder="E-MAIL">
             <input type="password" id="login-pass" placeholder="SENHA">
             <button class="btn-duo" onclick="handleAuth('login')">Entrar na Trilha</button>
         </div>
-
         <div id="form-signup" class="auth-form hidden">
             <input type="text" id="signup-user" placeholder="NOME DE USUÁRIO">
             <input type="email" id="signup-email-new" placeholder="E-MAIL">
             <input type="tel" id="signup-phone" placeholder="TELEFONE">
             <input type="password" id="signup-pass-new" placeholder="SENHA">
             <input type="password" id="signup-pass-repeat" placeholder="REPETIR SENHA">
-            <label class="label-igreja">Já é cristão? então deixe aqui o nome da sua igreja</label>
+            <label class="label-igreja">Já é cristão? deixe aqui o nome da sua igreja</label>
             <input type="text" id="signup-church" placeholder="NOME DA SUA IGREJA">
-            <button class="btn-duo" style="background:var(--blue); border-bottom-color:#1899d6" onclick="handleAuth('signup')">Começar minha Jornada</button>
+            <button class="btn-duo" style="background:var(--blue); border-bottom-color:#1899d6" onclick="handleAuth('signup')">Criar Conta</button>
         </div>
     </div>
 
     <div id="main-screen" class="hidden">
         <div class="header-stats">
             <div style="display:flex; align-items:center;">
-                <svg class="mini-logo-svg" viewBox="0 0 500 500">
-                    <circle cx="250" cy="250" r="140" fill="none" stroke="#00274c" stroke-width="20"/>
-                    <path d="M250,150 L275,250 L250,350 L225,250 Z" fill="#c49a4f" stroke="#00274c" stroke-width="8"/>
-                    <path d="M210,210 L290,210 L290,240 L210,240 Z" fill="#c49a4f" stroke="#00274c" stroke-width="8" transform="rotate(90 250 250)"/>
-                </svg>
+                <svg class="mini-logo-svg" viewBox="0 0 500 500"><circle cx="250" cy="250" r="140" fill="none" stroke="#00274c" stroke-width="20"/><path d="M250,150 L275,250 L250,350 L225,250 Z" fill="#c49a4f" stroke="#00274c" stroke-width="8"/><path d="M210,210 L290,210 L290,240 L210,240 Z" fill="#c49a4f" stroke="#00274c" stroke-width="8" transform="rotate(90 250 250)"/></svg>
                 <div class="user-info-box">
                     <b id="user-display">USUÁRIO</b> 
-                    <div class="level-text">NÍVEL <span id="level-val">0</span></div>
                     <div class="header-progress-container"><div id="progress-fill" class="header-progress-fill"></div></div>
                 </div>
             </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div style="text-align:right">
-                    <span>🔥 <b id="streak-val">0</b></span>
-                    <span style="color:var(--blue); margin-left:10px;">💎 <b id="xp-val">0</b></span>
-                </div>
-                <button style="background:#ff4b4b; color:white; border:none; padding:8px 12px; border-radius:12px; font-weight:900; cursor:pointer;" onclick="logout()">SAIR</button>
+            <div style="text-align:right">
+                <span>🔥 <b id="streak-val">0</b></span>
+                <span style="color:var(--blue); margin-left:10px;">💎 <b id="xp-val">0</b></span>
+                <div onclick="logout()" style="color:var(--error); font-size:0.6rem; font-weight:900; cursor:pointer;">SAIR</div>
             </div>
         </div>
         
         <div id="tab-home">
             <div class="card">
                 <h3 style="color: var(--blue); margin:0">📖 DESAFIO DO DIA</h3>
-                <p id="verse-text" style="font-weight: 700; font-size: 1.1rem; line-height: 1.4;">Buscando novo versículo...</p>
-                <div id="verse-ref" style="color: #afafaf; font-weight: 900; font-size: 0.8rem;"></div>
+                <p id="verse-text" style="font-weight: 700; font-size: 1.1rem;">Buscando versículo...</p>
+                <div id="verse-ref" style="color:var(--gray); font-weight: 900; font-size: 0.8rem;"></div>
             </div>
             <button id="btn-study" class="btn-duo" onclick="generateStudy()">GERAR ESTUDO PROFUNDO</button>
             
             <div id="study-area" class="hidden">
-                <div class="card" id="ai-response" style="background: #f0fbff; font-size: 1rem; line-height: 1.5; white-space: pre-wrap;"></div>
+                <div class="card" id="ai-response" style="white-space: pre-wrap;"></div>
                 
                 <div class="card" style="border-color: var(--blue);">
-                    <h4 style="color: var(--blue); margin-top:0">🤔 Dúvida sobre o estudo?</h4>
-                    <input type="text" id="study-doubt" placeholder="Pergunte algo sobre este trecho...">
-                    <button class="btn-duo" style="padding:10px; font-size:14px; background:var(--blue); border-bottom-color:#1899d6" onclick="askProfessor()">Perguntar ao Professor</button>
+                    <h4 style="color:var(--blue); margin-top:0">🤔 Dúvida?</h4>
+                    <input type="text" id="study-doubt" placeholder="Pergunte ao Professor...">
+                    <button class="btn-duo" style="padding:10px; font-size:14px; background:var(--blue); border-bottom-color:#1899d6" onclick="askProfessor()">Perguntar</button>
                     <p id="ai-doubt-response" style="font-size: 0.9rem; font-style: italic; margin-top: 10px;"></p>
                 </div>
 
                 <div class="card" style="border-color: var(--gold);">
-                    <h4 style="color: var(--gold); margin-top:0">✍️ Minhas Anotações</h4>
-                    <textarea id="study-notes" placeholder="O que Deus falou com você hoje?"></textarea>
-                    <button class="btn-duo" style="padding:10px; font-size:14px; background:var(--gold); border-bottom-color:#b38a42" onclick="saveNotes()">Salvar Anotação</button>
+                    <h4 style="color:var(--gold); margin-top:0">✍️ Anotação</h4>
+                    <textarea id="study-notes" placeholder="O que você aprendeu?"></textarea>
+                    <button class="btn-duo" style="padding:10px; font-size:14px; background:var(--gold); border-bottom-color:#b38a42" onclick="saveNotes()">Salvar em Minhas Notas</button>
                 </div>
 
-                <div id="quiz-container" class="card" style="border-color: var(--blue);">
-                    <h4 id="quiz-question" style="margin-top:0; color: var(--blue);"></h4>
+                <div id="quiz-container" class="card" style="border-color: var(--primary);">
+                    <h4 id="quiz-question"></h4>
                     <div id="quiz-options"></div>
                 </div>
             </div>
         </div>
 
+        <div id="tab-notes" class="hidden">
+            <h2 style="text-align:center; color: var(--gold);">✍️ MINHAS ANOTAÇÕES</h2>
+            <div id="notes-list"></div>
+        </div>
+
         <div id="tab-rank" class="hidden">
-            <h2 style="text-align:center; color: var(--blue);">🏆 RANKING GLOBAL</h2>
+            <h2 style="text-align:center; color: var(--blue);">🏆 RANKING</h2>
             <div class="auth-tabs" style="margin-bottom:10px;">
                 <div class="auth-tab active" id="rank-tab-users" onclick="loadRanking('users')">INDIVIDUAL</div>
                 <div class="auth-tab" id="rank-tab-church" onclick="loadRanking('churches')">IGREJAS</div>
@@ -160,21 +151,20 @@
         </div>
 
         <div id="tab-config" class="hidden">
-            <h2 style="text-align:center; color: #afafaf;">SOBRE</h2>
             <div class="card">
-                <h4 style="color: var(--blue); margin-top: 0;">💡 Sugestão para o App</h4>
-                <textarea id="app-suggestion" placeholder="Como podemos melhorar o Trilha VIVA?"></textarea>
-                <button class="btn-duo" style="padding:10px; font-size:14px;" onclick="sendSuggestion()">Enviar Sugestão</button>
+                <h4 style="color: var(--blue); margin-top: 0;">💡 Sugestão</h4>
+                <textarea id="app-suggestion" placeholder="Como melhorar o app?"></textarea>
+                <button class="btn-duo" style="padding:10px; font-size:14px;" onclick="sendSuggestion()">Enviar</button>
             </div>
             <div class="card" style="text-align:center">
-                <h3 style="color: var(--blue); margin-top: 0;">Idealizador e Criador</h3>
-                <p style="font-weight: 900; font-size: 1.2rem; margin-bottom: 20px;">Northon Duarte</p>
-                <button class="btn-duo" onclick="resetVerses()">REINICIAR LISTA DE VERSÍCULOS</button>
+                <h3>Northon Duarte</h3>
+                <button class="btn-duo" onclick="resetVerses()">RESETAR LISTA</button>
             </div>
         </div>
 
         <div id="nav" class="nav-bar hidden">
             <div class="nav-item nav-active" id="nav-home" onclick="showTab('home')">ESTUDO</div>
+            <div class="nav-item" id="nav-notes" onclick="showTab('notes')">NOTAS</div>
             <div class="nav-item" id="nav-rank" onclick="showTab('rank')">RANKING</div>
             <div class="nav-item" id="nav-config" onclick="showTab('config')">⚙️</div>
         </div>
@@ -191,6 +181,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     let correctAnswer = "";
+    let currentVerseRef = "";
 
     const BIBLE_DATABASE = [ { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" } ];
 
@@ -210,8 +201,7 @@
                 const user = document.getElementById('signup-user').value;
                 const phone = document.getElementById('signup-phone').value;
                 const church = document.getElementById('signup-church').value || "Independente";
-                if (!user || !e || !p || !p2) return alert("Preencha todos os campos!");
-                if (p !== p2) return alert("As senhas não conferem!");
+                if (!user || !e || !p || p !== p2) return alert("Verifique os dados!");
                 const r = await createUserWithEmailAndPassword(auth, e, p);
                 await setDoc(doc(db, "users", r.user.uid), { xp: 0, name: user, phone: phone, church: church, streak: 1, lastLoginDate: new Date().toISOString().split('T')[0] });
             } else {
@@ -222,101 +212,44 @@
         } catch(err) { alert("Ops! Verifique seu login e senha."); }
     };
 
-    // NOVAS FUNÇÕES
+    // NOVA LÓGICA DE SALVAR TODAS AS ANOTAÇÕES
     window.saveNotes = async () => {
-        const notes = document.getElementById('study-notes').value;
-        if(!notes) return alert("Escreva algo para salvar.");
+        const text = document.getElementById('study-notes').value;
+        if(!text) return alert("Escreva algo!");
         try {
-            const userRef = doc(db, "users", auth.currentUser.uid);
-            await updateDoc(userRef, { lastNote: notes, noteDate: new Date().toISOString() });
-            alert("Anotação salva com sucesso!");
-        } catch (e) { alert("Erro ao salvar anotação."); }
-    };
-
-    window.sendSuggestion = async () => {
-        const text = document.getElementById('app-suggestion').value;
-        if(!text) return alert("Qual a sua sugestão?");
-        try {
-            await addDoc(collection(db, "suggestions"), { text, user: auth.currentUser.email, date: new Date().toISOString() });
-            alert("Valeu pela sugestão! Vamos analisar.");
-            document.getElementById('app-suggestion').value = "";
-        } catch (e) { alert("Erro ao enviar sugestão."); }
-    };
-
-    window.askProfessor = async () => {
-        const question = document.getElementById('study-doubt').value;
-        const resBox = document.getElementById('ai-doubt-response');
-        if(!question) return alert("Qual a sua dúvida?");
-        resBox.innerText = "Consultando os mestres...";
-        try {
-            const response = await fetch('/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ verse: window.currentVerse, question: question })
+            const uid = auth.currentUser.uid;
+            await addDoc(collection(db, "users", uid, "notes"), {
+                text: text,
+                verse: currentVerseRef,
+                date: new Date().toISOString()
             });
-            const data = await response.json();
-            resBox.innerText = data.choices[0].message.content;
-        } catch(e) { resBox.innerText = "Desculpe, o professor está ocupado agora."; }
+            alert("Anotação guardada no seu histórico!");
+            document.getElementById('study-notes').value = "";
+        } catch (e) { alert("Erro ao salvar."); }
     };
 
-    // RESTANTE DA LÓGICA (MANTIDA)
-    onAuthStateChanged(auth, u => {
-        document.getElementById('auth-screen').classList.toggle('hidden', !!u);
-        document.getElementById('main-screen').classList.toggle('hidden', !u);
-        document.getElementById('nav').classList.toggle('hidden', !u);
-        if(u) { loadUserData(u.uid); fetchVerse(); }
-    });
-
-    async function loadUserData(uid) {
-        const s = await getDoc(doc(db, "users", uid));
-        if(s.exists()) {
-            const d = s.data();
-            const xp = d.xp || 0;
-            document.getElementById('xp-val').innerText = xp;
-            document.getElementById('level-val').innerText = Math.floor(xp / 100);
-            document.getElementById('user-display').innerText = (d.name || "").toUpperCase();
-            document.getElementById('progress-fill').style.width = `${xp % 100}%`;
-            document.getElementById('streak-val').innerText = d.streak || 0;
-            if(d.lastNote) document.getElementById('study-notes').value = d.lastNote;
-        }
-    }
-
-    window.loadRanking = async (type = 'users') => {
-        const list = document.getElementById('ranking-list');
-        list.innerHTML = `<p style="text-align:center; padding:20px; color:#afafaf;">Buscando líderes...</p>`;
-        document.getElementById('rank-tab-users').classList.toggle('active', type === 'users');
-        document.getElementById('rank-tab-church').classList.toggle('active', type === 'churches');
-        try {
-            const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(100));
-            const snapshot = await getDocs(q);
-            list.innerHTML = "";
-            if (type === 'users') {
-                snapshot.forEach((docSnap, i) => {
-                    const d = docSnap.data();
-                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${d.xp} XP</span><b class="rank-name">${(d.name || "").toUpperCase()}</b><span class="rank-sub">${d.church || 'Independente'}</span></div></div>`;
-                });
-            } else {
-                const churchTotals = {};
-                snapshot.forEach(docSnap => {
-                    const d = docSnap.data();
-                    const c = d.church || "Independente";
-                    churchTotals[c] = (churchTotals[c] || 0) + (d.xp || 0);
-                });
-                const sorted = Object.entries(churchTotals).sort((a,b) => b[1] - a[1]);
-                sorted.forEach((item, i) => {
-                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${item[1]} XP</span><b class="rank-name">${item[0].toUpperCase()}</b></div></div>`;
-                });
-            }
-        } catch (e) { list.innerHTML = "Erro ao carregar."; }
+    window.loadUserNotes = async () => {
+        const list = document.getElementById('notes-list');
+        list.innerHTML = "<p style='text-align:center'>Carregando suas pérolas...</p>";
+        const uid = auth.currentUser.uid;
+        const q = query(collection(db, "users", uid, "notes"), orderBy("date", "desc"));
+        const snap = await getDocs(q);
+        list.innerHTML = snap.empty ? "<p style='text-align:center; padding:20px;'>Você ainda não salvou anotações.</p>" : "";
+        snap.forEach(doc => {
+            const n = doc.data();
+            const date = new Date(n.date).toLocaleDateString('pt-BR');
+            list.innerHTML += `<div class="saved-note-card"><span class="note-date">${date}</span><span class="note-verse">${n.verse}</span><div class="note-content">${n.text}</div></div>`;
+        });
     };
 
     window.showTab = (t) => {
-        ['home', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
-        ['home', 'rank', 'config'].forEach(nav => {
+        ['home', 'notes', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
+        ['home', 'notes', 'rank', 'config'].forEach(nav => {
             const el = document.getElementById(`nav-${nav}`);
             if(el) el.classList.toggle('nav-active', nav === t);
         });
         if(t === 'rank') loadRanking('users');
+        if(t === 'notes') loadUserNotes();
     };
 
     window.generateStudy = async () => {
@@ -332,6 +265,7 @@
             const quizPart = parts[1];
             const questionText = quizPart.split(/[A-D]\)/)[0].trim();
             correctAnswer = fullText.split(/CORRETA:|Correta:/i)[1].trim()[0].toUpperCase();
+
             document.getElementById('ai-response').innerText = explanation;
             document.getElementById('quiz-question').innerText = questionText;
             const opts = fullText.match(/[A-D]\) .+/g);
@@ -345,34 +279,66 @@
                 quizDiv.appendChild(button);
             });
             document.getElementById('study-area').classList.remove('hidden');
-            btn.innerText = "ESTUDO GERADO";
+            btn.innerText = "ESTUDO CONCLUÍDO";
         } catch (err) { alert("Erro na conexão."); btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; }
     };
 
-    async function checkAnswer(c, btn) {
-        document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
-        const userRef = doc(db, "users", auth.currentUser.uid);
-        if(c === correctAnswer) {
-            btn.style.background = "#d7ffb8";
-            await updateDoc(userRef, { xp: increment(25) });
-            alert("Correto! +25 XP.");
-        } else {
-            btn.style.background = "#ffd7d7";
-            await updateDoc(userRef, { xp: increment(5) });
-            alert(`A certa era ${correctAnswer}. +5 XP.`);
+    // RESTANTE DAS FUNÇÕES (RANKING, AUTH OBSERVER, ETC)
+    onAuthStateChanged(auth, u => {
+        document.getElementById('auth-screen').classList.toggle('hidden', !!u);
+        document.getElementById('main-screen').classList.toggle('hidden', !u);
+        document.getElementById('nav').classList.toggle('hidden', !u);
+        if(u) { loadUserData(u.uid); fetchVerse(); }
+    });
+
+    async function loadUserData(uid) {
+        const s = await getDoc(doc(db, "users", uid));
+        if(s.exists()) {
+            const d = s.data();
+            document.getElementById('xp-val').innerText = d.xp || 0;
+            document.getElementById('level-val').innerText = Math.floor((d.xp || 0) / 100);
+            document.getElementById('user-display').innerText = (d.name || "").toUpperCase();
+            document.getElementById('progress-fill').style.width = `${(d.xp || 0) % 100}%`;
+            document.getElementById('streak-val').innerText = d.streak || 0;
         }
-        setTimeout(() => location.reload(), 2000);
     }
 
     function fetchVerse() {
         const selected = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)];
         window.currentVerse = selected.text;
+        currentVerseRef = selected.ref.toUpperCase();
         document.getElementById('verse-text').innerText = `"${selected.text}"`;
-        document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
+        document.getElementById('verse-ref').innerText = currentVerseRef;
     }
 
+    window.loadRanking = async (type = 'users') => {
+        const list = document.getElementById('ranking-list');
+        list.innerHTML = `<p style="text-align:center; padding:20px; color:#afafaf;">Buscando líderes...</p>`;
+        document.getElementById('rank-tab-users').classList.toggle('active', type === 'users');
+        document.getElementById('rank-tab-church').classList.toggle('active', type === 'churches');
+        const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(50));
+        const snapshot = await getDocs(q);
+        list.innerHTML = "";
+        if (type === 'users') {
+            snapshot.forEach((docSnap, i) => {
+                const d = docSnap.data();
+                list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${d.xp} XP</span><b class="rank-name">${(d.name || "").toUpperCase()}</b><span class="rank-sub">${d.church || 'Independente'}</span></div></div>`;
+            });
+        } else {
+            const churchTotals = {};
+            snapshot.forEach(docSnap => {
+                const d = docSnap.data();
+                const c = d.church || "Independente";
+                churchTotals[c] = (churchTotals[c] || 0) + (d.xp || 0);
+            });
+            const sorted = Object.entries(churchTotals).sort((a,b) => b[1] - a[1]);
+            sorted.forEach((item, i) => {
+                list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${item[1]} XP</span><b class="rank-name">${item[0].toUpperCase()}</b></div></div>`;
+            });
+        }
+    };
+
     window.logout = () => signOut(auth).then(() => location.reload());
-    window.resetVerses = () => { localStorage.removeItem("seen_verses"); alert("Lista reiniciada!"); location.reload(); };
 </script>
 </body>
 </html>
