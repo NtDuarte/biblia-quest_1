@@ -36,7 +36,6 @@
 
         /* HEADER */
         .header-stats { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
-        .mini-logo-svg { width: 45px; height: 45px; margin-right: 12px; }
         #user-display { color: var(--primary); font-size: 1rem; text-transform: uppercase; font-weight: 900; }
         .header-progress-container { width: 100px; background: #eee; border-radius: 10px; height: 8px; overflow: hidden; margin-top: 4px; }
         .header-progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.6s; }
@@ -115,7 +114,6 @@
                 <div id="verse-ref" style="color: var(--gray); font-weight: 900; font-size: 0.8rem;"></div>
             </div>
             <button id="btn-study" class="btn-duo btn-primary" onclick="generateStudy()">GERAR ESTUDO PROFUNDO</button>
-            
             <div id="study-area" class="hidden">
                 <div class="card" id="ai-response"></div>
                 
@@ -154,10 +152,11 @@
         </div>
 
         <div id="tab-config" class="hidden">
-            <div class="card" style="border-color: var(--blue);">
-                <h4 style="color:var(--blue); margin:0 0 10px 0;">💡 SUGESTÃO</h4>
-                <textarea id="app-suggestion" placeholder="Como melhorar o app?"></textarea>
-                <button class="btn-duo btn-secondary" onclick="sendSuggestion()">Enviar</button>
+            <h2 style="text-align:center; color: var(--blue);">⚙️ AJUSTE</h2>
+            <div class="card" style="border-color: var(--gold);">
+                <h4 style="color:var(--gold); margin:0 0 10px 0;">💡 SUGESTÃO</h4>
+                <textarea id="app-suggestion" placeholder="Como podemos melhorar o app?"></textarea>
+                <button class="btn-duo" style="padding:12px; font-size:14px; background:var(--gold); border-bottom-color: #b38a42;" onclick="sendSuggestion()">Enviar Sugestão</button>
             </div>
             <div class="card" style="text-align:center">
                 <p><b>Northon Duarte</b></p>
@@ -184,6 +183,25 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     let correctAnswer = "";
+
+    // FUNÇÃO DE SUGESTÃO REVISADA
+    window.sendSuggestion = async () => {
+        const text = document.getElementById('app-suggestion').value;
+        if(!text) return alert("Escreva sua sugestão antes de enviar!");
+        
+        try {
+            await addDoc(collection(db, "suggestions"), {
+                text: text,
+                user: auth.currentUser.email,
+                date: new Date().toISOString()
+            });
+            alert("Valeu! Duarte vai ler sua sugestão no Firebase.");
+            document.getElementById('app-suggestion').value = "";
+        } catch (e) {
+            console.error(e);
+            alert("Erro ao enviar: " + e.message + " (Verifique as regras do Firebase)");
+        }
+    };
 
     window.switchAuth = (m) => {
         document.getElementById('form-login').classList.toggle('hidden', m !== 'login');
@@ -1336,34 +1354,14 @@
     window.loadUserNotes = async () => {
         const list = document.getElementById('notes-list');
         list.innerHTML = "<p style='text-align:center'>Carregando...</p>";
-        const q = query(collection(db, "users", auth.currentUser.uid, "notes"), orderBy("date", "desc"));
+        const uid = auth.currentUser.uid;
+        const q = query(collection(db, "users", uid, "notes"), orderBy("date", "desc"));
         const snap = await getDocs(q);
         list.innerHTML = snap.empty ? "<p style='text-align:center; color:var(--gray)'>Nenhuma nota.</p>" : "";
         snap.forEach(d => {
             const n = d.data();
             list.innerHTML += `<div class="note-card"><div class="note-meta"><span>${new Date(n.date).toLocaleDateString()}</span><span style="color:var(--blue)">${n.verse}</span></div><div>${n.text}</div></div>`;
         });
-    };
-
-    window.askProfessor = async () => {
-        const doubt = document.getElementById('study-doubt').value;
-        const verse = document.getElementById('verse-text').innerText;
-        const resBox = document.getElementById('ai-doubt-res');
-        if(!doubt) return alert("Qual sua dúvida?");
-        resBox.innerText = "Consultando professor...";
-        try {
-            const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: verse, question: doubt }) });
-            const data = await response.json();
-            resBox.innerText = data.choices[0].message.content;
-        } catch(e) { resBox.innerText = "Professor indisponível."; }
-    };
-
-    window.sendSuggestion = async () => {
-        const text = document.getElementById('app-suggestion').value;
-        if(!text) return alert("Qual sua sugestão?");
-        await addDoc(collection(db, "suggestions"), { text, user: auth.currentUser.email, date: new Date().toISOString() });
-        alert("Valeu! Duarte vai ler.");
-        document.getElementById('app-suggestion').value = "";
     };
 
     window.logout = () => signOut(auth).then(() => location.reload());
