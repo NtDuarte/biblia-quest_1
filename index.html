@@ -59,6 +59,7 @@
         .btn-primary { background: var(--primary); border-bottom-color: var(--secondary); }
         .btn-secondary { background: var(--blue); border-bottom-color: #5d4037; }
         .btn-gold { background: var(--gold); border-bottom-color: #8d6e1d; }
+        .btn-whatsapp { background-color: #25d366; border-bottom-color: #128c7e; }
         .btn-duo:active { transform: translateY(2px); border-bottom-width: 2px; }
 
         /* HEADER STATS */
@@ -166,6 +167,7 @@
                 <h3 style="color: var(--primary); margin:0; font-size: 0.9rem;">📖 JORNADA DO DIA</h3>
                 <p id="verse-text" style="font-weight: 700; font-size: 1.1rem; margin: 10px 0;">Buscando paz...</p>
                 <div id="verse-ref" style="color: var(--gray); font-weight: 900; font-size: 0.8rem;"></div>
+                <button class="btn-duo btn-whatsapp" style="padding: 12px; font-size: 14px; width: auto;" onclick="shareVerse()">Compartilhar Versículo 📲</button>
             </div>
             <button id="btn-study" class="btn-duo btn-primary" onclick="generateStudy()">INICIAR ESTUDO</button>
             <div id="study-area" class="hidden">
@@ -211,7 +213,7 @@
                 <button class="btn-duo btn-secondary" style="padding:12px; font-size:14px; margin-bottom: 10px;" onclick="resetPasswordFromSettings()">Redefinir Senha</button>
                 <div style="border-top: 1px solid #efebe9; margin: 15px 0; padding-top: 15px;">
                     <input type="email" id="new-email" placeholder="Novo e-mail" style="margin-bottom: 10px; padding: 12px;">
-                    <button class="btn-duo btn-primary" style="padding:12px; font-size:14px; background-color: var(--primary);" onclick="updateUserEmail()">Alterar E-mail</button>
+                    <button class="btn-duo btn-primary" style="padding:12px; font-size:14px;" onclick="updateUserEmail()">Alterar E-mail</button>
                 </div>
             </div>
 
@@ -237,7 +239,7 @@
 
         <div id="nav" class="nav-bar hidden">
             <div class="nav-item nav-active" id="nav-home" onclick="showTab('home')">JORNADA 📖</div>
-            <div class="nav-item" id="nav-notes" onclick="showTab('notes')">DIÁRIO 📜</div>
+            <div class="nav-item" id="nav-notes" onclick="showTab('notes')">DIÁRIO ✍️</div>
             <div class="nav-item" id="nav-rank" onclick="showTab('rank')">RANKING 🏆</div>
             <div class="nav-item" id="nav-config" onclick="showTab('config')">AJUSTE ⚙️</div>
         </div>
@@ -262,32 +264,30 @@
         setTimeout(() => { bird.classList.add('hidden'); bird.classList.remove('fly-animation'); }, 4600);
     }
 
-    // --- NOVAS FUNÇÕES DE AJUSTE ---
+    // FUNÇÃO DE COMPARTILHAMENTO
+    window.shareVerse = () => {
+        const text = document.getElementById('verse-text').innerText;
+        const ref = document.getElementById('verse-ref').innerText;
+        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!`;
+        const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    };
+
     window.resetPasswordFromSettings = async () => {
         const userEmail = auth.currentUser.email;
-        try {
-            await sendPasswordResetEmail(auth, userEmail);
-            alert("E-mail de redefinição enviado para: " + userEmail);
-        } catch (e) { alert("Erro ao enviar e-mail: " + e.message); }
+        try { await sendPasswordResetEmail(auth, userEmail); alert("E-mail de redefinição enviado para: " + userEmail); } 
+        catch (e) { alert("Erro: " + e.message); }
     };
 
     window.updateUserEmail = async () => {
         const newEmail = document.getElementById('new-email').value;
         if (!newEmail) return alert("Digite o novo e-mail!");
         try {
-            // Método moderno do Firebase que envia verificação antes de trocar
             await verifyBeforeUpdateEmail(auth.currentUser, newEmail);
-            alert("E-mail de verificação enviado! Verifique o novo endereço para concluir a alteração.");
+            alert("E-mail de verificação enviado! Verifique o novo endereço.");
             document.getElementById('new-email').value = "";
-        } catch (e) { 
-            if (e.code === 'auth/requires-recent-login') {
-                alert("Por segurança, saia e entre novamente no app antes de trocar o e-mail.");
-            } else {
-                alert("Erro: " + e.message);
-            }
-        }
+        } catch (e) { alert("Erro: " + e.message); }
     };
-    // --------------------------------
 
     window.togglePassword = (id) => {
         const input = document.getElementById(id);
@@ -383,7 +383,7 @@
         const text = document.getElementById('app-suggestion').value;
         if(!text) return alert("Escreva algo!");
         await addDoc(collection(db, "suggestions"), { text, user: auth.currentUser.email, date: new Date().toISOString() });
-        alert("Feedback enviado com sucesso!"); document.getElementById('app-suggestion').value = "";
+        alert("Valeu!"); document.getElementById('app-suggestion').value = "";
     };
 
     window.switchAuth = (m) => {
