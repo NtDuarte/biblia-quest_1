@@ -484,32 +484,34 @@
             body: JSON.stringify({ verse: vText }) 
         });
 
-        // Se a rota não existir ou der 500
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Erro na API");
-        }
+        if (!response.ok) throw new Error("Erro no servidor (API)");
 
         const data = await response.json();
         const fullText = data.choices[0].message.content;
         
-        // LOG DE DEBUG - Pressione F12 no navegador para ver isso
-        console.log("Texto recebido da IA:", fullText);
+        // Log para você depurar no F12
+        console.log("Resposta da IA:", fullText);
 
-        // Captura a parte que começa em EXPLICAÇÃO (limpa lixo inicial)
-        const cleanText = fullText.substring(fullText.search(/EXPLICAÇÃO:/i));
+        // Acha onde começa a EXPLICAÇÃO e ignora o que vier antes
+        const startIdx = fullText.search(/EXPLICAÇÃO:/i);
+        if (startIdx === -1) throw new Error("Formato de resposta inválido (Sem 'EXPLICAÇÃO')");
+        
+        const cleanText = fullText.substring(startIdx);
 
+        // Divide o texto entre Explicação e Pergunta
         const parts = cleanText.split(/PERGUNTA:|Pergunta:/i); 
-        const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
-        const quizPart = parts[1] || "";
+        if (parts.length < 2) throw new Error("Formato de resposta inválido (Sem 'PERGUNTA')");
 
+        const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
+        const quizPart = parts[1].trim();
+
+        // Pega a letra CORRETA
         const correctMatch = fullText.match(/CORRETA:\s*([A-D])/i);
         correctAnswer = correctMatch ? correctMatch[1].toUpperCase() : "";
 
-        if (!explanation || !quizPart || !correctAnswer) {
-            throw new Error("Formato de resposta inválido pela IA");
-        }
+        if (!correctAnswer) throw new Error("Formato de resposta inválido (Sem 'CORRETA')");
 
+        // Preenche a interface
         document.getElementById('ai-response').innerText = explanation; 
         document.getElementById('quiz-question').innerText = quizPart.split(/[A-D]\)/)[0].trim();
 
@@ -517,6 +519,8 @@
         const quizDiv = document.getElementById('quiz-options'); 
         quizDiv.innerHTML = "";
         
+        if (!opts) throw new Error("Não foi possível carregar as opções");
+
         opts.forEach(o => { 
             const b = document.createElement('button'); 
             b.className = "quiz-option"; 
@@ -529,10 +533,10 @@
         btn.innerText = "ESTUDO PRONTO";
 
     } catch (err) { 
-        console.error("ERRO NO FRONT-END:", err.message);
+        console.error("ERRO DETALHADO:", err);
         btn.disabled = false; 
         btn.innerText = "TENTAR NOVAMENTE";
-        alert(`Erro: ${err.message}. Verifique os Logs da Vercel e a GROQ_API_KEY.`);
+        alert(`Opa! A trilha deu uma escorregada: ${err.message}`);
     }
 };
     
