@@ -8,8 +8,13 @@ export default async function handler(req, res) {
     const { verse } = req.body;
     const apiKey = process.env.GROQ_API_KEY;
 
+    // Validação inicial para evitar chamadas desnecessárias
     if (!apiKey) {
-        return res.status(500).json({ error: "API Key ausente na Vercel." });
+        return res.status(500).json({ error: "Configuração incompleta: GROQ_API_KEY não encontrada na Vercel." });
+    }
+
+    if (!verse) {
+        return res.status(400).json({ error: "O versículo não foi enviado corretamente." });
     }
 
     try {
@@ -44,8 +49,20 @@ export default async function handler(req, res) {
         });
 
         const data = await response.json();
+
+        // TRATAMENTO DE ERRO: Se a Groq responder com erro (401, 429, 400, etc.)
+        if (!response.ok) {
+            console.error("Erro retornado pela Groq:", data);
+            return res.status(response.status).json({ 
+                error: data.error?.message || "A Groq recusou a requisição." 
+            });
+        }
+
+        // Sucesso total
         return res.status(200).json(data);
+
     } catch (error) {
-        return res.status(500).json({ error: "Erro na conexão com a Groq." });
+        console.error("Erro na conexão com o servidor:", error);
+        return res.status(500).json({ error: "Falha crítica na conexão com o servidor de IA." });
     }
 }
