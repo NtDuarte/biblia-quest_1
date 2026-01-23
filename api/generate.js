@@ -23,29 +23,23 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 model: "llama-3.3-70b-versatile",
-                messages: [
-                    { 
-                        role: "system", 
-                        content: `Você é um professor de teologia acadêmico. 
-                        Sua tarefa é analisar versículos e criar um quiz desafiador. 
-                        REGRAS RÍGIDAS:
-                        1. EXPLICAÇÃO: Texto profundo com 3 parágrafos.
-                        2. PERGUNTA: Deve testar a interpretação do texto.
-                        3. OPÇÕES (A, B, C, D): 
-                           - Devem ser COMPLETAMENTE DIFERENTES entre si.
-                           - Proibido repetir conceitos ou palavras-chave entre as opções.
-                           - As opções incorretas (distratores) devem ser plausíveis e baseadas no contexto bíblico, mas erradas conforme a sua explicação.
-                        4. FORMATO: Responda apenas seguindo este padrão:
-                        EXPLICAÇÃO: [texto]
-                        PERGUNTA: [texto]
-                        A) [opção]
-                        B) [opção]
-                        C) [opção]
-                        D) [opção]
-                        CORRETA: [Letra]` 
-                    },
-                    { role: "user", content: `Analise o versículo: "${verse}".` } "Responda diretamente no formato solicitado, sem introduções ou cumprimentos."
-                ],
+messages: [
+    { 
+        role: "system", 
+        content: `Você é um professor de teologia acadêmico. 
+        Analise o versículo e crie um quiz.
+        IMPORTANTE: Responda DIRETAMENTE no formato abaixo, sem introduções.
+        
+        EXPLICAÇÃO: [texto]
+        PERGUNTA: [texto]
+        A) [opção]
+        B) [opção]
+        C) [opção]
+        D) [opção]
+        CORRETA: [Letra]` 
+    },
+    { role: "user", content: `Analise o versículo: "${verse}".` }
+],
                 temperature: 0.6 // Aumentado levemente para maior criatividade nos distratores
             })
         });
@@ -56,4 +50,5 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Erro interno ao processar estudo." });
     }
 }
+
 
