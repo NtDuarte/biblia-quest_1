@@ -359,11 +359,12 @@
         const today = new Date().toISOString().split('T')[0];
         
         // Atualiza XP, DailyXP e carimba a data de hoje para o ranking resetar visualmente
-        await updateDoc(userRef, { 
-            xp: increment(points), 
-            dailyXP: increment(points),
-            lastXPUpdateDate: today 
-        });
+        const today = new Date().toISOString().split('T')[0];
+await updateDoc(userRef, { 
+    xp: increment(points), 
+    dailyXP: increment(points),
+    lastXPUpdateDate: today // Isso garante que o ranking te ache hoje
+});
 
         if(c === correctAnswer) { 
             btn.style.background = "#d7ffb8"; 
