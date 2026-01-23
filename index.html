@@ -34,7 +34,7 @@
             100% { left: 110%; top: 25%; transform: rotate(10deg); }
         }
 
-        /* LOGO BÚSSOLA */
+        /* LOGO BÚSSOLA REFINADA */
         .logo-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
         .logo-svg { width: 110px; height: 110px; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
         .logo-text { font-size: 2.2rem; font-weight: 900; color: var(--text); margin: 0; letter-spacing: -1px; }
@@ -45,7 +45,7 @@
         .auth-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 900; color: var(--gray); transition: 0.3s; font-size: 0.9rem; }
         .auth-tab.active { color: var(--primary); border-bottom: 4px solid var(--primary); }
 
-        /* INPUTS E OLHINHO */
+        /* INPUTS E GRUPOS */
         .input-group { position: relative; width: 100%; margin-bottom: 12px; }
         input, textarea { width: 100%; padding: 16px; border: 2px solid #d7ccc8; border-radius: 18px; box-sizing: border-box; font-family: 'Nunito'; font-weight: 700; font-size: 1rem; outline: none; transition: 0.2s; background: #fafafa; color: var(--text); }
         input:focus, textarea:focus { border-color: var(--primary); background: white; }
@@ -73,9 +73,6 @@
         #ai-response { background: #fffcf5; font-size: 1.1rem; line-height: 1.6; white-space: pre-wrap; border: 1px solid var(--primary); color: var(--text); }
         .quiz-option { width: 100%; text-align: left; padding: 18px; margin: 8px 0; border: 1px solid #efebe9; border-radius: 16px; background: white; cursor: pointer; font-weight: 700; font-size: 1rem; font-family: 'Nunito'; color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
 
-        .note-card { border: 1px solid #efebe9; border-left: 6px solid var(--gold); border-radius: 16px; padding: 18px; margin-bottom: 15px; background: #fffdf9; }
-        .note-meta { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 900; color: var(--gray); margin-bottom: 5px; }
-
         /* RANKING */
         .rank-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #fcfaf9; }
         .rank-pos { font-weight: 900; width: 45px; color: var(--primary); font-size: 1.2rem; }
@@ -86,8 +83,6 @@
 
         /* NAVBAR */
         .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 1px solid #efebe9; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; z-index: 1000; box-shadow: 0 -2px 8px rgba(0,0,0,0.05); }
-        .nav-item { cursor: pointer; font-weight: 900; color: var(--gray); font-size: 0.75rem; text-align: center; }
-        .nav-active { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -98,13 +93,12 @@
     <div id="auth-screen">
         <div class="logo-container">
             <svg class="logo-svg" viewBox="0 0 500 500">
-                <circle cx="250" cy="250" r="220" fill="white" stroke="#c49a4f" stroke-width="15"/>
-                <path d="M250,40 L250,80 M250,420 L250,460 M40,250 L80,250 M420,250 L460,250" stroke="#c49a4f" stroke-width="10" stroke-linecap="round"/>
-                <g transform="rotate(-45 250 250)">
-                    <path d="M250,100 L290,250 L210,250 Z" fill="#e67e22"/>
-                    <path d="M250,400 L290,250 L210,250 Z" fill="#b38a42"/>
-                </g>
-                <circle cx="250" cy="250" r="25" fill="#4e342e" stroke="white" stroke-width="5"/>
+                <circle cx="250" cy="250" r="220" fill="white" stroke="#c49a4f" stroke-width="12"/>
+                <circle cx="250" cy="250" r="195" fill="none" stroke="#efebe9" stroke-width="2"/>
+                <path d="M250,30 L250,70 M250,430 L250,470 M30,250 L70,250 M430,250 L470,250" stroke="#c49a4f" stroke-width="8" stroke-linecap="round"/>
+                <path d="M250,250 L250,110 L280,250 L250,390 L220,250 Z" fill="#e67e22" stroke="#4e342e" stroke-width="2"/>
+                <path d="M250,250 L390,250 L250,280 L110,250 L250,220 Z" fill="#b38a42" stroke="#4e342e" stroke-width="2"/>
+                <circle cx="250" cy="250" r="20" fill="#4e342e" stroke="white" stroke-width="4"/>
             </svg>
             <h1 class="logo-text">TRILHA <span>VIVA</span></h1>
         </div>
@@ -144,8 +138,8 @@
                 <svg viewBox="0 0 500 500" style="width:40px; margin-right:10px;">
                     <circle cx="250" cy="250" r="220" fill="white" stroke="#c49a4f" stroke-width="25"/>
                     <g transform="rotate(-45 250 250)">
-                        <path d="M250,100 L290,250 L210,250 Z" fill="#e67e22"/>
-                        <path d="M250,400 L290,250 L210,250 Z" fill="#b38a42"/>
+                        <path d="M250,100 L285,250 L215,250 Z" fill="#e67e22"/>
+                        <path d="M250,400 L285,250 L215,250 Z" fill="#b38a42"/>
                     </g>
                     <circle cx="250" cy="250" r="30" fill="#4e342e"/>
                 </svg>
@@ -167,7 +161,7 @@
                 <h3 style="color: var(--primary); margin:0; font-size: 0.9rem;">📖 JORNADA DO DIA</h3>
                 <p id="verse-text" style="font-weight: 700; font-size: 1.1rem; margin: 10px 0;">Buscando paz...</p>
                 <div id="verse-ref" style="color: var(--gray); font-weight: 900; font-size: 0.8rem;"></div>
-                <button class="btn-duo btn-whatsapp" style="padding: 12px; font-size: 14px; width: auto;" onclick="shareVerse()">Compartilhar Versículo 📲</button>
+                <button class="btn-duo btn-whatsapp" style="padding: 12px; font-size: 14px; width: auto; margin-top: 10px;" onclick="shareVerse()">Compartilhar Versículo 📲</button>
             </div>
             <button id="btn-study" class="btn-duo btn-primary" onclick="generateStudy()">INICIAR ESTUDO</button>
             <div id="study-area" class="hidden">
@@ -209,11 +203,11 @@
             
             <div class="card" style="border-color: var(--blue);">
                 <h4 style="color:var(--blue); margin:0 0 10px 0;">👤 MINHA CONTA</h4>
-                <p style="font-size: 0.85rem; margin-bottom: 10px;">Mantenha seus dados de acesso atualizados.</p>
-                <button class="btn-duo btn-secondary" style="padding:12px; font-size:14px; margin-bottom: 10px;" onclick="resetPasswordFromSettings()">Redefinir Senha</button>
-                <div style="border-top: 1px solid #efebe9; margin: 15px 0; padding-top: 15px;">
-                    <input type="email" id="new-email" placeholder="Novo e-mail" style="margin-bottom: 10px; padding: 12px;">
-                    <button class="btn-duo btn-primary" style="padding:12px; font-size:14px;" onclick="updateUserEmail()">Alterar E-mail</button>
+                <p style="font-size: 0.85rem; margin-bottom: 10px;">Gerencie seu acesso com segurança.</p>
+                <button class="btn-duo btn-secondary" style="padding:10px; font-size:12px; margin-bottom: 15px;" onclick="resetPasswordFromSettings()">Redefinir Senha via E-mail</button>
+                <div style="border-top: 1px solid #efebe9; padding-top: 15px;">
+                    <input type="email" id="new-email" placeholder="Novo endereço de e-mail" style="margin-bottom: 8px; padding: 12px;">
+                    <button class="btn-duo btn-primary" style="padding:10px; font-size:12px; background-color: var(--primary);" onclick="updateUserEmail()">Alterar E-mail</button>
                 </div>
             </div>
 
@@ -239,7 +233,7 @@
 
         <div id="nav" class="nav-bar hidden">
             <div class="nav-item nav-active" id="nav-home" onclick="showTab('home')">JORNADA 📖</div>
-            <div class="nav-item" id="nav-notes" onclick="showTab('notes')">DIÁRIO ✍️</div>
+            <div class="nav-item" id="nav-notes" onclick="showTab('notes')">DIÁRIO 📜</div>
             <div class="nav-item" id="nav-rank" onclick="showTab('rank')">RANKING 🏆</div>
             <div class="nav-item" id="nav-config" onclick="showTab('config')">AJUSTE ⚙️</div>
         </div>
@@ -259,34 +253,37 @@
 
     function triggerNatureEffect() {
         const bird = document.getElementById('nature-effect');
-        bird.classList.remove('hidden');
-        bird.classList.add('fly-animation');
+        bird.classList.remove('hidden'); bird.classList.add('fly-animation');
         setTimeout(() => { bird.classList.add('hidden'); bird.classList.remove('fly-animation'); }, 4600);
     }
 
-    // FUNÇÃO DE COMPARTILHAMENTO
+    // COMPARTILHAR COM LINK
     window.shareVerse = () => {
         const text = document.getElementById('verse-text').innerText;
         const ref = document.getElementById('verse-ref').innerText;
-        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!`;
+        const appLink = window.location.href; 
+        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!\n👉 ${appLink}`;
         const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
     };
 
+    // FUNÇÕES DE AJUSTE DE CONTA
     window.resetPasswordFromSettings = async () => {
         const userEmail = auth.currentUser.email;
-        try { await sendPasswordResetEmail(auth, userEmail); alert("E-mail de redefinição enviado para: " + userEmail); } 
-        catch (e) { alert("Erro: " + e.message); }
+        try {
+            await sendPasswordResetEmail(auth, userEmail);
+            alert("E-mail de redefinição enviado com sucesso para: " + userEmail);
+        } catch (e) { alert("Erro ao enviar e-mail: " + e.message); }
     };
 
     window.updateUserEmail = async () => {
         const newEmail = document.getElementById('new-email').value;
-        if (!newEmail) return alert("Digite o novo e-mail!");
+        if (!newEmail) return alert("Digite o novo endereço de e-mail!");
         try {
             await verifyBeforeUpdateEmail(auth.currentUser, newEmail);
-            alert("E-mail de verificação enviado! Verifique o novo endereço.");
+            alert("E-mail de verificação enviado! Verifique o novo endereço para concluir a alteração.");
             document.getElementById('new-email').value = "";
-        } catch (e) { alert("Erro: " + e.message); }
+        } catch (e) { alert("Erro ao atualizar: " + e.message); }
     };
 
     window.togglePassword = (id) => {
@@ -309,7 +306,6 @@
             const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
             const yesterdayStr = yesterday.toISOString().split('T')[0];
             let updates = {};
-
             if (d.lastXPUpdateDate !== today) { updates.dailyXP = 0; updates.lastXPUpdateDate = today; }
             if (d.lastLoginDate !== today) {
                 let newStreak = d.streak || 1;
@@ -317,7 +313,6 @@
                 updates.streak = newStreak; updates.lastLoginDate = today;
             }
             if (Object.keys(updates).length > 0) { await updateDoc(userRef, updates); location.reload(); return; }
-
             document.getElementById('xp-val').innerText = d.xp || 0;
             document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
             document.getElementById('streak-val').innerText = d.streak || 1;
@@ -378,21 +373,18 @@
             } else { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-pass').value); }
         } catch(e) { alert("Erro no login."); }
     };
-
     window.sendSuggestion = async () => {
         const text = document.getElementById('app-suggestion').value;
         if(!text) return alert("Escreva algo!");
         await addDoc(collection(db, "suggestions"), { text, user: auth.currentUser.email, date: new Date().toISOString() });
         alert("Valeu!"); document.getElementById('app-suggestion').value = "";
     };
-
     window.switchAuth = (m) => {
         document.getElementById('form-login').classList.toggle('hidden', m !== 'login');
         document.getElementById('form-signup').classList.toggle('hidden', m !== 'signup');
         document.getElementById('tab-login-btn').classList.toggle('active', m === 'login');
         document.getElementById('tab-signup-btn').classList.toggle('active', m === 'signup');
     };
-
     window.showTab = (t) => {
         ['home', 'notes', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
         ['home', 'notes', 'rank', 'config'].forEach(nav => {
@@ -400,21 +392,18 @@
         });
         if(t === 'rank') loadRanking('users'); if(t === 'notes') loadUserNotes();
     };
-
     onAuthStateChanged(auth, u => {
         document.getElementById('auth-screen').classList.toggle('hidden', !!u);
         document.getElementById('main-screen').classList.toggle('hidden', !u);
         document.getElementById('nav').classList.toggle('hidden', !u);
         if(u) { loadUserData(u.uid); fetchVerse(); }
     });
-
     const BIBLE_DATABASE = [ { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" } ];
     function fetchVerse() {
         const selected = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)];
         document.getElementById('verse-text').innerText = `"${selected.text}"`;
         document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
     }
-
     window.generateStudy = async () => {
         const btn = document.getElementById('btn-study'); const vText = document.getElementById('verse-text').innerText;
         btn.innerText = "ANALISANDO..."; btn.disabled = true;
@@ -429,27 +418,23 @@
             document.getElementById('study-area').classList.remove('hidden'); btn.innerText = "ESTUDO PRONTO";
         } catch (err) { btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; }
     };
-
     window.saveNotes = async () => {
         const text = document.getElementById('study-notes').value; const vRef = document.getElementById('verse-ref').innerText;
         if(!text) return alert("Escreva algo!");
         await addDoc(collection(db, "users", auth.currentUser.uid, "notes"), { text, verse: vRef, date: new Date().toISOString() });
         alert("Nota salva!"); document.getElementById('study-notes').value = "";
     };
-
     window.loadUserNotes = async () => {
         const list = document.getElementById('notes-list'); list.innerHTML = "<p>Carregando...</p>";
         const q = query(collection(db, "users", auth.currentUser.uid, "notes"), orderBy("date", "desc"));
         const snap = await getDocs(q); list.innerHTML = snap.empty ? "<p>Vazio.</p>" : "";
         snap.forEach(d => { const n = d.data(); list.innerHTML += `<div class="note-card"><div class="note-meta"><span>${new Date(n.date).toLocaleDateString()}</span><span style="color:var(--primary)">${n.verse}</span></div><div>${n.text}</div></div>`; });
     };
-
     window.askProfessor = async () => {
         const doubt = document.getElementById('study-doubt').value; const verse = document.getElementById('verse-text').innerText;
         const resBox = document.getElementById('ai-doubt-res'); if(!doubt) return alert("Dúvida?"); resBox.innerText = "Pensando...";
         try { const r = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse, question: doubt }) }); const d = await r.json(); resBox.innerText = d.choices[0].message.content; } catch(e) { resBox.innerText = "Erro."; }
     };
-
     window.logout = () => signOut(auth).then(() => location.reload());
     window.resetVerses = () => { localStorage.removeItem("seen_verses"); location.reload(); };
 </script>
