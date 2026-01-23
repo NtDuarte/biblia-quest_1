@@ -471,42 +471,67 @@
     }
 
     window.generateStudy = async () => {
-        const btn = document.getElementById('btn-study'); const vText = document.getElementById('verse-text').innerText;
-        btn.innerText = "ANALISANDO..."; btn.disabled = true;
-        try {
-            const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: vText }) });
-            const data = await response.json(); 
-            const fullText = data.choices[0].message.content;
-            
-            // FIX: Parsing robusto para capturar os dados mesmo que a IA mude levemente o formato
-            const parts = fullText.split(/PERGUNTA:|Pergunta:/i); 
-            const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
-            const quizPart = parts[1] || "";
-            
-            const correctMatch = fullText.match(/CORRETA:\s*([A-D])/i);
-            correctAnswer = correctMatch ? correctMatch[1].toUpperCase() : "";
+    const btn = document.getElementById('btn-study'); 
+    const vText = document.getElementById('verse-text').innerText;
+    
+    btn.innerText = "ANALISANDO..."; 
+    btn.disabled = true;
 
-            document.getElementById('ai-response').innerText = explanation; 
+    try {
+        const response = await fetch('/api/generate', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ verse: vText }) 
+        });
+
+        if (!response.ok) throw new Error("Erro na requisição da API");
+
+        const data = await response.json(); 
+        
+        // Verifica se a resposta da Groq/IA existe
+        if (!data.choices || !data.choices[0]) throw new Error("Resposta da IA vazia");
+        
+        const fullText = data.choices[0].message.content;
+        
+        // DIVISÃO DO TEXTO (Parsing Robusto)
+        const parts = fullText.split(/PERGUNTA:|Pergunta:/i); 
+        const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
+        const quizPart = parts[1] || ""; // Evita erro se parts[1] for undefined
+
+        // CAPTURA DA RESPOSTA CORRETA
+        const correctMatch = fullText.match(/CORRETA:\s*([A-D])/i);
+        correctAnswer = correctMatch ? correctMatch[1].toUpperCase() : "";
+
+        // PREENCHIMENTO DA TELA
+        document.getElementById('ai-response').innerText = explanation || "Não foi possível gerar a explicação."; 
+        
+        if (quizPart) {
             document.getElementById('quiz-question').innerText = quizPart.split(/[A-D]\)/)[0].trim();
-
             const opts = quizPart.match(/[A-D]\) .+/g); 
-            const quizDiv = document.getElementById('quiz-options'); quizDiv.innerHTML = "";
+            const quizDiv = document.getElementById('quiz-options'); 
+            quizDiv.innerHTML = "";
             
             if (opts) {
                 opts.forEach(o => { 
                     const b = document.createElement('button'); 
-                    b.className = "quiz-option"; b.innerText = o; 
+                    b.className = "quiz-option"; 
+                    b.innerText = o; 
                     b.onclick = () => checkAnswer(o[0].toUpperCase(), b); 
                     quizDiv.appendChild(b); 
                 });
             }
-            document.getElementById('study-area').classList.remove('hidden'); btn.innerText = "ESTUDO PRONTO";
-        } catch (err) { 
-            console.error("Erro no estudo:", err);
-            btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; 
         }
-    };
 
+        document.getElementById('study-area').classList.remove('hidden'); 
+        btn.innerText = "ESTUDO PRONTO";
+    } catch (err) { 
+        console.error("Erro detalhado:", err);
+        btn.disabled = false; 
+        btn.innerText = "TENTAR NOVAMENTE";
+        alert("Opa! A trilha deu uma escorregada. Verifique se sua chave da Groq está configurada na Vercel.");
+    }
+};
+    
     window.saveNotes = async () => {
         const text = document.getElementById('study-notes').value; const vRef = document.getElementById('verse-ref').innerText;
         if(!text) return alert("Escreva algo!");
