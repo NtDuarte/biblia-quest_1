@@ -20,7 +20,7 @@
         }
 
         body { font-family: 'Nunito', sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; color: var(--text); overflow-x: hidden; }
-        #app { width: 100%; max-width: 480px; background: var(--card-bg); min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 100px; position: relative; box-shadow: 0 4px 20px rgba(78, 52, 46, 0.1); }
+        #app { width: 100%; max-width: 480px; background: var(--card-bg); min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 110px; position: relative; box-shadow: 0 4px 20px rgba(78, 52, 46, 0.1); }
         .hidden { display: none !important; }
         
         /* ANIMAÇÃO DO PASSARINHO */
@@ -75,7 +75,7 @@
 
         .note-card { border: 1px solid #efebe9; border-left: 6px solid var(--gold); border-radius: 16px; padding: 18px; margin-bottom: 15px; background: #fffdf9; }
         .note-meta { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 900; color: var(--gray); margin-bottom: 5px; }
-        
+
         /* CARD BIBLIOTECA */
         .library-card { border: 1px solid #efebe9; border-left: 8px solid var(--primary); border-radius: 16px; padding: 18px; margin-bottom: 15px; background: #f7fcf9; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
 
@@ -217,10 +217,11 @@
             
             <div class="card" style="border-color: var(--blue);">
                 <h4 style="color:var(--blue); margin:0 0 10px 0;">👤 MINHA CONTA</h4>
-                <button class="btn-duo btn-secondary" style="padding:10px; font-size:12px; margin-bottom: 15px;" onclick="resetPasswordFromSettings()">Redefinir Senha</button>
+                <p style="font-size: 0.85rem; margin-bottom: 10px;">Gerencie seu acesso com segurança.</p>
+                <button class="btn-duo btn-secondary" style="padding:10px; font-size:12px; margin-bottom: 15px;" onclick="resetPasswordFromSettings()">Redefinir Senha via E-mail</button>
                 <div style="border-top: 1px solid #efebe9; padding-top: 15px;">
-                    <input type="email" id="new-email" placeholder="Novo e-mail" style="margin-bottom: 8px; padding: 12px;">
-                    <button class="btn-duo btn-primary" style="padding:10px; font-size:12px;" onclick="updateUserEmail()">Alterar E-mail</button>
+                    <input type="email" id="new-email" placeholder="Novo endereço de e-mail" style="margin-bottom: 8px; padding: 12px;">
+                    <button class="btn-duo btn-primary" style="padding:10px; font-size:12px; background-color: var(--primary);" onclick="updateUserEmail()">Alterar E-mail</button>
                 </div>
             </div>
 
@@ -237,16 +238,16 @@
                 <div style="border-top: 1px solid #ffe4b5; margin: 15px 0; padding-top: 15px;">
                     <p style="font-size: 0.9rem; font-weight: 900; color: var(--primary); margin-bottom: 5px;">OBJETIVO</p>
                     <p style="font-style: italic; font-size: 0.95rem; line-height: 1.4; color: var(--text);">
-                        "Uma bússola espiritual para iluminar seu caminho diário, transformando cada versículo em um passo de fé e sabedoria."
+                        "Uma bússola espiritual projetada para guiar corações em uma jornada diária de fé, transformando cada versículo em um passo firme rumo à sabedoria e renovação."
                     </p>
                 </div>
-                <button class="btn-duo btn-primary" onclick="resetVerses()" style="font-size:12px; padding:10px; width: auto; margin-top: 10px;">Resetar Versículos</button>
+                <button class="btn-duo btn-primary" onclick="resetVerses()" style="font-size:12px; padding:10px; width: auto; margin-top: 10px;">Resetar Lista</button>
             </div>
         </div>
 
         <div id="nav" class="nav-bar hidden">
             <div class="nav-item nav-active" id="nav-home" onclick="showTab('home')">JORNADA 📖</div>
-            <div class="nav-item" id="nav-notes" onclick="showTab('notes')">DIÁRIO 📜</div>
+            <div class="nav-item" id="nav-notes" onclick="showTab('notes')">DIÁRIO ✍️</div>
             <div class="nav-item" id="nav-library" onclick="showTab('library')">ESTUDOS 📚</div>
             <div class="nav-item" id="nav-rank" onclick="showTab('rank')">RANKING 🏆</div>
             <div class="nav-item" id="nav-config" onclick="showTab('config')">AJUSTE ⚙️</div>
@@ -267,7 +268,8 @@
 
     function triggerNatureEffect() {
         const bird = document.getElementById('nature-effect');
-        bird.classList.remove('hidden'); bird.classList.add('fly-animation');
+        bird.classList.remove('hidden');
+        bird.classList.add('fly-animation');
         setTimeout(() => { bird.classList.add('hidden'); bird.classList.remove('fly-animation'); }, 4600);
     }
 
@@ -282,10 +284,10 @@
 
     // BIBLIOTECA
     async function saveCompletedStudy(explanation) {
-        const vRef = document.getElementById('verse-ref').innerText;
-        const vText = document.getElementById('verse-text').innerText;
         await addDoc(collection(db, "users", auth.currentUser.uid, "completed_studies"), {
-            verse: vText, ref: vRef, explanation, date: new Date().toISOString()
+            verse: document.getElementById('verse-text').innerText,
+            ref: document.getElementById('verse-ref').innerText,
+            explanation, date: new Date().toISOString()
         });
     }
 
@@ -294,7 +296,7 @@
         list.innerHTML = "<p>Abrindo baú de estudos...</p>";
         const q = query(collection(db, "users", auth.currentUser.uid, "completed_studies"), orderBy("date", "desc"));
         const snap = await getDocs(q);
-        list.innerHTML = snap.empty ? "<p>Você ainda não concluiu nenhum estudo hoje.</p>" : "";
+        list.innerHTML = snap.empty ? "<p>Nenhum estudo concluído ainda.</p>" : "";
         snap.forEach(d => {
             const s = d.data();
             list.innerHTML += `<div class="library-card"><small>${new Date(s.date).toLocaleDateString()}</small><br><b>${s.ref}</b><p style="font-size:0.85rem">${s.explanation}</p></div>`;
@@ -302,13 +304,17 @@
     };
 
     window.resetPasswordFromSettings = async () => {
-        try { await sendPasswordResetEmail(auth, auth.currentUser.email); alert("E-mail enviado!"); } catch(e) { alert("Erro."); }
+        try { await sendPasswordResetEmail(auth, auth.currentUser.email); alert("E-mail enviado!"); } 
+        catch (e) { alert("Erro: " + e.message); }
     };
 
     window.updateUserEmail = async () => {
         const newEmail = document.getElementById('new-email').value;
-        if (!newEmail) return alert("Digite o e-mail!");
-        try { await verifyBeforeUpdateEmail(auth.currentUser, newEmail); alert("E-mail de verificação enviado!"); } catch(e) { alert("Erro."); }
+        if (!newEmail) return alert("Digite o novo endereço de e-mail!");
+        try {
+            await verifyBeforeUpdateEmail(auth.currentUser, newEmail);
+            alert("E-mail de verificação enviado!");
+        } catch (e) { alert("Erro ao atualizar: " + e.message); }
     };
 
     window.togglePassword = (id) => {
@@ -328,13 +334,14 @@
         if(s.exists()) {
             const d = s.data();
             const today = new Date().toISOString().split('T')[0];
-            const yesterdayStr = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0];
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
             let updates = {};
 
             if (d.lastXPUpdateDate !== today) { updates.dailyXP = 0; updates.lastXPUpdateDate = today; }
             if (d.lastLoginDate !== today) {
-                let newStreak = (d.lastLoginDate === yesterdayStr) ? (d.streak || 1) + 1 : 1;
-                if(newStreak > (d.streak || 0)) triggerNatureEffect();
+                let newStreak = d.streak || 1;
+                if (d.lastLoginDate === yesterdayStr) { newStreak++; triggerNatureEffect(); } else { newStreak = 1; }
                 updates.streak = newStreak; updates.lastLoginDate = today;
             }
             if (Object.keys(updates).length > 0) { await updateDoc(userRef, updates); location.reload(); return; }
@@ -353,9 +360,11 @@
         await updateDoc(userRef, { xp: increment(points), dailyXP: increment(points) });
         if(c === correctAnswer) { 
             btn.style.background = "#d7ffb8"; 
+            btn.style.borderColor = "#58cc02";
             await saveCompletedStudy(document.getElementById('ai-response').innerText);
-            alert(`+${points} XP! Estudo salvo 📚`); 
-        } else { btn.style.background = "#ffd7d7"; alert(`Era ${correctAnswer}. +${points} XP.`); }
+            alert(`+${points} XP! Estudo salvo na biblioteca 📚`); 
+        } 
+        else { btn.style.background = "#ffd7d7"; btn.style.borderColor = "#ff4b4b"; alert(`Era ${correctAnswer}. +${points} XP.`); }
         setTimeout(() => location.reload(), 1500);
     }
 
@@ -399,15 +408,78 @@
             } else { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-pass').value); }
         } catch(e) { alert("Erro no login."); }
     };
-    window.sendSuggestion = async () => { await addDoc(collection(db, "suggestions"), { text: document.getElementById('app-suggestion').value, user: auth.currentUser.email, date: new Date().toISOString() }); alert("Valeu!"); };
-    window.switchAuth = (m) => { document.getElementById('form-login').classList.toggle('hidden', m !== 'login'); document.getElementById('form-signup').classList.toggle('hidden', m !== 'signup'); document.getElementById('tab-login-btn').classList.toggle('active', m === 'login'); document.getElementById('tab-signup-btn').classList.toggle('active', m === 'signup'); };
-    window.showTab = (t) => { ['home', 'notes', 'library', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t)); ['home', 'notes', 'library', 'rank', 'config'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) el.classList.toggle('nav-active', nav === t); }); if(t === 'rank') loadRanking('users'); if(t === 'notes') loadUserNotes(); if(t === 'library') loadLibrary(); };
-    onAuthStateChanged(auth, u => { document.getElementById('auth-screen').classList.toggle('hidden', !!u); document.getElementById('main-screen').classList.toggle('hidden', !u); document.getElementById('nav').classList.toggle('hidden', !u); if(u) { loadUserData(u.uid); fetchVerse(); } });
+
+    window.sendSuggestion = async () => {
+        const text = document.getElementById('app-suggestion').value;
+        if(!text) return alert("Escreva algo!");
+        await addDoc(collection(db, "suggestions"), { text: text, user: auth.currentUser.email, date: new Date().toISOString() });
+        alert("Valeu!"); document.getElementById('app-suggestion').value = "";
+    };
+
+    window.switchAuth = (m) => {
+        document.getElementById('form-login').classList.toggle('hidden', m !== 'login');
+        document.getElementById('form-signup').classList.toggle('hidden', m !== 'signup');
+        document.getElementById('tab-login-btn').classList.toggle('active', m === 'login');
+        document.getElementById('tab-signup-btn').classList.toggle('active', m === 'signup');
+    };
+
+    window.showTab = (t) => {
+        ['home', 'notes', 'library', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
+        ['home', 'notes', 'library', 'rank', 'config'].forEach(nav => {
+            const el = document.getElementById(`nav-${nav}`); if(el) el.classList.toggle('nav-active', nav === t);
+        });
+        if(t === 'rank') loadRanking('users'); if(t === 'notes') loadUserNotes(); if(t === 'library') loadLibrary();
+    };
+
+    onAuthStateChanged(auth, u => {
+        document.getElementById('auth-screen').classList.toggle('hidden', !!u);
+        document.getElementById('main-screen').classList.toggle('hidden', !u);
+        document.getElementById('nav').classList.toggle('hidden', !u);
+        if(u) { loadUserData(u.uid); fetchVerse(); }
+    });
+
     const BIBLE_DATABASE = [ { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" } ];
-    function fetchVerse() { const s = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)]; document.getElementById('verse-text').innerText = `"${s.text}"`; document.getElementById('verse-ref').innerText = s.ref.toUpperCase(); }
-    window.generateStudy = async () => { const btn = document.getElementById('btn-study'); const vText = document.getElementById('verse-text').innerText; btn.innerText = "ANALISANDO..."; btn.disabled = true; try { const r = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: vText }) }); const data = await r.json(); const fullText = data.choices[0].message.content; const parts = fullText.split(/PERGUNTA:|Pergunta:/i); const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim(); correctAnswer = fullText.split(/CORRETA:|Correta:/i)[1].trim()[0].toUpperCase(); document.getElementById('ai-response').innerText = explanation; document.getElementById('quiz-question').innerText = parts[1].split(/[A-D]\)/)[0].trim(); const opts = fullText.match(/[A-D]\) .+/g); const quizDiv = document.getElementById('quiz-options'); quizDiv.innerHTML = ""; opts.forEach(o => { const b = document.createElement('button'); b.className = "quiz-option"; b.innerText = o; b.onclick = () => checkAnswer(o[0].toUpperCase(), b); quizDiv.appendChild(b); }); document.getElementById('study-area').classList.remove('hidden'); btn.innerText = "ESTUDO PRONTO"; } catch (err) { btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; } };
-    window.saveNotes = async () => { await addDoc(collection(db, "users", auth.currentUser.uid, "notes"), { text: document.getElementById('study-notes').value, verse: document.getElementById('verse-ref').innerText, date: new Date().toISOString() }); alert("Salvo!"); };
-    window.loadUserNotes = async () => { const list = document.getElementById('notes-list'); const q = query(collection(db, "users", auth.currentUser.uid, "notes"), orderBy("date", "desc")); const snap = await getDocs(q); list.innerHTML = snap.empty ? "<p>Vazio.</p>" : ""; snap.forEach(d => { const n = d.data(); list.innerHTML += `<div class="note-card"><small>${new Date(n.date).toLocaleDateString()}</small><br><b>${n.verse}</b><p>${n.text}</p></div>`; }); };
+    function fetchVerse() {
+        const selected = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)];
+        document.getElementById('verse-text').innerText = `"${selected.text}"`;
+        document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
+    }
+
+    window.generateStudy = async () => {
+        const btn = document.getElementById('btn-study'); const vText = document.getElementById('verse-text').innerText;
+        btn.innerText = "ANALISANDO..."; btn.disabled = true;
+        try {
+            const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: vText }) });
+            const data = await response.json(); const fullText = data.choices[0].message.content;
+            const parts = fullText.split(/PERGUNTA:|Pergunta:/i); const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
+            correctAnswer = fullText.split(/CORRETA:|Correta:/i)[1].trim()[0].toUpperCase();
+            document.getElementById('ai-response').innerText = explanation; document.getElementById('quiz-question').innerText = parts[1].split(/[A-D]\)/)[0].trim();
+            const opts = fullText.match(/[A-D]\) .+/g); const quizDiv = document.getElementById('quiz-options'); quizDiv.innerHTML = "";
+            opts.forEach(o => { const b = document.createElement('button'); b.className = "quiz-option"; b.innerText = o; b.onclick = () => checkAnswer(o[0].toUpperCase(), b); quizDiv.appendChild(b); });
+            document.getElementById('study-area').classList.remove('hidden'); btn.innerText = "ESTUDO PRONTO";
+        } catch (err) { btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; }
+    };
+
+    window.saveNotes = async () => {
+        const text = document.getElementById('study-notes').value; const vRef = document.getElementById('verse-ref').innerText;
+        if(!text) return alert("Escreva algo!");
+        await addDoc(collection(db, "users", auth.currentUser.uid, "notes"), { text, verse: vRef, date: new Date().toISOString() });
+        alert("Nota salva!"); document.getElementById('study-notes').value = "";
+    };
+
+    window.loadUserNotes = async () => {
+        const list = document.getElementById('notes-list'); list.innerHTML = "<p>Carregando...</p>";
+        const q = query(collection(db, "users", auth.currentUser.uid, "notes"), orderBy("date", "desc"));
+        const snap = await getDocs(q); list.innerHTML = snap.empty ? "<p>Vazio.</p>" : "";
+        snap.forEach(d => { const n = d.data(); list.innerHTML += `<div class="note-card"><div class="note-meta"><span>${new Date(n.date).toLocaleDateString()}</span><span style="color:var(--primary)">${n.verse}</span></div><div>${n.text}</div></div>`; });
+    };
+
+    window.askProfessor = async () => {
+        const doubt = document.getElementById('study-doubt').value; const verse = document.getElementById('verse-text').innerText;
+        const resBox = document.getElementById('ai-doubt-res'); if(!doubt) return alert("Dúvida?"); resBox.innerText = "Pensando...";
+        try { const r = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse, question: doubt }) }); const d = await r.json(); resBox.innerText = d.choices[0].message.content; } catch(e) { resBox.innerText = "Erro."; }
+    };
+
     window.logout = () => signOut(auth).then(() => location.reload());
     window.resetVerses = () => { localStorage.removeItem("seen_verses"); location.reload(); };
 </script>
