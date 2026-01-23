@@ -258,7 +258,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, verifyBeforeUpdateEmail } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs, addDoc, where } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4", authDomain: "bibliaquest-fbc44.firebaseapp.com", projectId: "bibliaquest-fbc44", storageBucket: "bibliaquest-fbc44.firebasestorage.app", messagingSenderId: "670585434397", appId: "1:670585434397:web:6d699582986e8dcbc6f1f4", measurementId: "G-H0Z7T8LCPE" };
     const app = initializeApp(firebaseConfig);
@@ -348,6 +348,7 @@
 
             document.getElementById('xp-val').innerText = d.xp || 0;
             document.getElementById('streak-val').innerText = d.streak || 1;
+            // Nível agora acompanha os dias da pessoa (streak) conforme solicitado
             document.getElementById('level-display').innerText = d.streak || 1;
             document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
         }
@@ -357,7 +358,13 @@
         document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
         const userRef = doc(db, "users", auth.currentUser.uid);
         const points = (c === correctAnswer) ? 25 : 5;
-        await updateDoc(userRef, { xp: increment(points), dailyXP: increment(points) });
+        // Atualiza tanto o XP total quanto o diário e a data de atualização
+        const today = new Date().toISOString().split('T')[0];
+        await updateDoc(userRef, { 
+            xp: increment(points), 
+            dailyXP: increment(points),
+            lastXPUpdateDate: today 
+        });
         if(c === correctAnswer) { 
             btn.style.background = "#d7ffb8"; 
             btn.style.borderColor = "#58cc02";
@@ -373,25 +380,43 @@
         list.innerHTML = "<p style='text-align:center'>Puxando dados...</p>";
         document.getElementById('rank-users-btn').classList.toggle('active', type === 'users');
         document.getElementById('rank-church-btn').classList.toggle('active', type === 'churches');
-        const sortBy = (type === 'users') ? "dailyXP" : "xp";
-        const q = query(collection(db, "users"), orderBy(sortBy, "desc"), limit(50));
-        const snapshot = await getDocs(q);
-        list.innerHTML = "";
+        
+        const today = new Date().toISOString().split('T')[0];
+        let q;
+
         if (type === 'users') {
-            snapshot.forEach((docSnap, i) => {
-                const d = docSnap.data();
-                list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${d.dailyXP || 0} XP HOJE</span><b class="rank-name">${(d.name || "").toUpperCase()}</b><span class="rank-church-tag">${d.church || ''}</span></div></div>`;
-            });
+            // Ranking diário agora filtra apenas quem pontuou hoje
+            q = query(collection(db, "users"), where("lastXPUpdateDate", "==", today), orderBy("dailyXP", "desc"), limit(50));
         } else {
-            const churches = {};
-            snapshot.forEach(docSnap => {
-                const d = docSnap.data(); const c = d.church || "Independente";
-                churches[c] = (churches[c] || 0) + (d.xp || 0);
-            });
-            const sorted = Object.entries(churches).sort((a,b) => b[1] - a[1]);
-            sorted.forEach((item, i) => {
-                list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${item[1]} XP TOTAL</span><b class="rank-name">${item[0].toUpperCase()}</b></div></div>`;
-            });
+            q = query(collection(db, "users"), orderBy("xp", "desc"), limit(50));
+        }
+
+        try {
+            const snapshot = await getDocs(q);
+            list.innerHTML = "";
+            if (type === 'users') {
+                if (snapshot.empty) {
+                    list.innerHTML = "<p style='text-align:center; padding:20px;'>Ninguém pontuou hoje ainda. Comece agora! 🔥</p>";
+                    return;
+                }
+                snapshot.forEach((docSnap, i) => {
+                    const d = docSnap.data();
+                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${d.dailyXP || 0} XP HOJE</span><b class="rank-name">${(d.name || "").toUpperCase()}</b><span class="rank-church-tag">${d.church || ''}</span></div></div>`;
+                });
+            } else {
+                const churches = {};
+                snapshot.forEach(docSnap => {
+                    const d = docSnap.data(); const c = d.church || "Independente";
+                    churches[c] = (churches[c] || 0) + (d.xp || 0);
+                });
+                const sorted = Object.entries(churches).sort((a,b) => b[1] - a[1]);
+                sorted.forEach((item, i) => {
+                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${item[1]} XP TOTAL</span><b class="rank-name">${item[0].toUpperCase()}</b></div></div>`;
+                });
+            }
+        } catch (e) {
+            console.error(e);
+            list.innerHTML = "<p style='text-align:center'>Erro ao carregar. Tente novamente.</p>";
         }
     };
 
@@ -451,13 +476,39 @@
         try {
             const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: vText }) });
             const data = await response.json(); const fullText = data.choices[0].message.content;
-            const parts = fullText.split(/PERGUNTA:|Pergunta:/i); const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
-            correctAnswer = fullText.split(/CORRETA:|Correta:/i)[1].trim()[0].toUpperCase();
-            document.getElementById('ai-response').innerText = explanation; document.getElementById('quiz-question').innerText = parts[1].split(/[A-D]\)/)[0].trim();
-            const opts = fullText.match(/[A-D]\) .+/g); const quizDiv = document.getElementById('quiz-options'); quizDiv.innerHTML = "";
-            opts.forEach(o => { const b = document.createElement('button'); b.className = "quiz-option"; b.innerText = o; b.onclick = () => checkAnswer(o[0].toUpperCase(), b); quizDiv.appendChild(b); });
-            document.getElementById('study-area').classList.remove('hidden'); btn.innerText = "ESTUDO PRONTO";
-        } catch (err) { btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; }
+            
+            // Lógica de parsing aprimorada
+            const parts = fullText.split(/PERGUNTA:|Pergunta:/i); 
+            const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
+            
+            const quizPart = parts[1] || "";
+            const correctMatch = fullText.match(/CORRETA:\s*([A-D])/i);
+            correctAnswer = correctMatch ? correctMatch[1].toUpperCase() : "";
+
+            document.getElementById('ai-response').innerText = explanation; 
+            document.getElementById('quiz-question').innerText = quizPart.split(/[A-D]\)/)[0].trim();
+
+            const opts = quizPart.match(/[A-D]\) .+/g); 
+            const quizDiv = document.getElementById('quiz-options'); 
+            quizDiv.innerHTML = "";
+            
+            if (opts) {
+                opts.forEach(o => { 
+                    const b = document.createElement('button'); 
+                    b.className = "quiz-option"; 
+                    b.innerText = o; 
+                    b.onclick = () => checkAnswer(o[0].toUpperCase(), b); 
+                    quizDiv.appendChild(b); 
+                });
+            }
+            
+            document.getElementById('study-area').classList.remove('hidden'); 
+            btn.innerText = "ESTUDO PRONTO";
+        } catch (err) { 
+            console.error(err);
+            btn.disabled = false; 
+            btn.innerText = "TENTAR NOVAMENTE"; 
+        }
     };
 
     window.saveNotes = async () => {
