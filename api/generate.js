@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+orexport default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -27,8 +27,8 @@ messages: [
     { 
         role: "system", 
         content: `Você é um professor de teologia acadêmico. 
-        Analise o versículo e crie um quiz.
-        IMPORTANTE: Responda DIRETAMENTE no formato abaixo, sem introduções.
+        Analise o versículo de forma clara e gere um devocional de nominimo 2 paragrafos e crie um quiz.
+        IMPORTANTE: Responda DIRETAMENTE no formato abaixo, sem introduções. As respostas não podem estar na mesma opção que estava antes
         
         EXPLICAÇÃO: [texto]
         PERGUNTA: [texto]
@@ -50,5 +50,6 @@ messages: [
         return res.status(500).json({ error: "Erro interno ao processar estudo." });
     }
 }
+
 
 
