@@ -1381,47 +1381,82 @@
         setTimeout(() => location.reload(), 1500);
     }
 
-    window.loadRanking = async (type = 'users') => {
+   window.loadRanking = async (type = 'users') => {
         const list = document.getElementById('ranking-list');
-        list.innerHTML = "<p style='text-align:center'>Puxando dados...</p>";
+        list.innerHTML = "<p style='text-align:center; padding:20px;'>Buscando os melhores da trilha... ⏳</p>";
+        
         document.getElementById('rank-users-btn').classList.toggle('active', type === 'users');
         document.getElementById('rank-church-btn').classList.toggle('active', type === 'churches');
         
         const today = new Date().toISOString().split('T')[0];
         let q;
 
-        if (type === 'users') {
-            q = query(collection(db, "users"), where("lastXPUpdateDate", "==", today), orderBy("dailyXP", "desc"), limit(50));
-        } else {
-            q = query(collection(db, "users"), orderBy("xp", "desc"), limit(50));
-        }
-
         try {
+            if (type === 'users') {
+                // Query para o ranking diário
+                q = query(
+                    collection(db, "users"), 
+                    where("lastXPUpdateDate", "==", today), 
+                    orderBy("dailyXP", "desc"), 
+                    limit(50)
+                );
+            } else {
+                // Query para o ranking geral
+                q = query(collection(db, "users"), orderBy("xp", "desc"), limit(100));
+            }
+
             const snapshot = await getDocs(q);
             list.innerHTML = "";
+
+            if (snapshot.empty) {
+                const msg = type === 'users' ? "Ninguém pontuou hoje ainda. Seja o primeiro! 🔥" : "Nenhum dado encontrado.";
+                list.innerHTML = `<p style='text-align:center; padding:20px;'>${msg}</p>`;
+                return;
+            }
+
             if (type === 'users') {
-                if (snapshot.empty) {
-                    list.innerHTML = "<p style='text-align:center; padding:20px;'>Ninguém pontuou hoje ainda. Seja o primeiro! 🔥</p>";
-                    return;
-                }
+                // O 'i' aqui é o índice (0, 1, 2...), então 'i + 1' dá a posição correta (1º, 2º, 3º...)
                 snapshot.forEach((docSnap, i) => {
                     const d = docSnap.data();
-                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${d.dailyXP || 0} XP HOJE</span><b class="rank-name">${(d.name || "").toUpperCase()}</b><span class="rank-church-tag">${d.church || ''}</span></div></div>`;
+                    list.innerHTML += `
+                        <div class="rank-item">
+                            <span class="rank-pos">${i + 1}º</span>
+                            <div class="rank-info">
+                                <span class="rank-xp">${d.dailyXP || 0} XP HOJE</span>
+                                <b class="rank-name">${(d.name || "Viajante").toUpperCase()}</b>
+                                <span class="rank-church-tag">${d.church || 'Independente'}</span>
+                            </div>
+                        </div>`;
                 });
             } else {
                 const churches = {};
                 snapshot.forEach(docSnap => {
-                    const d = docSnap.data(); const c = d.church || "Independente";
+                    const d = docSnap.data();
+                    const c = d.church || "Independente";
                     churches[c] = (churches[c] || 0) + (d.xp || 0);
                 });
-                const sorted = Object.entries(churches).sort((a,b) => b[1] - a[1]);
-                sorted.forEach((item, i) => {
-                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${item[1]} XP TOTAL</span><b class="rank-name">${item[0].toUpperCase()}</b></div></div>`;
+
+                const sortedChurches = Object.entries(churches).sort((a, b) => b[1] - a[1]);
+                
+                // Mesma lógica aqui para o ranking de igrejas
+                sortedChurches.forEach((item, i) => {
+                    list.innerHTML += `
+                        <div class="rank-item">
+                            <span class="rank-pos">${i + 1}º</span>
+                            <div class="rank-info">
+                                <span class="rank-xp">${item[1]} XP TOTAL</span>
+                                <b class="rank-name">${item[0].toUpperCase()}</b>
+                            </div>
+                        </div>`;
                 });
             }
         } catch (e) {
-            console.error("Erro no ranking:", e);
-            list.innerHTML = "<p style='text-align:center'>Erro ao carregar dados. Verifique os índices do Firebase.</p>";
+            console.error("ERRO NO RANKING:", e);
+            list.innerHTML = `
+                <div style="padding:20px; text-align:center;">
+                    <p style="color:var(--error); font-weight:900;">Erro ao carregar dados.</p>
+                    <p style="font-size:0.8rem;">Verifique o console se o problema persistir.</p>
+                </div>`;
         }
     };
 
