@@ -273,7 +273,6 @@
         setTimeout(() => { bird.classList.add('hidden'); bird.classList.remove('fly-animation'); }, 4600);
     }
 
-    // COMPARTILHAR COM LINK
     window.shareVerse = () => {
         const text = document.getElementById('verse-text').innerText;
         const ref = document.getElementById('verse-ref').innerText;
@@ -282,7 +281,6 @@
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
     };
 
-    // BIBLIOTECA
     async function saveCompletedStudy(explanation) {
         await addDoc(collection(db, "users", auth.currentUser.uid, "completed_studies"), {
             verse: document.getElementById('verse-text').innerText,
@@ -348,7 +346,7 @@
 
             document.getElementById('xp-val').innerText = d.xp || 0;
             document.getElementById('streak-val').innerText = d.streak || 1;
-            // Nível agora acompanha os dias da pessoa (streak) conforme solicitado
+            // Nível agora acompanha os dias da pessoa (ofensiva) conforme solicitado
             document.getElementById('level-display').innerText = d.streak || 1;
             document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
         }
@@ -358,13 +356,15 @@
         document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
         const userRef = doc(db, "users", auth.currentUser.uid);
         const points = (c === correctAnswer) ? 25 : 5;
-        // Atualiza tanto o XP total quanto o diário e a data de atualização
         const today = new Date().toISOString().split('T')[0];
+        
+        // Atualiza XP, DailyXP e carimba a data de hoje para o ranking resetar visualmente
         await updateDoc(userRef, { 
             xp: increment(points), 
             dailyXP: increment(points),
             lastXPUpdateDate: today 
         });
+
         if(c === correctAnswer) { 
             btn.style.background = "#d7ffb8"; 
             btn.style.borderColor = "#58cc02";
@@ -385,7 +385,7 @@
         let q;
 
         if (type === 'users') {
-            // Ranking diário agora filtra apenas quem pontuou hoje
+            // FIX: Filtra usuários que pontuaram na data de hoje
             q = query(collection(db, "users"), where("lastXPUpdateDate", "==", today), orderBy("dailyXP", "desc"), limit(50));
         } else {
             q = query(collection(db, "users"), orderBy("xp", "desc"), limit(50));
@@ -396,7 +396,7 @@
             list.innerHTML = "";
             if (type === 'users') {
                 if (snapshot.empty) {
-                    list.innerHTML = "<p style='text-align:center; padding:20px;'>Ninguém pontuou hoje ainda. Comece agora! 🔥</p>";
+                    list.innerHTML = "<p style='text-align:center; padding:20px;'>Ninguém pontuou hoje ainda. Seja o primeiro! 🔥</p>";
                     return;
                 }
                 snapshot.forEach((docSnap, i) => {
@@ -415,8 +415,8 @@
                 });
             }
         } catch (e) {
-            console.error(e);
-            list.innerHTML = "<p style='text-align:center'>Erro ao carregar. Tente novamente.</p>";
+            console.error("Erro no ranking:", e);
+            list.innerHTML = "<p style='text-align:center'>Erro ao carregar dados. Verifique os índices do Firebase.</p>";
         }
     };
 
@@ -475,13 +475,14 @@
         btn.innerText = "ANALISANDO..."; btn.disabled = true;
         try {
             const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: vText }) });
-            const data = await response.json(); const fullText = data.choices[0].message.content;
+            const data = await response.json(); 
+            const fullText = data.choices[0].message.content;
             
-            // Lógica de parsing aprimorada
+            // FIX: Parsing robusto para capturar os dados mesmo que a IA mude levemente o formato
             const parts = fullText.split(/PERGUNTA:|Pergunta:/i); 
             const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
-            
             const quizPart = parts[1] || "";
+            
             const correctMatch = fullText.match(/CORRETA:\s*([A-D])/i);
             correctAnswer = correctMatch ? correctMatch[1].toUpperCase() : "";
 
@@ -489,25 +490,20 @@
             document.getElementById('quiz-question').innerText = quizPart.split(/[A-D]\)/)[0].trim();
 
             const opts = quizPart.match(/[A-D]\) .+/g); 
-            const quizDiv = document.getElementById('quiz-options'); 
-            quizDiv.innerHTML = "";
+            const quizDiv = document.getElementById('quiz-options'); quizDiv.innerHTML = "";
             
             if (opts) {
                 opts.forEach(o => { 
                     const b = document.createElement('button'); 
-                    b.className = "quiz-option"; 
-                    b.innerText = o; 
+                    b.className = "quiz-option"; b.innerText = o; 
                     b.onclick = () => checkAnswer(o[0].toUpperCase(), b); 
                     quizDiv.appendChild(b); 
                 });
             }
-            
-            document.getElementById('study-area').classList.remove('hidden'); 
-            btn.innerText = "ESTUDO PRONTO";
+            document.getElementById('study-area').classList.remove('hidden'); btn.innerText = "ESTUDO PRONTO";
         } catch (err) { 
-            console.error(err);
-            btn.disabled = false; 
-            btn.innerText = "TENTAR NOVAMENTE"; 
+            console.error("Erro no estudo:", err);
+            btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; 
         }
     };
 
