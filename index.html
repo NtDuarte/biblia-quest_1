@@ -484,34 +484,34 @@
             body: JSON.stringify({ verse: vText }) 
         });
 
-        if (!response.ok) throw new Error("Erro no servidor (API)");
-
         const data = await response.json();
-        const fullText = data.choices[0].message.content;
         
-        // Log para você depurar no F12
-        console.log("Resposta da IA:", fullText);
+        // DEBUG: Veja no console o que o servidor realmente mandou
+        console.log("Dados recebidos da API:", data);
 
-        // Acha onde começa a EXPLICAÇÃO e ignora o que vier antes
+        // Se a API mandou um erro, a gente para aqui e exibe o erro real
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        if (!data.choices || !data.choices[0]) {
+            throw new Error("A resposta da Groq veio vazia ou em formato inesperado.");
+        }
+
+        const fullText = data.choices[0].message.content;
         const startIdx = fullText.search(/EXPLICAÇÃO:/i);
-        if (startIdx === -1) throw new Error("Formato de resposta inválido (Sem 'EXPLICAÇÃO')");
+        if (startIdx === -1) throw new Error("A IA não seguiu o formato solicitado (Faltou 'EXPLICAÇÃO').");
         
         const cleanText = fullText.substring(startIdx);
-
-        // Divide o texto entre Explicação e Pergunta
         const parts = cleanText.split(/PERGUNTA:|Pergunta:/i); 
-        if (parts.length < 2) throw new Error("Formato de resposta inválido (Sem 'PERGUNTA')");
+        if (parts.length < 2) throw new Error("A IA não seguiu o formato solicitado (Faltou 'PERGUNTA').");
 
         const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
         const quizPart = parts[1].trim();
 
-        // Pega a letra CORRETA
         const correctMatch = fullText.match(/CORRETA:\s*([A-D])/i);
         correctAnswer = correctMatch ? correctMatch[1].toUpperCase() : "";
 
-        if (!correctAnswer) throw new Error("Formato de resposta inválido (Sem 'CORRETA')");
-
-        // Preenche a interface
         document.getElementById('ai-response').innerText = explanation; 
         document.getElementById('quiz-question').innerText = quizPart.split(/[A-D]\)/)[0].trim();
 
@@ -519,8 +519,6 @@
         const quizDiv = document.getElementById('quiz-options'); 
         quizDiv.innerHTML = "";
         
-        if (!opts) throw new Error("Não foi possível carregar as opções");
-
         opts.forEach(o => { 
             const b = document.createElement('button'); 
             b.className = "quiz-option"; 
@@ -536,6 +534,7 @@
         console.error("ERRO DETALHADO:", err);
         btn.disabled = false; 
         btn.innerText = "TENTAR NOVAMENTE";
+        // Agora o alerta vai te dizer o ERRO REAL (Ex: Chave de API ausente)
         alert(`Opa! A trilha deu uma escorregada: ${err.message}`);
     }
 };
