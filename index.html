@@ -78,7 +78,23 @@
         .rank-xp { font-weight: 900; color: var(--blue); font-size: 1rem; float: right; }
         .rank-church-tag { font-size: 0.65rem; color: var(--primary); font-weight: 900; background: #fff3e0; padding: 2px 8px; border-radius: 10px; }
 
-        .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 1px solid #efebe9; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; z-index: 1000; box-shadow: 0 -2px 8px rgba(0,0,0,0.05); }
+ .nav-bar { 
+    display: flex; 
+    justify-content: space-around; 
+    background: white; 
+    border-top: 1px solid #efebe9; 
+    padding: 12px 5px; 
+    position: fixed; 
+    bottom: 0; 
+    left: 50%;
+    transform: translateX(-50%); /* Garante centralização absoluta */
+    width: 100%; 
+    max-width: 480px; 
+    box-sizing: border-box; 
+    z-index: 1000; 
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    padding-bottom: env(safe-area-inset-bottom, 15px); /* Ajuste para notch de celular */
+}
         .nav-item { cursor: pointer; font-weight: 900; color: var(--gray); font-size: 0.65rem; text-align: center; }
         .nav-active { color: var(--primary); }
     </style>
