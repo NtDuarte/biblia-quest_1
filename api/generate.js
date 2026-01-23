@@ -22,7 +22,7 @@ orexport default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
+                model: "llama-3-8b-8192",
 messages: [
     { 
         role: "system", 
@@ -50,6 +50,7 @@ messages: [
         return res.status(500).json({ error: "Erro interno ao processar estudo." });
     }
 }
+
 
 
 
