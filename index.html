@@ -20,7 +20,7 @@
         }
 
         body { font-family: 'Nunito', sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; color: var(--text); overflow-x: hidden; }
-        #app { width: 100%; max-width: 480px; background: var(--card-bg); min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 100px; position: relative; box-shadow: 0 4px 20px rgba(78, 52, 46, 0.1); }
+        #app { width: 100%; max-width: 480px; background: var(--card-bg); min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 110px; position: relative; box-shadow: 0 4px 20px rgba(78, 52, 46, 0.1); }
         .hidden { display: none !important; }
         
         /* ANIMAÇÃO DO PASSARINHO */
@@ -28,9 +28,6 @@
         .fly-animation { animation: flyAcross 4.5s ease-in-out forwards; }
         @keyframes flyAcross {
             0% { left: -50px; top: 30%; transform: rotate(10deg); }
-            25% { top: 20%; transform: rotate(-10deg); }
-            50% { top: 25%; transform: rotate(10deg); }
-            75% { top: 15%; transform: rotate(-10deg); }
             100% { left: 110%; top: 25%; transform: rotate(10deg); }
         }
 
@@ -73,9 +70,11 @@
         #ai-response { background: #fffcf5; font-size: 1.1rem; line-height: 1.6; white-space: pre-wrap; border: 1px solid var(--primary); color: var(--text); }
         .quiz-option { width: 100%; text-align: left; padding: 18px; margin: 8px 0; border: 1px solid #efebe9; border-radius: 16px; background: white; cursor: pointer; font-weight: 700; font-size: 1rem; font-family: 'Nunito'; color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
 
+        /* NOTAS SALVAS */
         .note-card { border: 1px solid #efebe9; border-left: 6px solid var(--gold); border-radius: 16px; padding: 18px; margin-bottom: 15px; background: #fffdf9; }
         .note-meta { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 900; color: var(--gray); margin-bottom: 5px; }
         
+        /* CARD BIBLIOTECA */
         .library-card { border: 1px solid #efebe9; border-left: 8px solid var(--primary); border-radius: 16px; padding: 18px; margin-bottom: 15px; background: #f7fcf9; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
 
         /* RANKING */
@@ -88,7 +87,7 @@
 
         /* NAVBAR */
         .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 1px solid #efebe9; padding: 15px; position: fixed; bottom: 0; width: 100%; max-width: 480px; box-sizing: border-box; z-index: 1000; box-shadow: 0 -2px 8px rgba(0,0,0,0.05); }
-        .nav-item { cursor: pointer; font-weight: 900; color: var(--gray); font-size: 0.75rem; text-align: center; }
+        .nav-item { cursor: pointer; font-weight: 900; color: var(--gray); font-size: 0.65rem; text-align: center; }
         .nav-active { color: var(--primary); }
     </style>
 </head>
@@ -212,23 +211,33 @@
 
         <div id="tab-config" class="hidden">
             <h2 style="text-align:center; color: var(--primary);">⚙️ AJUSTES</h2>
+            
             <div class="card" style="border-color: var(--blue);">
                 <h4 style="color:var(--blue); margin:0 0 10px 0;">👤 MINHA CONTA</h4>
+                <p style="font-size: 0.85rem; margin-bottom: 10px;">Mantenha seus dados atualizados.</p>
                 <button class="btn-duo btn-secondary" style="padding:10px; font-size:12px; margin-bottom: 15px;" onclick="resetPasswordFromSettings()">Redefinir Senha</button>
                 <div style="border-top: 1px solid #efebe9; padding-top: 15px;">
-                    <input type="email" id="new-email" placeholder="Novo e-mail" style="margin-bottom: 8px; padding: 12px;">
+                    <input type="email" id="new-email" placeholder="Novo e-mail" style="margin-bottom: 10px; padding: 12px;">
                     <button class="btn-duo btn-primary" style="padding:10px; font-size:12px;" onclick="updateUserEmail()">Alterar E-mail</button>
                 </div>
             </div>
+
             <div class="card" style="border-color: var(--gold);">
                 <h4 style="color:var(--gold); margin:0 0 10px 0;">💡 SUGESTÃO</h4>
                 <textarea id="app-suggestion" placeholder="Como podemos melhorar o app?"></textarea>
                 <button class="btn-duo" style="padding:12px; font-size:14px; background:var(--gold); border-bottom-color: #8d6e1d;" onclick="sendSuggestion()">Enviar Feedback</button>
             </div>
+
             <div class="card" style="border-color: var(--primary); text-align: center; background-color: #fffaf0;">
                 <h3 style="color: var(--primary); margin-top: 0;">Sobre o Trilha</h3>
-                <p>Idealizador e Criador: <b>Northon Duarte</b></p>
-                <p style="font-style: italic; font-size: 0.95rem; line-height: 1.4; color: var(--text);">"Uma bússola espiritual projetada para guiar corações em uma jornada diária de fé."</p>
+                <p style="margin-bottom: 5px;"><strong>Idealizador e Criador:</strong></p>
+                <p style="font-weight: 700; color: var(--text); margin-top: 0;">Northon Duarte</p>
+                <div style="border-top: 1px solid #ffe4b5; margin: 15px 0; padding-top: 15px;">
+                    <p style="font-size: 0.9rem; font-weight: 900; color: var(--primary); margin-bottom: 5px;">OBJETIVO</p>
+                    <p style="font-style: italic; font-size: 0.95rem; line-height: 1.4; color: var(--text);">
+                        "Uma bússola espiritual projetada para guiar corações em uma jornada diária de fé."
+                    </p>
+                </div>
                 <button class="btn-duo btn-primary" onclick="resetVerses()" style="font-size:10px; padding:8px; width: auto; margin-top: 10px;">Resetar Versículos</button>
             </div>
         </div>
@@ -264,7 +273,7 @@
     window.shareVerse = () => {
         const text = document.getElementById('verse-text').innerText;
         const ref = document.getElementById('verse-ref').innerText;
-        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\n👉 ${window.location.href}`;
+        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!\n👉 ${window.location.href}`;
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
     };
 
@@ -282,7 +291,7 @@
         list.innerHTML = "<p style='text-align:center'>Puxando seus estudos...</p>";
         const q = query(collection(db, "users", auth.currentUser.uid, "completed_studies"), orderBy("date", "desc"));
         const snap = await getDocs(q);
-        list.innerHTML = snap.empty ? "<p style='text-align:center'>Nenhum estudo salvo.</p>" : "";
+        list.innerHTML = snap.empty ? "<p style='text-align:center'>Nenhum estudo salvo ainda.</p>" : "";
         snap.forEach(d => {
             const s = d.data();
             list.innerHTML += `<div class="library-card"><small>${new Date(s.date).toLocaleDateString()}</small><br><b>${s.ref}</b><p style="font-size:0.85rem">${s.explanation}</p></div>`;
@@ -301,7 +310,7 @@
         list.innerHTML = "";
         
         if (type === 'users') {
-            let pos = 1; // Contador manual fixo
+            let pos = 1; // Fix manual para evitar NaN
             snapshot.forEach((docSnap) => {
                 const d = docSnap.data();
                 list.innerHTML += `<div class="rank-item"><span class="rank-pos">${pos}º</span><div class="rank-info"><span class="rank-xp">${d.dailyXP || 0} XP HOJE</span><b class="rank-name">${(d.name || "").toUpperCase()}</b><span class="rank-church-tag">${d.church || ''}</span></div></div>`;
@@ -339,11 +348,10 @@
             document.getElementById('streak-val').innerText = d.streak || 1;
             document.getElementById('level-display').innerText = d.streak || 1;
             document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
-            document.getElementById('progress-fill').style.width = `${(d.xp || 0) % 100}%`;
         }
     }
 
-    // HELPERS
+    // FIREBASE HELPERS
     window.resetPasswordFromSettings = async () => { try { await sendPasswordResetEmail(auth, auth.currentUser.email); alert("E-mail enviado!"); } catch(e) { alert("Erro."); } };
     window.updateUserEmail = async () => { try { await verifyBeforeUpdateEmail(auth.currentUser, document.getElementById('new-email').value); alert("Link enviado!"); } catch(e) { alert("Erro."); } };
     window.togglePassword = (id) => { const i = document.getElementById(id); i.type = i.type === "password" ? "text" : "password"; };
@@ -352,6 +360,8 @@
     window.switchAuth = (m) => { document.getElementById('form-login').classList.toggle('hidden', m !== 'login'); document.getElementById('form-signup').classList.toggle('hidden', m !== 'signup'); document.getElementById('tab-login-btn').classList.toggle('active', m === 'login'); document.getElementById('tab-signup-btn').classList.toggle('active', m === 'signup'); };
     window.showTab = (t) => { ['home', 'notes', 'library', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t)); ['home', 'notes', 'library', 'rank', 'config'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) el.classList.toggle('nav-active', nav === t); }); if(t === 'rank') loadRanking('users'); if(t === 'notes') loadUserNotes(); if(t === 'library') loadLibrary(); };
     onAuthStateChanged(auth, u => { document.getElementById('auth-screen').classList.toggle('hidden', !!u); document.getElementById('main-screen').classList.toggle('hidden', !u); if(u) { loadUserData(u.uid); fetchVerse(); } });
+    
+    // FETCH VERSE E GERAR ESTUDO
     const BIBLE_DATABASE = [ { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" } ];
     function fetchVerse() { const s = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)]; document.getElementById('verse-text').innerText = `"${s.text}"`; document.getElementById('verse-ref').innerText = s.ref.toUpperCase(); }
     
@@ -373,16 +383,12 @@
     };
 
     async function checkAnswer(c, btn) { 
-        const userRef = doc(db, "users", auth.currentUser.uid); 
-        const points = (c === correctAnswer) ? 25 : 5; 
+        const userRef = doc(db, "users", auth.currentUser.uid); const points = (c === correctAnswer) ? 25 : 5; 
         await updateDoc(userRef, { xp: increment(points), dailyXP: increment(points) }); 
         if(c === correctAnswer) { 
-            btn.style.background = "#d7ffb8"; 
-            await saveCompletedStudy(document.getElementById('ai-response').innerText); 
-            alert(`+${points} XP! Estudo salvo no baú!`); 
+            btn.style.background = "#d7ffb8"; await saveCompletedStudy(document.getElementById('ai-response').innerText); alert(`+${points} XP! Estudo salvo!`); 
         } else { 
-            btn.style.background = "#ffd7d7"; 
-            alert(`Era ${correctAnswer}. +${points} XP.`); 
+            btn.style.background = "#ffd7d7"; alert(`Era ${correctAnswer}. +${points} XP.`); 
         } 
         setTimeout(() => location.reload(), 1500); 
     }
