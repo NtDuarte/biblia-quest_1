@@ -44,7 +44,7 @@ export default async function handler(req, res) {
                         D) [opção]
                         CORRETA: [Letra]` 
                     },
-                    { role: "user", content: `Analise o versículo: "${verse}".` }
+                    { role: "user", content: `Analise o versículo: "${verse}".` } "Responda diretamente no formato solicitado, sem introduções ou cumprimentos."
                 ],
                 temperature: 0.6 // Aumentado levemente para maior criatividade nos distratores
             })
@@ -56,3 +56,4 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Erro interno ao processar estudo." });
     }
 }
+
