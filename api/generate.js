@@ -24,10 +24,10 @@ export default async function handler(req, res) {
                 messages: [
                     { 
                         role: "system", 
-                        content: `Professor de Teologia. Analise o versículo e gere um devocional de 2 parágrafos e um quiz.
+                        content: `Você é um professor de teologia. Analise o versículo e crie um devocional (2 parágrafos) e um quiz.
                         REGRAS: 
-                        1. Não use negrito (**) no texto.
-                        2. Responda APENAS no formato abaixo, sem saudações.
+                        - Responda APENAS no formato abaixo.
+                        - Proibido qualquer texto antes ou depois do formato.
                         
                         EXPLICAÇÃO: [texto]
                         PERGUNTA: [texto]
@@ -39,18 +39,13 @@ export default async function handler(req, res) {
                     },
                     { role: "user", content: `Analise: "${verse}".` }
                 ],
-                temperature: 0.5 // Menor temperatura = resposta mais estável no formato
+                temperature: 0.4
             })
         });
 
         const data = await response.json();
-        
-        // Log para debug no console da Vercel
-        console.log("Resposta da Groq:", JSON.stringify(data));
-        
         return res.status(200).json(data);
     } catch (error) {
-        console.error("Erro na API:", error);
-        return res.status(500).json({ error: "Erro interno no servidor." });
+        return res.status(500).json({ error: "Erro na conexão com a Groq." });
     }
 }
