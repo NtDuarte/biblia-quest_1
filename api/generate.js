@@ -25,7 +25,7 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "llama-3-8b-8192",
+                model: "llama-3.3-70b-versatile",
                 messages: [
                     { 
                         role: "system", 
@@ -66,3 +66,4 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Falha crítica na conexão com o servidor de IA." });
     }
 }
+
