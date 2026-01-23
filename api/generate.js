@@ -29,7 +29,7 @@ export default async function handler(req, res) {
                 messages: [
                     { 
                         role: "system", 
-                        content: `Você é um professor de teologia. Analise o versículo e crie um devocional (2 parágrafos) e um quiz.
+                        content: `Você é um professor de teologia. Analise o versículo e crie um devocional profundo (3 parágrafos) e um quiz.
                         REGRAS: 
                         - Responda APENAS no formato abaixo.
                         - Proibido qualquer texto antes ou depois do formato.
@@ -66,4 +66,5 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Falha crítica na conexão com o servidor de IA." });
     }
 }
+
 
