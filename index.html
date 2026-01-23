@@ -28,6 +28,9 @@
         .fly-animation { animation: flyAcross 4.5s ease-in-out forwards; }
         @keyframes flyAcross {
             0% { left: -50px; top: 30%; transform: rotate(10deg); }
+            25% { top: 20%; transform: rotate(-10deg); }
+            50% { top: 25%; transform: rotate(10deg); }
+            75% { top: 15%; transform: rotate(-10deg); }
             100% { left: 110%; top: 25%; transform: rotate(10deg); }
         }
 
@@ -70,10 +73,9 @@
         #ai-response { background: #fffcf5; font-size: 1.1rem; line-height: 1.6; white-space: pre-wrap; border: 1px solid var(--primary); color: var(--text); }
         .quiz-option { width: 100%; text-align: left; padding: 18px; margin: 8px 0; border: 1px solid #efebe9; border-radius: 16px; background: white; cursor: pointer; font-weight: 700; font-size: 1rem; font-family: 'Nunito'; color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
 
-        /* NOTAS SALVAS */
         .note-card { border: 1px solid #efebe9; border-left: 6px solid var(--gold); border-radius: 16px; padding: 18px; margin-bottom: 15px; background: #fffdf9; }
         .note-meta { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 900; color: var(--gray); margin-bottom: 5px; }
-        
+
         /* CARD BIBLIOTECA */
         .library-card { border: 1px solid #efebe9; border-left: 8px solid var(--primary); border-radius: 16px; padding: 18px; margin-bottom: 15px; background: #f7fcf9; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
 
@@ -99,12 +101,13 @@
     <div id="auth-screen">
         <div class="logo-container">
             <svg class="logo-svg" viewBox="0 0 500 500">
-                <circle cx="250" cy="250" r="220" fill="white" stroke="#c49a4f" stroke-width="12"/>
-                <circle cx="250" cy="250" r="195" fill="none" stroke="#efebe9" stroke-width="2"/>
-                <path d="M250,30 L250,70 M250,430 L250,470 M30,250 L70,250 M430,250 L470,250" stroke="#c49a4f" stroke-width="8" stroke-linecap="round"/>
-                <path d="M250,250 L250,110 L280,250 L250,390 L220,250 Z" fill="#e67e22" stroke="#4e342e" stroke-width="2"/>
-                <path d="M250,250 L390,250 L250,280 L110,250 L250,220 Z" fill="#b38a42" stroke="#4e342e" stroke-width="2"/>
-                <circle cx="250" cy="250" r="20" fill="#4e342e" stroke="white" stroke-width="4"/>
+                <circle cx="250" cy="250" r="220" fill="white" stroke="#c49a4f" stroke-width="15"/>
+                <path d="M250,40 L250,80 M250,420 L250,460 M40,250 L80,250 M420,250 L460,250" stroke="#c49a4f" stroke-width="10" stroke-linecap="round"/>
+                <g transform="rotate(-45 250 250)">
+                    <path d="M250,100 L290,250 L210,250 Z" fill="#e67e22"/>
+                    <path d="M250,400 L290,250 L210,250 Z" fill="#b38a42"/>
+                </g>
+                <circle cx="250" cy="250" r="25" fill="#4e342e" stroke="white" stroke-width="5"/>
             </svg>
             <h1 class="logo-text">TRILHA <span>VIVA</span></h1>
         </div>
@@ -144,8 +147,8 @@
                 <svg viewBox="0 0 500 500" style="width:40px; margin-right:10px;">
                     <circle cx="250" cy="250" r="220" fill="white" stroke="#c49a4f" stroke-width="25"/>
                     <g transform="rotate(-45 250 250)">
-                        <path d="M250,100 L285,250 L215,250 Z" fill="#e67e22"/>
-                        <path d="M250,400 L285,250 L215,250 Z" fill="#b38a42"/>
+                        <path d="M250,100 L290,250 L210,250 Z" fill="#e67e22"/>
+                        <path d="M250,400 L290,250 L210,250 Z" fill="#b38a42"/>
                     </g>
                     <circle cx="250" cy="250" r="30" fill="#4e342e"/>
                 </svg>
@@ -214,11 +217,11 @@
             
             <div class="card" style="border-color: var(--blue);">
                 <h4 style="color:var(--blue); margin:0 0 10px 0;">👤 MINHA CONTA</h4>
-                <p style="font-size: 0.85rem; margin-bottom: 10px;">Mantenha seus dados atualizados.</p>
-                <button class="btn-duo btn-secondary" style="padding:10px; font-size:12px; margin-bottom: 15px;" onclick="resetPasswordFromSettings()">Redefinir Senha</button>
+                <p style="font-size: 0.85rem; margin-bottom: 10px;">Gerencie seu acesso com segurança.</p>
+                <button class="btn-duo btn-secondary" style="padding:10px; font-size:12px; margin-bottom: 15px;" onclick="resetPasswordFromSettings()">Redefinir Senha via E-mail</button>
                 <div style="border-top: 1px solid #efebe9; padding-top: 15px;">
-                    <input type="email" id="new-email" placeholder="Novo e-mail" style="margin-bottom: 10px; padding: 12px;">
-                    <button class="btn-duo btn-primary" style="padding:10px; font-size:12px;" onclick="updateUserEmail()">Alterar E-mail</button>
+                    <input type="email" id="new-email" placeholder="Novo endereço de e-mail" style="margin-bottom: 8px; padding: 12px;">
+                    <button class="btn-duo btn-primary" style="padding:10px; font-size:12px; background-color: var(--primary);" onclick="updateUserEmail()">Alterar E-mail</button>
                 </div>
             </div>
 
@@ -235,10 +238,10 @@
                 <div style="border-top: 1px solid #ffe4b5; margin: 15px 0; padding-top: 15px;">
                     <p style="font-size: 0.9rem; font-weight: 900; color: var(--primary); margin-bottom: 5px;">OBJETIVO</p>
                     <p style="font-style: italic; font-size: 0.95rem; line-height: 1.4; color: var(--text);">
-                        "Uma bússola espiritual projetada para guiar corações em uma jornada diária de fé."
+                        "Uma bússola espiritual projetada para guiar corações em uma jornada diária de fé, transformando cada versículo em um passo firme rumo à sabedoria e renovação."
                     </p>
                 </div>
-                <button class="btn-duo btn-primary" onclick="resetVerses()" style="font-size:10px; padding:8px; width: auto; margin-top: 10px;">Resetar Versículos</button>
+                <button class="btn-duo btn-primary" onclick="resetVerses()" style="font-size:12px; padding:10px; width: auto; margin-top: 10px;">Resetar Lista</button>
             </div>
         </div>
 
@@ -265,19 +268,21 @@
 
     function triggerNatureEffect() {
         const bird = document.getElementById('nature-effect');
-        bird.classList.remove('hidden'); bird.classList.add('fly-animation');
+        bird.classList.remove('hidden');
+        bird.classList.add('fly-animation');
         setTimeout(() => { bird.classList.add('hidden'); bird.classList.remove('fly-animation'); }, 4600);
     }
 
-    // COMPARTILHAR
+    // COMPARTILHAR COM LINK
     window.shareVerse = () => {
         const text = document.getElementById('verse-text').innerText;
         const ref = document.getElementById('verse-ref').innerText;
-        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!\n👉 ${window.location.href}`;
+        const appLink = window.location.href; 
+        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!\n👉 ${appLink}`;
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
     };
 
-    // BIBLIOTECA - FIX
+    // BIBLIOTECA
     async function saveCompletedStudy(explanation) {
         await addDoc(collection(db, "users", auth.currentUser.uid, "completed_studies"), {
             verse: document.getElementById('verse-text').innerText,
@@ -288,33 +293,94 @@
 
     window.loadLibrary = async () => {
         const list = document.getElementById('library-list');
-        list.innerHTML = "<p style='text-align:center'>Puxando seus estudos...</p>";
+        list.innerHTML = "<p>Abrindo baú de estudos...</p>";
         const q = query(collection(db, "users", auth.currentUser.uid, "completed_studies"), orderBy("date", "desc"));
         const snap = await getDocs(q);
-        list.innerHTML = snap.empty ? "<p style='text-align:center'>Nenhum estudo salvo ainda.</p>" : "";
+        list.innerHTML = snap.empty ? "<p>Nenhum estudo concluído ainda.</p>" : "";
         snap.forEach(d => {
             const s = d.data();
             list.innerHTML += `<div class="library-card"><small>${new Date(s.date).toLocaleDateString()}</small><br><b>${s.ref}</b><p style="font-size:0.85rem">${s.explanation}</p></div>`;
         });
     };
 
-    // RANKING - FIX NaN
+    window.resetPasswordFromSettings = async () => {
+        try { await sendPasswordResetEmail(auth, auth.currentUser.email); alert("E-mail enviado!"); } 
+        catch (e) { alert("Erro: " + e.message); }
+    };
+
+    window.updateUserEmail = async () => {
+        const newEmail = document.getElementById('new-email').value;
+        if (!newEmail) return alert("Digite o novo endereço de e-mail!");
+        try {
+            await verifyBeforeUpdateEmail(auth.currentUser, newEmail);
+            alert("E-mail de verificação enviado!");
+        } catch (e) { alert("Erro ao atualizar: " + e.message); }
+    };
+
+    window.togglePassword = (id) => {
+        const input = document.getElementById(id);
+        input.type = input.type === "password" ? "text" : "password";
+    };
+
+    window.resetPassword = async () => {
+        const email = document.getElementById('login-email').value;
+        if (!email) return alert("Digite seu e-mail no login primeiro!");
+        try { await sendPasswordResetEmail(auth, email); alert("E-mail enviado!"); } catch (e) { alert("Erro."); }
+    };
+
+    async function loadUserData(uid) {
+        const userRef = doc(db, "users", uid);
+        const s = await getDoc(userRef);
+        if(s.exists()) {
+            const d = s.data();
+            const today = new Date().toISOString().split('T')[0];
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            let updates = {};
+
+            if (d.lastXPUpdateDate !== today) { updates.dailyXP = 0; updates.lastXPUpdateDate = today; }
+            if (d.lastLoginDate !== today) {
+                let newStreak = d.streak || 1;
+                if (d.lastLoginDate === yesterdayStr) { newStreak++; triggerNatureEffect(); } else { newStreak = 1; }
+                updates.streak = newStreak; updates.lastLoginDate = today;
+            }
+            if (Object.keys(updates).length > 0) { await updateDoc(userRef, updates); location.reload(); return; }
+
+            document.getElementById('xp-val').innerText = d.xp || 0;
+            document.getElementById('streak-val').innerText = d.streak || 1;
+            document.getElementById('level-display').innerText = d.streak || 1;
+            document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
+        }
+    }
+
+    async function checkAnswer(c, btn) {
+        document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        const points = (c === correctAnswer) ? 25 : 5;
+        await updateDoc(userRef, { xp: increment(points), dailyXP: increment(points) });
+        if(c === correctAnswer) { 
+            btn.style.background = "#d7ffb8"; 
+            btn.style.borderColor = "#58cc02";
+            await saveCompletedStudy(document.getElementById('ai-response').innerText);
+            alert(`+${points} XP! Estudo salvo na biblioteca 📚`); 
+        } 
+        else { btn.style.background = "#ffd7d7"; btn.style.borderColor = "#ff4b4b"; alert(`Era ${correctAnswer}. +${points} XP.`); }
+        setTimeout(() => location.reload(), 1500);
+    }
+
     window.loadRanking = async (type = 'users') => {
         const list = document.getElementById('ranking-list');
-        list.innerHTML = "<p style='text-align:center'>Carregando líderes...</p>";
+        list.innerHTML = "<p style='text-align:center'>Puxando dados...</p>";
         document.getElementById('rank-users-btn').classList.toggle('active', type === 'users');
         document.getElementById('rank-church-btn').classList.toggle('active', type === 'churches');
         const sortBy = (type === 'users') ? "dailyXP" : "xp";
         const q = query(collection(db, "users"), orderBy(sortBy, "desc"), limit(50));
         const snapshot = await getDocs(q);
         list.innerHTML = "";
-        
         if (type === 'users') {
-            let pos = 1; // Fix manual para evitar NaN
-            snapshot.forEach((docSnap) => {
+            snapshot.forEach((docSnap, i) => {
                 const d = docSnap.data();
-                list.innerHTML += `<div class="rank-item"><span class="rank-pos">${pos}º</span><div class="rank-info"><span class="rank-xp">${d.dailyXP || 0} XP HOJE</span><b class="rank-name">${(d.name || "").toUpperCase()}</b><span class="rank-church-tag">${d.church || ''}</span></div></div>`;
-                pos++;
+                list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i+1}º</span><div class="rank-info"><span class="rank-xp">${d.dailyXP || 0} XP HOJE</span><b class="rank-name">${(d.name || "").toUpperCase()}</b><span class="rank-church-tag">${d.church || ''}</span></div></div>`;
             });
         } else {
             const churches = {};
@@ -329,71 +395,91 @@
         }
     };
 
-    async function loadUserData(uid) {
-        const userRef = doc(db, "users", uid);
-        const s = await getDoc(userRef);
-        if(s.exists()) {
-            const d = s.data();
-            const today = new Date().toISOString().split('T')[0];
-            const yesterdayStr = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0];
-            let updates = {};
-            if (d.lastXPUpdateDate !== today) { updates.dailyXP = 0; updates.lastXPUpdateDate = today; }
-            if (d.lastLoginDate !== today) {
-                let newStreak = (d.lastLoginDate === yesterdayStr) ? (d.streak || 1) + 1 : 1;
-                if(newStreak > (d.streak || 0)) triggerNatureEffect();
-                updates.streak = newStreak; updates.lastLoginDate = today;
-            }
-            if (Object.keys(updates).length > 0) { await updateDoc(userRef, updates); location.reload(); return; }
-            document.getElementById('xp-val').innerText = d.xp || 0;
-            document.getElementById('streak-val').innerText = d.streak || 1;
-            document.getElementById('level-display').innerText = d.streak || 1;
-            document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
-        }
-    }
-
-    // FIREBASE HELPERS
-    window.resetPasswordFromSettings = async () => { try { await sendPasswordResetEmail(auth, auth.currentUser.email); alert("E-mail enviado!"); } catch(e) { alert("Erro."); } };
-    window.updateUserEmail = async () => { try { await verifyBeforeUpdateEmail(auth.currentUser, document.getElementById('new-email').value); alert("Link enviado!"); } catch(e) { alert("Erro."); } };
-    window.togglePassword = (id) => { const i = document.getElementById(id); i.type = i.type === "password" ? "text" : "password"; };
-    window.resetPassword = async () => { const e = document.getElementById('login-email').value; if (!e) return alert("E-mail?"); try { await sendPasswordResetEmail(auth, e); alert("Link enviado!"); } catch(e) { alert("Erro."); } };
-    window.sendSuggestion = async () => { const t = document.getElementById('app-suggestion').value; if(!t) return; await addDoc(collection(db, "suggestions"), { text: t, user: auth.currentUser.email, date: new Date().toISOString() }); alert("Valeu!"); };
-    window.switchAuth = (m) => { document.getElementById('form-login').classList.toggle('hidden', m !== 'login'); document.getElementById('form-signup').classList.toggle('hidden', m !== 'signup'); document.getElementById('tab-login-btn').classList.toggle('active', m === 'login'); document.getElementById('tab-signup-btn').classList.toggle('active', m === 'signup'); };
-    window.showTab = (t) => { ['home', 'notes', 'library', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t)); ['home', 'notes', 'library', 'rank', 'config'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) el.classList.toggle('nav-active', nav === t); }); if(t === 'rank') loadRanking('users'); if(t === 'notes') loadUserNotes(); if(t === 'library') loadLibrary(); };
-    onAuthStateChanged(auth, u => { document.getElementById('auth-screen').classList.toggle('hidden', !!u); document.getElementById('main-screen').classList.toggle('hidden', !u); if(u) { loadUserData(u.uid); fetchVerse(); } });
-    
-    // FETCH VERSE E GERAR ESTUDO
-    const BIBLE_DATABASE = [ { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" } ];
-    function fetchVerse() { const s = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)]; document.getElementById('verse-text').innerText = `"${s.text}"`; document.getElementById('verse-ref').innerText = s.ref.toUpperCase(); }
-    
-    window.generateStudy = async () => { 
-        const btn = document.getElementById('btn-study'); btn.innerText = "ANALISANDO..."; btn.disabled = true; 
-        try { 
-            const r = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: document.getElementById('verse-text').innerText }) }); 
-            const data = await r.json(); const fullText = data.choices[0].message.content; 
-            const parts = fullText.split(/PERGUNTA:|Pergunta:/i); 
-            const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim(); 
-            correctAnswer = fullText.split(/CORRETA:|Correta:/i)[1].trim()[0].toUpperCase(); 
-            document.getElementById('ai-response').innerText = explanation; 
-            document.getElementById('quiz-question').innerText = parts[1].split(/[A-D]\)/)[0].trim(); 
-            const opts = fullText.match(/[A-D]\) .+/g); 
-            const quizDiv = document.getElementById('quiz-options'); quizDiv.innerHTML = ""; 
-            opts.forEach(o => { const b = document.createElement('button'); b.className = "quiz-option"; b.innerText = o; b.onclick = () => checkAnswer(o[0].toUpperCase(), b); quizDiv.appendChild(b); }); 
-            document.getElementById('study-area').classList.remove('hidden'); btn.innerText = "ESTUDO PRONTO"; 
-        } catch (err) { btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; } 
+    window.handleAuth = async (m) => {
+        try {
+            if(m === 'signup') {
+                const user = document.getElementById('signup-user').value;
+                const email = document.getElementById('signup-email-new').value; 
+                const p = document.getElementById('signup-pass-new').value;      
+                const church = document.getElementById('signup-church').value || "Independente";
+                const today = new Date().toISOString().split('T')[0];
+                const r = await createUserWithEmailAndPassword(auth, email, p);
+                await setDoc(doc(db, "users", r.user.uid), { xp: 0, dailyXP: 0, name: user, church, streak: 1, lastLoginDate: today, lastXPUpdateDate: today });
+            } else { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-pass').value); }
+        } catch(e) { alert("Erro no login."); }
     };
 
-    async function checkAnswer(c, btn) { 
-        const userRef = doc(db, "users", auth.currentUser.uid); const points = (c === correctAnswer) ? 25 : 5; 
-        await updateDoc(userRef, { xp: increment(points), dailyXP: increment(points) }); 
-        if(c === correctAnswer) { 
-            btn.style.background = "#d7ffb8"; await saveCompletedStudy(document.getElementById('ai-response').innerText); alert(`+${points} XP! Estudo salvo!`); 
-        } else { 
-            btn.style.background = "#ffd7d7"; alert(`Era ${correctAnswer}. +${points} XP.`); 
-        } 
-        setTimeout(() => location.reload(), 1500); 
+    window.sendSuggestion = async () => {
+        const text = document.getElementById('app-suggestion').value;
+        if(!text) return alert("Escreva algo!");
+        await addDoc(collection(db, "suggestions"), { text: text, user: auth.currentUser.email, date: new Date().toISOString() });
+        alert("Valeu!"); document.getElementById('app-suggestion').value = "";
+    };
+
+    window.switchAuth = (m) => {
+        document.getElementById('form-login').classList.toggle('hidden', m !== 'login');
+        document.getElementById('form-signup').classList.toggle('hidden', m !== 'signup');
+        document.getElementById('tab-login-btn').classList.toggle('active', m === 'login');
+        document.getElementById('tab-signup-btn').classList.toggle('active', m === 'signup');
+    };
+
+    window.showTab = (t) => {
+        ['home', 'notes', 'library', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
+        ['home', 'notes', 'library', 'rank', 'config'].forEach(nav => {
+            const el = document.getElementById(`nav-${nav}`); if(el) el.classList.toggle('nav-active', nav === t);
+        });
+        if(t === 'rank') loadRanking('users'); if(t === 'notes') loadUserNotes(); if(t === 'library') loadLibrary();
+    };
+
+    onAuthStateChanged(auth, u => {
+        document.getElementById('auth-screen').classList.toggle('hidden', !!u);
+        document.getElementById('main-screen').classList.toggle('hidden', !u);
+        document.getElementById('nav').classList.toggle('hidden', !u);
+        if(u) { loadUserData(u.uid); fetchVerse(); }
+    });
+
+    const BIBLE_DATABASE = [ { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" } ];
+    function fetchVerse() {
+        const selected = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)];
+        document.getElementById('verse-text').innerText = `"${selected.text}"`;
+        document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
     }
-    window.saveNotes = async () => { await addDoc(collection(db, "users", auth.currentUser.uid, "notes"), { text: document.getElementById('study-notes').value, verse: document.getElementById('verse-ref').innerText, date: new Date().toISOString() }); alert("Salvo!"); };
-    window.loadUserNotes = async () => { const list = document.getElementById('notes-list'); const q = query(collection(db, "users", auth.currentUser.uid, "notes"), orderBy("date", "desc")); const snap = await getDocs(q); list.innerHTML = snap.empty ? "<p>Vazio.</p>" : ""; snap.forEach(d => { const n = d.data(); list.innerHTML += `<div class="note-card"><small>${new Date(n.date).toLocaleDateString()}</small><br><b>${n.verse}</b><p>${n.text}</p></div>`; }); };
+
+    window.generateStudy = async () => {
+        const btn = document.getElementById('btn-study'); const vText = document.getElementById('verse-text').innerText;
+        btn.innerText = "ANALISANDO..."; btn.disabled = true;
+        try {
+            const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: vText }) });
+            const data = await response.json(); const fullText = data.choices[0].message.content;
+            const parts = fullText.split(/PERGUNTA:|Pergunta:/i); const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
+            correctAnswer = fullText.split(/CORRETA:|Correta:/i)[1].trim()[0].toUpperCase();
+            document.getElementById('ai-response').innerText = explanation; document.getElementById('quiz-question').innerText = parts[1].split(/[A-D]\)/)[0].trim();
+            const opts = fullText.match(/[A-D]\) .+/g); const quizDiv = document.getElementById('quiz-options'); quizDiv.innerHTML = "";
+            opts.forEach(o => { const b = document.createElement('button'); b.className = "quiz-option"; b.innerText = o; b.onclick = () => checkAnswer(o[0].toUpperCase(), b); quizDiv.appendChild(b); });
+            document.getElementById('study-area').classList.remove('hidden'); btn.innerText = "ESTUDO PRONTO";
+        } catch (err) { btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; }
+    };
+
+    window.saveNotes = async () => {
+        const text = document.getElementById('study-notes').value; const vRef = document.getElementById('verse-ref').innerText;
+        if(!text) return alert("Escreva algo!");
+        await addDoc(collection(db, "users", auth.currentUser.uid, "notes"), { text, verse: vRef, date: new Date().toISOString() });
+        alert("Nota salva!"); document.getElementById('study-notes').value = "";
+    };
+
+    window.loadUserNotes = async () => {
+        const list = document.getElementById('notes-list'); list.innerHTML = "<p>Carregando...</p>";
+        const q = query(collection(db, "users", auth.currentUser.uid, "notes"), orderBy("date", "desc"));
+        const snap = await getDocs(q); list.innerHTML = snap.empty ? "<p>Vazio.</p>" : "";
+        snap.forEach(d => { const n = d.data(); list.innerHTML += `<div class="note-card"><div class="note-meta"><span>${new Date(n.date).toLocaleDateString()}</span><span style="color:var(--primary)">${n.verse}</span></div><div>${n.text}</div></div>`; });
+    };
+
+    window.askProfessor = async () => {
+        const doubt = document.getElementById('study-doubt').value; const verse = document.getElementById('verse-text').innerText;
+        const resBox = document.getElementById('ai-doubt-res'); if(!doubt) return alert("Dúvida?"); resBox.innerText = "Pensando...";
+        try { const r = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse, question: doubt }) }); const d = await r.json(); resBox.innerText = d.choices[0].message.content; } catch(e) { resBox.innerText = "Erro."; }
+    };
+
     window.logout = () => signOut(auth).then(() => location.reload());
     window.resetVerses = () => { localStorage.removeItem("seen_verses"); location.reload(); };
 </script>
