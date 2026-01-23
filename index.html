@@ -6,7 +6,7 @@
     <title>Trilha VIVA</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* VOLTANDO PARA A PALETA ACONCHEGANTE: Laranja, Bege e Marrom */
+        /* PALETA ACONCHEGANTE: Laranja, Bege e Marrom */
         :root { 
             --primary: #e67e22;    /* Laranja Pôr do Sol */
             --secondary: #d35400;  /* Laranja mais escuro para bordas */
@@ -204,14 +204,34 @@
 
         <div id="tab-config" class="hidden">
             <h2 style="text-align:center; color: var(--primary);">⚙️ AJUSTES</h2>
+            
+            <div class="card" style="border-color: var(--blue);">
+                <h4 style="color:var(--blue); margin:0 0 10px 0;">👤 MINHA CONTA</h4>
+                <p style="font-size: 0.85rem; margin-bottom: 10px;">Mantenha seus dados de acesso atualizados.</p>
+                <button class="btn-duo btn-secondary" style="padding:12px; font-size:14px; margin-bottom: 10px;" onclick="resetPasswordFromSettings()">Redefinir Senha</button>
+                <div style="border-top: 1px solid #efebe9; margin: 15px 0; padding-top: 15px;">
+                    <input type="email" id="new-email" placeholder="Novo e-mail" style="margin-bottom: 10px; padding: 12px;">
+                    <button class="btn-duo btn-primary" style="padding:12px; font-size:14px; background-color: var(--primary);" onclick="updateUserEmail()">Alterar E-mail</button>
+                </div>
+            </div>
+
             <div class="card" style="border-color: var(--gold);">
                 <h4 style="color:var(--gold); margin:0 0 10px 0;">💡 SUGESTÃO</h4>
                 <textarea id="app-suggestion" placeholder="Como podemos melhorar o app?"></textarea>
-                <button class="btn-duo" style="padding:12px; font-size:14px; background:var(--gold); border-bottom-color: #8d6e1d;" onclick="sendSuggestion()">Enviar</button>
+                <button class="btn-duo" style="padding:12px; font-size:14px; background:var(--gold); border-bottom-color: #8d6e1d;" onclick="sendSuggestion()">Enviar Feedback</button>
             </div>
-            <div class="card" style="text-align:center; border: none; box-shadow: none;">
-                <p><b>Northon Duarte</b></p>
-                <button class="btn-duo btn-primary" onclick="resetVerses()" style="font-size:12px; padding:10px;">Resetar Lista</button>
+
+            <div class="card" style="border-color: var(--primary); text-align: center; background-color: #fffaf0;">
+                <h3 style="color: var(--primary); margin-top: 0;">Sobre o Trilha</h3>
+                <p style="margin-bottom: 5px;"><strong>Idealizador e Criador:</strong></p>
+                <p style="font-weight: 700; color: var(--text); margin-top: 0;">Northon Duarte</p>
+                <div style="border-top: 1px solid #ffe4b5; margin: 15px 0; padding-top: 15px;">
+                    <p style="font-size: 0.9rem; font-weight: 900; color: var(--primary); margin-bottom: 5px;">OBJETIVO</p>
+                    <p style="font-style: italic; font-size: 0.95rem; line-height: 1.4; color: var(--text);">
+                        "Uma bússola espiritual projetada para guiar corações em uma jornada diária de fé, transformando cada versículo em um passo firme rumo à sabedoria e renovação."
+                    </p>
+                </div>
+                <button class="btn-duo btn-primary" onclick="resetVerses()" style="font-size:12px; padding:10px; width: auto; margin-top: 10px;">Resetar Versículos</button>
             </div>
         </div>
 
@@ -226,7 +246,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, verifyBeforeUpdateEmail } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4", authDomain: "bibliaquest-fbc44.firebaseapp.com", projectId: "bibliaquest-fbc44", storageBucket: "bibliaquest-fbc44.firebasestorage.app", messagingSenderId: "670585434397", appId: "1:670585434397:web:6d699582986e8dcbc6f1f4", measurementId: "G-H0Z7T8LCPE" };
@@ -241,6 +261,33 @@
         bird.classList.add('fly-animation');
         setTimeout(() => { bird.classList.add('hidden'); bird.classList.remove('fly-animation'); }, 4600);
     }
+
+    // --- NOVAS FUNÇÕES DE AJUSTE ---
+    window.resetPasswordFromSettings = async () => {
+        const userEmail = auth.currentUser.email;
+        try {
+            await sendPasswordResetEmail(auth, userEmail);
+            alert("E-mail de redefinição enviado para: " + userEmail);
+        } catch (e) { alert("Erro ao enviar e-mail: " + e.message); }
+    };
+
+    window.updateUserEmail = async () => {
+        const newEmail = document.getElementById('new-email').value;
+        if (!newEmail) return alert("Digite o novo e-mail!");
+        try {
+            // Método moderno do Firebase que envia verificação antes de trocar
+            await verifyBeforeUpdateEmail(auth.currentUser, newEmail);
+            alert("E-mail de verificação enviado! Verifique o novo endereço para concluir a alteração.");
+            document.getElementById('new-email').value = "";
+        } catch (e) { 
+            if (e.code === 'auth/requires-recent-login') {
+                alert("Por segurança, saia e entre novamente no app antes de trocar o e-mail.");
+            } else {
+                alert("Erro: " + e.message);
+            }
+        }
+    };
+    // --------------------------------
 
     window.togglePassword = (id) => {
         const input = document.getElementById(id);
@@ -336,7 +383,7 @@
         const text = document.getElementById('app-suggestion').value;
         if(!text) return alert("Escreva algo!");
         await addDoc(collection(db, "suggestions"), { text, user: auth.currentUser.email, date: new Date().toISOString() });
-        alert("Valeu!"); document.getElementById('app-suggestion').value = "";
+        alert("Feedback enviado com sucesso!"); document.getElementById('app-suggestion').value = "";
     };
 
     window.switchAuth = (m) => {
