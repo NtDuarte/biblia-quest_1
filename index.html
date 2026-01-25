@@ -16,7 +16,7 @@
             --text: #4e342e;       /* Marrom Café Profundo */
             --error: #c0392b; 
             --gold: #b38a42; 
-            --gray: #a1887f;       
+            --gray: #a1887f;        
         }
 
         body { font-family: 'Nunito', sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; color: var(--text); overflow-x: hidden; }
@@ -78,30 +78,43 @@
         .rank-xp { font-weight: 900; color: var(--blue); font-size: 1rem; float: right; }
         .rank-church-tag { font-size: 0.65rem; color: var(--primary); font-weight: 900; background: #fff3e0; padding: 2px 8px; border-radius: 10px; }
 
- .nav-bar { 
-    display: flex; 
-    justify-content: space-around; 
-    background: white; 
-    border-top: 1px solid #efebe9; 
-    padding: 12px 5px; 
-    position: fixed; 
-    bottom: 0; 
-    left: 50%;
-    transform: translateX(-50%); /* Garante centralização absoluta */
-    width: 100%; 
-    max-width: 480px; 
-    box-sizing: border-box; 
-    z-index: 1000; 
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-    padding-bottom: env(safe-area-inset-bottom, 15px); /* Ajuste para notch de celular */
-}
+        .nav-bar { 
+            display: flex; 
+            justify-content: space-around; 
+            background: white; 
+            border-top: 1px solid #efebe9; 
+            padding: 12px 5px; 
+            position: fixed; 
+            bottom: 0; 
+            left: 50%;
+            transform: translateX(-50%); 
+            width: 100%; 
+            max-width: 480px; 
+            box-sizing: border-box; 
+            z-index: 1000; 
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            padding-bottom: env(safe-area-inset-bottom, 15px); 
+        }
         .nav-item { cursor: pointer; font-weight: 900; color: var(--gray); font-size: 0.65rem; text-align: center; }
         .nav-active { color: var(--primary); }
+
+        /* NOVO: Ajuste para acessibilidade de idosos */
+        #verse-text {
+            font-weight: 700;
+            font-size: 1.5rem !important; /* Letra maior conforme solicitado */
+            line-height: 1.4;
+            margin: 15px 0;
+        }
+        #verse-ref {
+            color: var(--gray);
+            font-weight: 900;
+            font-size: 1rem !important;
+        }
     </style>
 </head>
 <body>
 
-<div id="nature-effect" class="bird-container hidden"></div>
+<div id="nature-effect" class="bird-container hidden">🐦</div>
 
 <div id="app">
     <div id="auth-screen">
@@ -174,9 +187,13 @@
         <div id="tab-home">
             <div class="card">
                 <h3 style="color: var(--primary); margin:0; font-size: 0.9rem;">📖 JORNADA DO DIA</h3>
-                <p id="verse-text" style="font-weight: 700; font-size: 1.1rem; margin: 10px 0;">Buscando paz...</p>
-                <div id="verse-ref" style="color: var(--gray); font-weight: 900; font-size: 0.8rem;"></div>
-                <button class="btn-duo btn-whatsapp" style="padding: 12px; font-size: 14px; width: auto; margin-top: 10px;" onclick="shareVerse()">Compartilhar Versículo 📲</button>
+                <p id="verse-text">Buscando paz...</p>
+                <div id="verse-ref"></div>
+                
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                    <button class="btn-duo btn-whatsapp" style="padding: 12px; font-size: 14px; flex: 1;" onclick="shareVerse()">Compartilhar 📲</button>
+                    <button class="btn-duo btn-gold" style="padding: 12px; font-size: 14px; flex: 1;" onclick="seeMoreContext()">Ver Contexto 🔍</button>
+                </div>
             </div>
             <button id="btn-study" class="btn-duo btn-primary" onclick="generateStudy()">INICIAR ESTUDO</button>
             <div id="study-area" class="hidden">
@@ -1274,6 +1291,7 @@
     { id: 999, text: "Eu sou o Alfa e o Ômega, o princípio e o fim. A quem quer que tiver sede, de graça lhe darei da fonte da água da vida.", ref: "Apocalipse 21:6" },
     { id: 1000, text: "Certamente cedo venho. Amém. Ora vem, Senhor Jesus.", ref: "Apocalipse 22:20" }
 ];
+
     function triggerNatureEffect() {
         const bird = document.getElementById('nature-effect');
         bird.classList.remove('hidden');
@@ -1281,12 +1299,24 @@
         setTimeout(() => { bird.classList.add('hidden'); bird.classList.remove('fly-animation'); }, 4600);
     }
 
-    window.shareVerse = () => {
+    // COMPARTILHAR COM LINK (Idealizado)
+   window.shareVerse = () => {
         const text = document.getElementById('verse-text').innerText;
         const ref = document.getElementById('verse-ref').innerText;
         const appLink = window.location.href; 
         const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!\n👉 ${appLink}`;
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+    };
+
+    // VER CONTEXTO (Idealizado)
+    window.seeMoreContext = async () => {
+        const studyArea = document.getElementById('study-area');
+        if (!studyArea.classList.contains('hidden')) {
+            studyArea.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+        alert("Buscando contexto profundo para você... ✨");
+        generateStudy();
     };
 
     async function saveCompletedStudy(explanation) {
@@ -1381,77 +1411,49 @@
         setTimeout(() => location.reload(), 1500);
     }
 
-  window.loadRanking = async (type = 'users') => {
-    const list = document.getElementById('ranking-list');
-    list.innerHTML = "<p style='text-align:center; padding:20px;'>Buscando os melhores da trilha... ⏳</p>";
-    
-    document.getElementById('rank-users-btn').classList.toggle('active', type === 'users');
-    document.getElementById('rank-church-btn').classList.toggle('active', type === 'churches');
-    
-    const today = new Date().toISOString().split('T')[0];
-    let q;
-
-    try {
-        if (type === 'users') {
-            q = query(
-                collection(db, "users"), 
-                where("lastXPUpdateDate", "==", today), 
-                orderBy("dailyXP", "desc"), 
-                limit(50)
-            );
-        } else {
-            q = query(collection(db, "users"), orderBy("xp", "desc"), limit(100));
+    // RANKING SEM O BUG DO NaN (Mantido conforme fix anterior)
+    window.loadRanking = async (type = 'users') => {
+        const list = document.getElementById('ranking-list');
+        list.innerHTML = "<p style='text-align:center; padding:20px;'>Buscando os melhores da trilha... ⏳</p>";
+        document.getElementById('rank-users-btn').classList.toggle('active', type === 'users');
+        document.getElementById('rank-church-btn').classList.toggle('active', type === 'churches');
+        const today = new Date().toISOString().split('T')[0];
+        let q;
+        try {
+            if (type === 'users') {
+                q = query(collection(db, "users"), where("lastXPUpdateDate", "==", today), orderBy("dailyXP", "desc"), limit(50));
+            } else {
+                q = query(collection(db, "users"), orderBy("xp", "desc"), limit(100));
+            }
+            const snapshot = await getDocs(q);
+            list.innerHTML = "";
+            if (snapshot.empty) {
+                const msg = type === 'users' ? "Ninguém pontuou hoje ainda. Seja o primeiro! 🔥" : "Nenhum dado encontrado.";
+                list.innerHTML = `<p style='text-align:center; padding:20px;'>${msg}</p>`;
+                return;
+            }
+            if (type === 'users') {
+                snapshot.docs.forEach((docSnap, i) => {
+                    const d = docSnap.data();
+                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i + 1}º</span><div class="rank-info"><span class="rank-xp">${d.dailyXP || 0} XP HOJE</span><b class="rank-name">${(d.name || "Viajante").toUpperCase()}</b><span class="rank-church-tag">${d.church || 'Independente'}</span></div></div>`;
+                });
+            } else {
+                const churches = {};
+                snapshot.docs.forEach(docSnap => {
+                    const d = docSnap.data();
+                    const c = d.church || "Independente";
+                    churches[c] = (churches[c] || 0) + (d.xp || 0);
+                });
+                const sortedChurches = Object.entries(churches).sort((a, b) => b[1] - a[1]);
+                sortedChurches.forEach((item, i) => {
+                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i + 1}º</span><div class="rank-info"><span class="rank-xp">${item[1]} XP TOTAL</span><b class="rank-name">${item[0].toUpperCase()}</b></div></div>`;
+                });
+            }
+        } catch (e) {
+            console.error("ERRO NO RANKING:", e);
+            list.innerHTML = "<p style='text-align:center; padding:20px;'>Erro ao carregar ranking. Tente novamente em breve.</p>";
         }
-
-        const snapshot = await getDocs(q);
-        list.innerHTML = "";
-
-        if (snapshot.empty) {
-            const msg = type === 'users' ? "Ninguém pontuou hoje ainda. Seja o primeiro! 🔥" : "Nenhum dado encontrado.";
-            list.innerHTML = `<p style='text-align:center; padding:20px;'>${msg}</p>`;
-            return;
-        }
-
-        if (type === 'users') {
-            // O SEGREDO: Usar snapshot.docs.forEach para o índice (i) funcionar
-            snapshot.docs.forEach((docSnap, i) => {
-                const d = docSnap.data();
-                list.innerHTML += `
-                    <div class="rank-item">
-                        <span class="rank-pos">${i + 1}º</span>
-                        <div class="rank-info">
-                            <span class="rank-xp">${d.dailyXP || 0} XP HOJE</span>
-                            <b class="rank-name">${(d.name || "Viajante").toUpperCase()}</b>
-                            <span class="rank-church-tag">${d.church || 'Independente'}</span>
-                        </div>
-                    </div>`;
-            });
-        } else {
-            const churches = {};
-            snapshot.docs.forEach(docSnap => {
-                const d = docSnap.data();
-                const c = d.church || "Independente";
-                churches[c] = (churches[c] || 0) + (d.xp || 0);
-            });
-
-            const sortedChurches = Object.entries(churches).sort((a, b) => b[1] - a[1]);
-            
-            sortedChurches.forEach((item, i) => {
-                list.innerHTML += `
-                    <div class="rank-item">
-                        <span class="rank-pos">${i + 1}º</span>
-                        <div class="rank-info">
-                            <span class="rank-xp">${item[1]} XP TOTAL</span>
-                            <b class="rank-name">${item[0].toUpperCase()}</b>
-                        </div>
-                    </div>`;
-            });
-        }
-    } catch (e) {
-        console.error("ERRO NO RANKING:", e);
-        list.innerHTML = "<p style='text-align:center; padding:20px;'>Erro ao carregar ranking. Tente novamente em breve.</p>";
-    }
-};
+    };
 
     window.handleAuth = async (m) => {
         try {
@@ -1507,48 +1509,32 @@
         const vText = document.getElementById('verse-text').innerText;
         btn.innerText = "ANALISANDO..."; 
         btn.disabled = true;
-
         try {
-            const response = await fetch('/api/generate', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ verse: vText }) 
-            });
-
+            const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: vText }) });
             const data = await response.json();
             if (data.error) throw new Error(data.error);
-
             const fullText = data.choices[0].message.content;
             const startIdx = fullText.search(/EXPLICAÇÃO:/i);
             const cleanText = fullText.substring(startIdx);
             const parts = cleanText.split(/PERGUNTA:|Pergunta:/i); 
-
             const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
             const quizPart = parts[1].trim();
-
             const correctMatch = fullText.match(/CORRETA:\s*([A-D])/i);
             correctAnswer = correctMatch ? correctMatch[1].toUpperCase() : "";
-
             document.getElementById('ai-response').innerText = explanation; 
             document.getElementById('quiz-question').innerText = quizPart.split(/[A-D]\)/)[0].trim();
-
             const opts = quizPart.match(/[A-D]\) .+/g); 
             const quizDiv = document.getElementById('quiz-options'); 
             quizDiv.innerHTML = "";
-            
             opts.forEach(o => { 
-                const b = document.createElement('button'); 
-                b.className = "quiz-option"; b.innerText = o; 
-                b.onclick = () => checkAnswer(o[0].toUpperCase(), b); 
-                quizDiv.appendChild(b); 
+                const b = document.createElement('button'); b.className = "quiz-option"; b.innerText = o; 
+                b.onclick = () => checkAnswer(o[0].toUpperCase(), b); quizDiv.appendChild(b); 
             });
-
             document.getElementById('study-area').classList.remove('hidden'); 
             btn.innerText = "ESTUDO PRONTO";
         } catch (err) { 
             console.error("ERRO DETALHADO:", err);
-            btn.disabled = false; 
-            btn.innerText = "TENTAR NOVAMENTE";
+            btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE";
             alert(`Erro: ${err.message}`);
         }
     };
