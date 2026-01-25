@@ -1,1560 +1,249 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trilha VIVA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        /* PALETA ACONCHEGANTE: Laranja, Bege e Marrom */
-        :root { 
-            --primary: #e67e22;    /* Laranja Pôr do Sol */
-            --secondary: #d35400;  /* Laranja mais escuro para bordas */
-            --blue: #8d6e63;       /* Marrom Médio */
-            --bg: #fdf5e6;         /* Bege Suave (Old Lace) */
-            --card-bg: #ffffff; 
-            --text: #4e342e;       /* Marrom Café Profundo */
-            --error: #c0392b; 
-            --gold: #b38a42; 
-            --gray: #a1887f;        
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trilha VIVA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #e67e22; --secondary: #d35400; --blue: #8d6e63;
+            --bg: #fdf5e6; --card-bg: #ffffff; --text: #4e342e;
+            --error: #c0392b; --gold: #b38a42; --gray: #a1887f; 
+        }
+        body { font-family: 'Nunito', sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; color: var(--text); overflow-x: hidden; }
+        #app { width: 100%; max-width: 480px; background: var(--card-bg); min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 120px; position: relative; box-shadow: 0 4px 20px rgba(78, 52, 46, 0.1); }
+        .hidden { display: none !important; }
+        
+        /* Animações */
+        .bird-container { position: fixed; top: 20%; left: -50px; z-index: 9999; pointer-events: none; font-size: 2.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        .fly-animation { animation: flyAcross 4.5s ease-in-out forwards; }
+        @keyframes flyAcross {
+            0% { left: -50px; top: 30%; transform: rotate(10deg); }
+            100% { left: 110%; top: 25%; transform: rotate(10deg); }
+        }
 
-        body { font-family: 'Nunito', sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; color: var(--text); overflow-x: hidden; }
-        #app { width: 100%; max-width: 480px; background: var(--card-bg); min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 120px; position: relative; box-shadow: 0 4px 20px rgba(78, 52, 46, 0.1); }
-        .hidden { display: none !important; }
-        
-        .bird-container { position: fixed; top: 20%; left: -50px; z-index: 9999; pointer-events: none; font-size: 2.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        .fly-animation { animation: flyAcross 4.5s ease-in-out forwards; }
-        @keyframes flyAcross {
-            0% { left: -50px; top: 30%; transform: rotate(10deg); }
-            25% { top: 20%; transform: rotate(-10deg); }
-            50% { top: 25%; transform: rotate(10deg); }
-            75% { top: 15%; transform: rotate(-10deg); }
-            100% { left: 110%; top: 25%; transform: rotate(10deg); }
-        }
+        /* UI Elements */
+        .logo-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
+        .logo-svg { width: 110px; height: 110px; margin-bottom: 15px; }
+        .logo-text { font-size: 2.2rem; font-weight: 900; color: var(--text); margin: 0; }
+        .logo-text span { color: var(--primary); }
 
-        .logo-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
-        .logo-svg { width: 110px; height: 110px; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        .logo-text { font-size: 2.2rem; font-weight: 900; color: var(--text); margin: 0; letter-spacing: -1px; }
-        .logo-text span { color: var(--primary); }
+        .auth-tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #efebe9; }
+        .auth-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 900; color: var(--gray); transition: 0.3s; }
+        .auth-tab.active { color: var(--primary); border-bottom: 4px solid var(--primary); }
 
-        .auth-tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #efebe9; }
-        .auth-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 900; color: var(--gray); transition: 0.3s; font-size: 1.1rem; }
-        .auth-tab.active { color: var(--primary); border-bottom: 4px solid var(--primary); }
+        input, textarea { width: 100%; padding: 16px; border: 2px solid #d7ccc8; border-radius: 18px; box-sizing: border-box; font-family: 'Nunito'; font-weight: 700; font-size: 1.15rem; margin-bottom: 10px; }
+        .btn-duo { width: 100%; padding: 20px; border: none; border-radius: 18px; font-size: 18px; font-weight: 900; text-transform: uppercase; cursor: pointer; color: white; border-bottom: 6px solid rgba(0,0,0,0.2); transition: 0.1s; margin-top: 10px; }
+        .btn-primary { background: var(--primary); border-bottom-color: var(--secondary); }
+        .btn-secondary { background: var(--blue); border-bottom-color: #5d4037; }
+        .btn-whatsapp { background-color: #25d366; border-bottom-color: #128c7e; }
 
-        .input-group { position: relative; width: 100%; margin-bottom: 12px; }
-        input, textarea { width: 100%; padding: 16px; border: 2px solid #d7ccc8; border-radius: 18px; box-sizing: border-box; font-family: 'Nunito'; font-weight: 700; font-size: 1.15rem; outline: none; transition: 0.2s; background: #fafafa; color: var(--text); }
-        input:focus, textarea:focus { border-color: var(--primary); background: white; }
-        textarea { resize: none; min-height: 110px; }
+        .header-stats { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #efebe9; margin-bottom: 25px; }
+        .card { border: 1px solid #efebe9; border-radius: 20px; padding: 20px; margin: 20px 0; background: white; }
+        
+        /* Estilos Diário */
+        .note-card { border-left: 6px solid var(--gold); border-radius: 16px; padding: 15px; margin-bottom: 15px; background: #fffdf9; border: 1px solid #efebe9; }
+        .library-card { border-left: 8px solid var(--primary); border-radius: 16px; padding: 15px; margin-bottom: 15px; background: #f7fcf9; border: 1px solid #efebe9; }
 
-        .toggle-password { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--gray); font-size: 1.2rem; display: flex; align-items: center; user-select: none; }
-        .reset-link { font-size: 1rem; color: var(--blue); font-weight: 900; text-align: right; display: block; margin: -5px 5px 15px 0; cursor: pointer; }
-
-        .btn-duo { width: 100%; padding: 20px; border: none; border-radius: 18px; font-size: 18px; font-weight: 900; text-transform: uppercase; cursor: pointer; color: white; border-bottom: 6px solid rgba(0,0,0,0.2); transition: 0.1s; margin-top: 10px; }
-        .btn-primary { background: var(--primary); border-bottom-color: var(--secondary); }
-        .btn-secondary { background: var(--blue); border-bottom-color: #5d4037; }
-        .btn-gold { background: var(--gold); border-bottom-color: #8d6e1d; }
-        .btn-whatsapp { background-color: #25d366; border-bottom-color: #128c7e; }
-        .btn-duo:active { transform: translateY(2px); border-bottom-width: 2px; }
-
-        .header-stats { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #efebe9; margin-bottom: 25px; }
-        #user-display { color: var(--primary); font-size: 1.1rem; text-transform: uppercase; font-weight: 900; }
-        .header-progress-container { width: 100px; background: #efebe9; border-radius: 10px; height: 8px; overflow: hidden; margin-top: 6px; }
-        .header-progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.6s; }
-
-        .card { border: 1px solid #efebe9; border-radius: 20px; padding: 20px; margin: 20px 0; background: white; box-shadow: 0 2px 8px rgba(78, 52, 46, 0.05); }
-        #ai-response { background: #fffcf5; font-size: 1.2rem; line-height: 1.6; white-space: pre-wrap; border: 1px solid var(--primary); color: var(--text); }
-        .quiz-option { width: 100%; text-align: left; padding: 20px; margin: 10px 0; border: 1px solid #efebe9; border-radius: 16px; background: white; cursor: pointer; font-weight: 700; font-size: 1.1rem; font-family: 'Nunito'; color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-
-        .note-card { border: 1px solid #efebe9; border-left: 6px solid var(--gold); border-radius: 16px; padding: 18px; margin-bottom: 15px; background: #fffdf9; font-size: 1.1rem; }
-        .note-meta { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 900; color: var(--gray); margin-bottom: 5px; }
-
-        .library-card { border: 1px solid #efebe9; border-left: 8px solid var(--primary); border-radius: 16px; padding: 18px; margin-bottom: 15px; background: #f7fcf9; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-        .library-card p { font-size: 1.1rem; }
-
-        .rank-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #fcfaf9; }
-        .rank-pos { font-weight: 900; width: 45px; color: var(--primary); font-size: 1.3rem; }
-        .rank-info { flex-grow: 1; margin-left: 10px; }
-        .rank-name { font-weight: 800; text-transform: uppercase; font-size: 1.1rem; display: block; }
-        .rank-xp { font-weight: 900; color: var(--blue); font-size: 1.1rem; float: right; }
-        .rank-church-tag { font-size: 0.85rem; color: var(--primary); font-weight: 900; background: #fff3e0; padding: 2px 10px; border-radius: 10px; }
-
-        .nav-bar { 
-            display: flex; justify-content: space-around; background: white; 
-            border-top: 2px solid #efebe9; padding: 12px 5px; position: fixed; 
-            bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; 
-            max-width: 480px; box-sizing: border-box; z-index: 1000; 
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.08); height: 90px;
-            padding-bottom: env(safe-area-inset-bottom, 15px); 
-        }
-        .nav-item { 
-            cursor: pointer; font-weight: 900; color: var(--gray); font-size: 0.85rem; 
-            text-align: center; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; flex: 1; gap: 2px;
-      }
-        .nav-item span:first-child { font-size: 1.5rem; }
-        .nav-active { color: var(--primary); }
-
-        #verse-text { font-weight: 700; font-size: 1.6rem !important; line-height: 1.4; margin: 15px 0; }
-        #verse-ref { color: var(--gray); font-weight: 900; font-size: 1.1rem !important; }
-    </style>
+        /* Menu Inferior */
+        .nav-bar { display: flex; justify-content: space-around; background: white; border-top: 2px solid #efebe9; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 90px; z-index: 1000; }
+        .nav-item { cursor: pointer; font-weight: 900; color: var(--gray); font-size: 0.85rem; display: flex; flex-direction: column; justify-content: center; align-items: center; flex: 1; }
+        .nav-item span:first-child { font-size: 1.5rem; }
+        .nav-active { color: var(--primary); }
+    </style>
 </head>
 <body>
 
 <div id="nature-effect" class="bird-container hidden">🐦</div>
 
 <div id="app">
-    <div id="auth-screen">
-        <div class="logo-container">
-            <svg class="logo-svg" viewBox="0 0 500 500">
-                <circle cx="250" cy="250" r="220" fill="white" stroke="#c49a4f" stroke-width="15"/>
-                <path d="M250,40 L250,80 M250,420 L250,460 M40,250 L80,250 M420,250 L460,250" stroke="#c49a4f" stroke-width="10" stroke-linecap="round"/>
-                <g transform="rotate(-45 250 250)">
-                    <path d="M250,100 L290,250 L210,250 Z" fill="#e67e22"/>
-                    <path d="M250,400 L290,250 L210,250 Z" fill="#b38a42"/>
-                </g>
-                <circle cx="250" cy="250" r="25" fill="#4e342e" stroke="white" stroke-width="5"/>
-            </svg>
-            <h1 class="logo-text">TRILHA <span>VIVA</span></h1>
-        </div>
-        <div class="auth-tabs">
-            <div class="auth-tab active" id="tab-login-btn" onclick="switchAuth('login')">ENTRAR</div>
-            <div class="auth-tab" id="tab-signup-btn" onclick="switchAuth('signup')">CRIAR CONTA</div>
-        </div>
-        <div id="form-login">
-            <input type="email" id="login-email" placeholder="E-MAIL">
-            <div class="input-group">
-                <input type="password" id="login-pass" placeholder="SENHA">
-                <span class="toggle-password" onclick="togglePassword('login-pass')">👁️</span>
-            </div>
-            <a class="reset-link" onclick="resetPassword()">Esqueceu a senha?</a>
-            <button class="btn-duo btn-primary" onclick="handleAuth('login')">Entrar na Trilha</button>
-        </div>
-        <div id="form-signup" class="hidden">
-            <input type="text" id="signup-user" placeholder="NOME DE USUÁRIO">
-            <input type="email" id="signup-email-new" placeholder="E-MAIL PARA CADASTRO">
-            <div class="input-group">
-                <input type="password" id="signup-pass-new" placeholder="SENHA">
-                <span class="toggle-password" onclick="togglePassword('signup-pass-new')">👁️</span>
-            </div>
-            <div class="input-group">
-                <input type="password" id="signup-pass-repeat" placeholder="REPETIR SENHA">
-                <span class="toggle-password" onclick="togglePassword('signup-pass-repeat')">👁️</span>
-            </div>
-            <label style="color: var(--primary); font-weight: 900; font-size: 0.9rem; display: block; text-align: center; margin-top: 10px;">JÁ É CRISTÃO? DIGITE SUA IGREJA:</label>
-            <input type="text" id="signup-church" placeholder="MINHA IGREJA">
-            <button class="btn-duo btn-secondary" onclick="handleAuth('signup')">Criar minha Conta</button>
-        </div>
-    </div>
+    <div id="auth-screen">
+        <div class="logo-container">
+            <h1 class="logo-text">TRILHA <span>VIVA</span></h1>
+        </div>
+        <div class="auth-tabs">
+            <div class="auth-tab active" id="tab-login-btn" onclick="switchAuth('login')">ENTRAR</div>
+            <div class="auth-tab" id="tab-signup-btn" onclick="switchAuth('signup')">CRIAR CONTA</div>
+        </div>
+        <div id="form-login">
+            <input type="email" id="login-email" placeholder="E-MAIL">
+            <input type="password" id="login-pass" placeholder="SENHA">
+            <button class="btn-duo btn-primary" onclick="handleAuth('login')">Entrar na Trilha</button>
+        </div>
+        <div id="form-signup" class="hidden">
+            <input type="text" id="signup-user" placeholder="NOME">
+            <input type="email" id="signup-email-new" placeholder="E-MAIL">
+            <input type="password" id="signup-pass-new" placeholder="SENHA">
+            <input type="text" id="signup-church" placeholder="MINHA IGREJA">
+            <button class="btn-duo btn-secondary" onclick="handleAuth('signup')">Criar Conta</button>
+        </div>
+    </div>
 
-    <div id="main-screen" class="hidden">
-        <div class="header-stats">
-            <div style="display:flex; align-items:center;">
-                <svg viewBox="0 0 500 500" style="width:45px; margin-right:10px;">
-                    <circle cx="250" cy="250" r="220" fill="white" stroke="#c49a4f" stroke-width="25"/>
-                    <g transform="rotate(-45 250 250)">
-                        <path d="M250,100 L290,250 L210,250 Z" fill="#e67e22"/>
-                        <path d="M250,400 L290,250 L210,250 Z" fill="#b38a42"/>
-                    </g>
-                    <circle cx="250" cy="250" r="30" fill="#4e342e"/>
-                </svg>
-                <div>
-                    <b id="user-display">USUÁRIO</b> 
-                    <div style="font-size: 0.8rem; font-weight: 900; color: var(--gray);">NÍVEL <span id="level-display">1</span></div>
-                    <div class="header-progress-container"><div id="progress-fill" class="header-progress-fill"></div></div>
-                </div>
-            </div>
-            <div style="text-align:right; font-size: 1.1rem;">
-                <span>🔥 <b id="streak-val">0</b></span>
-                <span style="color:var(--primary); margin-left:10px;">💎 <b id="xp-val">0</b></span>
-                <div onclick="logout()" style="color:var(--error); font-size:0.8rem; font-weight:900; cursor:pointer; margin-top:5px;">SAIR</div>
-            </div>
-        </div>
-        
-        <div id="tab-home">
-            <div class="card">
-                <h3 style="color: var(--primary); margin:0; font-size: 1rem;">📖 JORNADA DO DIA</h3>
-                <p id="verse-text">Buscando paz...</p>
-                <div id="verse-ref"></div>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-                    <button class="btn-duo btn-whatsapp" style="padding: 12px; font-size: 16px; flex: 1;" onclick="shareVerse()">Compartilhar Versículo 📲</button>
-                </div>
-            </div>
-            <button id="btn-study" class="btn-duo btn-primary" onclick="generateStudy()">INICIAR ESTUDO</button>
-            <div id="study-area" class="hidden">
-                <div class="card" id="ai-response"></div>
-                <div class="card" style="border-color: var(--blue);">
-                    <h4 style="color:var(--blue); margin:0 0 10px 0; font-size: 1.2rem;">🤔 DÚVIDA?</h4>
-                    <textarea id="study-doubt" placeholder="Pergunte ao Professor..."></textarea>
-                    <button class="btn-duo btn-secondary" style="padding:12px; font-size:16px;" onclick="askProfessor()">Perguntar</button>
-                    <p id="ai-doubt-res" style="font-size:1.1rem; font-style:italic; margin-top:10px;"></p>
-                </div>
-                <div class="card" style="border-color: var(--gold);">
-                    <h4 style="color:var(--gold); margin:0 0 10px 0; font-size: 1.2rem;">✍️ ANOTAÇÕES</h4>
-                    <textarea id="study-notes" placeholder="O que você aprendeu hoje?"></textarea>
-                    <button class="btn-duo" style="padding:12px; font-size:16px; background:var(--gold); border-bottom-color: #8d6e1d;" onclick="saveNotes()">Salvar Nota</button>
-                </div>
-                <div id="quiz-container" class="card" style="border-color: var(--primary);">
-                    <h4 id="quiz-question" style="color:var(--text); margin-top:0; font-size: 1.2rem;"></h4>
-                    <div id="quiz-options"></div>
-                </div>
-            </div>
-        </div>
+    <div id="main-screen" class="hidden">
+        <div class="header-stats">
+            <div><b id="user-display">USUÁRIO</b></div>
+            <div>🔥 <b id="streak-val">0</b> 💎 <b id="xp-val">0</b></div>
+        </div>
 
-        <div id="tab-notes" class="hidden">
-            <h2 style="text-align:center; color: var(--gold);">📜 MEU DIÁRIO</h2>
-            
-            <div class="auth-tabs" style="margin-bottom:15px;">
-                <div class="auth-tab active" id="diary-notes-btn" onclick="switchDiaryContent('notes')">ANOTAÇÕES</div>
-                <div class="auth-tab" id="diary-studies-btn" onclick="switchDiaryContent('studies')">ESTUDOS</div>
+        <div id="tab-home">
+            <div class="card">
+                <h3 style="color: var(--primary); margin:0;">📖 JORNADA DO DIA</h3>
+                <p id="verse-text">Buscando paz...</p>
+                <div id="verse-ref"></div>
+                <button class="btn-duo btn-whatsapp" onclick="shareVerse()">Compartilhar 📲</button>
+            </div>
+            <button id="btn-study" class="btn-duo btn-primary" onclick="generateStudy()">INICIAR ESTUDO</button>
+            <div id="study-area" class="hidden">
+                <div class="card" id="ai-response"></div>
+                <textarea id="study-notes" placeholder="O que aprendeu hoje?"></textarea>
+                <button class="btn-duo btn-primary" onclick="saveNotes()">Salvar Anotação</button>
+                <div id="quiz-container" class="card">
+                    <h4 id="quiz-question"></h4>
+                    <div id="quiz-options"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-notes" class="hidden">
+            <h2 style="text-align:center; color: var(--gold);">📜 MEU DIÁRIO</h2>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="sub-notes-btn" onclick="switchDiaryTab('notes')">MINHAS NOTAS</div>
+                <div class="auth-tab" id="sub-studies-btn" onclick="switchDiaryTab('studies')">HISTÓRICO IA</div>
             </div>
 
-            <div id="diary-notes-container">
+            <div id="diary-notes-content">
                 <div id="notes-list"></div>
             </div>
-
-            <div id="diary-studies-container" class="hidden">
+            <div id="diary-studies-content" class="hidden">
                 <div id="library-list"></div>
             </div>
-        </div>
+        </div>
 
-        <div id="tab-rank" class="hidden">
-            <h2 style="text-align:center; color: var(--primary);">🏆 RANKING</h2>
-            <div class="auth-tabs" style="margin-bottom:15px;">
-                <div class="auth-tab active" id="rank-users-btn" onclick="loadRanking('users')">DIÁRIO (HOJE)</div>
-                <div class="auth-tab" id="rank-church-btn" onclick="loadRanking('churches')">IGREJAS (TOTAL)</div>
-            </div>
-            <div id="ranking-list" class="card" style="padding:0"></div>
-        </div>
+        <div id="tab-rank" class="hidden">
+            <h2 style="text-align:center; color: var(--primary);">🏆 RANKING</h2>
+            <div id="ranking-list" class="card" style="padding:0"></div>
+        </div>
 
-        <div id="tab-config" class="hidden">
-            <h2 style="text-align:center; color: var(--primary);">⚙️ AJUSTES</h2>
-            <div class="card" style="border-color: var(--blue);">
-                <h4 style="color:var(--blue); margin:0 0 10px 0;">👤 MINHA CONTA</h4>
-                <p style="font-size: 1rem; margin-bottom: 10px;">Gerencie seu acesso com segurança.</p>
-                <button class="btn-duo btn-secondary" style="padding:10px; font-size:14px; margin-bottom: 15px;" onclick="resetPasswordFromSettings()">Redefinir Senha via E-mail</button>
-                <div style="border-top: 1px solid #efebe9; padding-top: 15px;">
-                    <input type="email" id="new-email" placeholder="Novo e-mail" style="margin-bottom: 8px; padding: 12px;">
-                    <button class="btn-duo btn-primary" style="padding:10px; font-size:14px; background-color: var(--primary);" onclick="updateUserEmail()">Alterar E-mail</button>
-                </div>
-            </div>
+        <div id="tab-config" class="hidden">
+            <h2 style="text-align:center; color: var(--primary);">⚙️ AJUSTES</h2>
+            <div class="card" style="text-align:center">
+                <p>Criado por: <b>Northon Duarte</b></p>
+                <button class="btn-duo btn-secondary" onclick="logout()">Sair</button>
+            </div>
+        </div>
 
-            <div class="card" style="border-color: var(--gold);">
-                <h4 style="color:var(--gold); margin:0 0 10px 0;">💡 SUGESTÃO</h4>
-                <textarea id="app-suggestion" placeholder="Como podemos melhorar?"></textarea>
-                <button class="btn-duo" style="padding:12px; font-size:16px; background:var(--gold); border-bottom-color: #8d6e1d;" onclick="sendSuggestion()">Enviar Feedback</button>
-            </div>
-
-            <div class="card" style="border-color: var(--primary); text-align: center; background-color: #fffaf0;">
-                <p style="margin-bottom: 5px;"><strong>Idealizador e Criador:</strong></p>
-                <p style="font-weight: 700; color: var(--text); margin-top: 0; font-size: 1.1rem;">Northon Duarte</p>
-                <p style="margin-bottom: 5px;"><strong>Ajudante:</strong></p>
-                <p style="font-weight: 700; color: var(--text); margin-top: 0; font-size: 1.1rem;">Thalis Bravim</p>
-                <p style="margin-bottom: 5px;"><strong>Apoio:</strong></p>
-                <p style="font-weight: 700; color: var(--text); margin-top: 0; font-size: 1.1rem;">3° Igreja Batista em Heliopolis</p>
-                <div style="border-top: 1px solid #ffe4b5; margin: 15px 0; padding-top: 15px;">
-                    <p style="font-size: 1rem; font-weight: 900; color: var(--primary); margin-bottom: 5px;">OBJETIVO</p>
-                    <p style="font-style: italic; font-size: 1.1rem; line-height: 1.4; color: var(--text);">
-                        "Uma bússola espiritual projetada para guiar corações em uma jornada diária de fé..."
-                    </p>
-                </div>
-                <button class="btn-duo btn-primary" onclick="resetVerses()" style="font-size:14px; padding:10px; width: auto; margin-top: 10px;">Resetar Lista</button>
-            </div>
-        </div>
-
-        <div id="nav" class="nav-bar hidden">
-            <div class="nav-item nav-active" id="nav-home" onclick="showTab('home')"><span>📖</span><span>JORNADA</span></div>
-            <div class="nav-item" id="nav-notes" onclick="showTab('notes')"><span>✍️</span><span>DIÁRIO</span></div>
-            <div class="nav-item" id="nav-rank" onclick="showTab('rank')"><span>🏆</span><span>RANKING</span></div>
-            <div class="nav-item" id="nav-config" onclick="showTab('config')"><span>⚙️</span><span>AJUSTE</span></div>
-        </div>
-    </div>
+        <div id="nav" class="nav-bar hidden">
+            <div class="nav-item nav-active" id="nav-home" onclick="showTab('home')"><span>📖</span><span>JORNADA</span></div>
+            <div class="nav-item" id="nav-notes" onclick="showTab('notes')"><span>✍️</span><span>DIÁRIO</span></div>
+            <div class="nav-item" id="nav-rank" onclick="showTab('rank')"><span>🏆</span><span>RANKING</span></div>
+            <div class="nav-item" id="nav-config" onclick="showTab('config')"><span>⚙️</span><span>AJUSTE</span></div>
+        </div>
+    </div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, verifyBeforeUpdateEmail } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs, addDoc, where } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, getDocs, addDoc, where, limit } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4", authDomain: "bibliaquest-fbc44.firebaseapp.com", projectId: "bibliaquest-fbc44", storageBucket: "bibliaquest-fbc44.firebasestorage.app", messagingSenderId: "670585434397", appId: "1:670585434397:web:6d699582986e8dcbc6f1f4", measurementId: "G-H0Z7T8LCPE" };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    let correctAnswer = "";
+    const firebaseConfig = { apiKey: "AIzaSyCAqU2eK-r5BBSud1nSZJHSbykATXdQNS4", authDomain: "bibliaquest-fbc44.firebaseapp.com", projectId: "bibliaquest-fbc44", storageBucket: "bibliaquest-fbc44.firebasestorage.app", messagingSenderId: "670585434397", appId: "1:670585434397:web:6d699582986e8dcbc6f1f4" };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let correctAnswer = "";
 
- // BASE DE DADOS EXPANDIDA (IDs 1 A 1000)
     const BIBLE_DATABASE = [
         { id: 1, text: "No princípio, criou Deus os céus e a terra.", ref: "Gênesis 1:1" },
         { id: 2, text: "O Senhor é o meu pastor; nada me faltará.", ref: "Salmos 23:1" },
-        { id: 3, text: "Tudo posso naquele que me fortalece.", ref: "Filipenses 4:13" },
-        { id: 4, text: "Lâmpada para os meus pés é tua palavra e luz, para o meu caminho.", ref: "Salmos 119:105" },
-        { id: 5, text: "O coração alegre é bom remédio, mas o espírito abatido seca até os ossos.", ref: "Provérbios 17:22" },
-        { id: 6, text: "Buscai, pois, em primeiro lugar, o seu reino e a sua justiça.", ref: "Mateus 6:33" },
-        { id: 7, text: "O Senhor te abençoe e te guarde.", ref: "Números 6:24" },
-        { id: 8, text: "Deem graças ao Senhor, porque ele é bom; o seu amor dura para sempre.", ref: "Salmos 136:1" },
-        { id: 9, text: "Seja forte e corajoso! Não desanime nem tenha medo.", ref: "Josué 1:9" },
-        { id: 10, text: "Eu sou o caminho, e a verdade, e a vida.", ref: "João 14:6" },
-        { id: 11, text: "O temor do Senhor é o princípio da sabedoria.", ref: "Provérbios 1:7" },
-        { id: 12, text: "Alegrai-vos sempre no Senhor; outra vez digo: alegrai-vos.", ref: "Filipenses 4:4" },
-        { id: 13, text: "Mas os que esperam no Senhor renovarão as suas forças.", ref: "Isaías 40:31" },
-        { id: 14, text: "Mil cairão ao teu lado, e dez mil, à tua direita, mas tu não serás atingido.", ref: "Salmos 91:7" },
-        { id: 15, text: "Honra a teu pai e a tua mãe.", ref: "Êxodo 20:12" },
-        { id: 16, text: "O amor é paciente, o amor é bondoso.", ref: "1 Coríntios 13:4" },
-        { id: 17, text: "Ensina-nos a contar os nossos dias para que alcancemos coração sábio.", ref: "Salmos 90:12" },
-        { id: 18, text: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito.", ref: "João 3:16" },
-        { id: 19, text: "A resposta branda desvia o furor, mas a palavra dura suscita a ira.", ref: "Provérbios 15:1" },
-        { id: 20, text: "Tudo quanto fizerdes, fazei-o de todo o coração, como ao Senhor.", ref: "Colossenses 3:23" },
-        { id: 21, text: "Lancem sobre ele toda a sua ansiedade, porque ele tem cuidado de vocês.", ref: "1 Pedro 5:7" },
-        { id: 22, text: "Entregue o seu caminho ao Senhor; confie nele, e ele agirá.", ref: "Salmos 37:5" },
-        { id: 23, text: "Confie no Senhor de todo o seu coração e não se apoie em seu próprio entendimento.", ref: "Provérbios 3:5" },
-        { id: 24, text: "Não tema, pois estou com você; não tenha medo, pois sou o seu Deus.", ref: "Isaías 41:10" },
-        { id: 25, text: "Sabemos que Deus age em todas as coisas para o bem daqueles que o amam.", ref: "Romanos 8:28" },
-        { id: 26, text: "Bem-aventurados os limpos de coração, porque eles verão a Deus.", ref: "Mateus 5:8" },
-        { id: 27, text: "Deus é o nosso refúgio e a nossa fortaleza, auxílio sempre presente na adversidade.", ref: "Salmos 46:1" },
-        { id: 28, text: "E a paz de Deus, que excede todo o entendimento, guardará o vosso coração.", ref: "Filipenses 4:7" },
-        { id: 29, text: "Porque sou eu que conheço os planos que tenho para vocês, diz o Senhor.", ref: "Jeremias 29:11" },
-        { id: 30, text: "O meu socorro vem do Senhor, que fez os céus e a terra.", ref: "Salmos 121:2" },
-        { id: 31, text: "O Senhor é bom, um refúgio em tempos de angústia. Ele cuida dos que nele confiam.", ref: "Naum 1:7" },
-        { id: 32, text: "Peçam, e lhes será dado; busquem, e encontrarão; batam, e a porta lhes será aberta.", ref: "Mateus 7:7" },
-        { id: 33, text: "Pois onde estiver o seu tesouro, ali também estará o seu coração.", ref: "Mateus 6:21" },
-        { id: 34, text: "O meu Deus suprirá todas as vossas necessidades segundo as suas riquezas.", ref: "Filipenses 4:19" },
-        { id: 35, text: "O Senhor é a minha força e o meu escudo; nele o meu coração confia.", ref: "Salmos 28:7" },
-        { id: 36, text: "Tudo o que fizerem, façam de bom coração, como se estivessem servindo ao Senhor.", ref: "Colossenses 3:23" },
-        { id: 37, text: "Aquele que habita no abrigo do Altíssimo e descansa à sombra do Todo-poderoso.", ref: "Salmos 91:1" },
-        { id: 38, text: "Vigiem e orem para que não caiam em tentação. O espírito está pronto, mas a carne é fraca.", ref: "Mateus 26:41" },
-        { id: 39, text: "A tua palavra é lâmpada que ilumina os meus passos e luz que clareia o meu caminho.", ref: "Salmos 119:105" },
-        { id: 40, text: "O coração do homem planeja o seu caminho, mas o Senhor lhe dirige os passos.", ref: "Provérbios 16:9" },
-        { id: 41, text: "Deixo-vos a paz, a minha paz vos dou; não vo-la dou como o mundo a dá.", ref: "João 14:27" },
-        { id: 42, text: "Mas, em todas estas coisas, somos mais do que vencedores, por aquele que nos amou.", ref: "Romanos 8:37" },
-        { id: 43, text: "A minha alma espera somente em Deus; dele vem a minha salvação.", ref: "Salmos 62:1" },
-        { id: 44, text: "O fruto do Espírito é amor, alegria, paz, paciência, amabilidade, bondade e fidelidade.", ref: "Gálatas 5:22" },
-        { id: 45, text: "Sede fortes e corajosos; não temais, nem vos espanteis diante deles.", ref: "Deuteronômio 31:6" },
-        { id: 46, text: "Até aqui nos ajudou o Senhor.", ref: "1 Samuel 7:12" },
-        { id: 47, text: "O Senhor é o meu forte e o meu escudo; nele confiou o meu coração, e fui socorrido.", ref: "Salmos 28:7" },
-        { id: 48, text: "Pois nada é impossível para Deus.", ref: "Lucas 1:37" },
-        { id: 49, text: "A sabedoria é melhor do que as joias, e nada do que se possa desejar se compara a ela.", ref: "Provérbios 8:11" },
-        { id: 50, text: "Em paz me deito e logo adormeço, pois só tu, Senhor, me fazes viver em segurança.", ref: "Salmos 4:8" },
-        { id: 51, text: "Não andem ansiosos por coisa alguma, mas em tudo apresentem seus pedidos a Deus.", ref: "Filipenses 4:6" },
-        { id: 52, text: "Honra ao Senhor com os teus bens e com as primícias de toda a tua renda.", ref: "Provérbios 3:9" },
-        { id: 53, text: "Escondi a tua palavra no meu coração, para eu não pecar contra ti.", ref: "Salmos 119:11" },
-        { id: 54, text: "O Senhor lutará por vocês; tão somente acalmem-se.", ref: "Êxodo 14:14" },
-        { id: 55, text: "Toda a Escritura é inspirada por Deus e útil para o ensino e a correção.", ref: "2 Timóteo 3:16" },
-        { id: 56, text: "A vontade de Deus é boa, perfeita e agradável.", ref: "Romanos 12:2" },
-        { id: 57, text: "Se Deus é por nós, quem será contra nós?", ref: "Romanos 8:31" },
-        { id: 58, text: "Para o homem é impossível, mas para Deus não; todas as coisas são possíveis para Deus.", ref: "Marcos 10:27" },
-        { id: 59, text: "Grandes coisas fez o Senhor por nós, e por isso estamos alegres.", ref: "Salmos 126:3" },
-        { id: 60, text: "Eis que estou à porta e bato; se alguém ouvir a minha voz e abrir a porta, entrarei.", ref: "Apocalipse 3:20" },
-        { id: 61, text: "A graça do Senhor Jesus Cristo seja com todos. Amém!", ref: "Apocalipse 22:21" },
-        { id: 62, text: "Agrada-te do Senhor, e ele satisfará os desejos do teu coração.", ref: "Salmos 37:4" },
-        { id: 63, text: "Justificados, pois, mediante a fé, temos paz com Deus por meio de nosso Senhor Jesus.", ref: "Romanos 5:1" },
-        { id: 64, text: "O que me consola na minha angústia é que a tua palavra me vivifica.", ref: "Salmos 119:50" },
-        { id: 65, text: "A glória desta última casa será maior do que a da primeira.", ref: "Ageu 2:9" },
-        { id: 66, text: "O Senhor é o meu refúgio e o meu Deus é a rocha em que me abrigo.", ref: "Salmos 94:22" },
-        { id: 67, text: "Pela graça sois salvos, mediante a fé; e isto não vem de vós, é dom de Deus.", ref: "Efésios 2:8" },
-        { id: 68, text: "No mundo tereis aflições, mas tende bom ânimo; eu venci o mundo.", ref: "João 16:33" },
-        { id: 69, text: "O Senhor completará o que a meu respeito ordenou.", ref: "Salmos 138:8" },
-        { id: 70, text: "Aquele que começou a boa obra em vocês vai completá-la até o dia de Cristo Jesus.", ref: "Filipenses 1:6" },
-        { id: 71, text: "Reconheça o Senhor em todos os seus caminhos, e ele endireitará as suas veredas.", ref: "Provérbios 3:6" },
-        { id: 72, text: "Provem e vejam como o Senhor é bom. Como é feliz o homem que nele se refugia!", ref: "Salmos 34:8" },
-        { id: 73, text: "Assim brilhe a luz de vocês diante dos homens, para que vejam as suas boas obras.", ref: "Mateus 5:16" },
-        { id: 74, text: "Entregue suas preocupações ao Senhor, e ele o susterá; jamais permitirá que o justo caia.", ref: "Salmos 55:22" },
-        { id: 75, text: "Portanto, se alguém está em Cristo, é nova criação; as coisas antigas já passaram.", ref: "2 Coríntios 5:17" },
-        { id: 76, text: "Ora, a fé é a certeza daquilo que esperamos e a prova das coisas que não vemos.", ref: "Hebreus 11:1" },
-        { id: 77, text: "Este é o dia que o Senhor fez; exultemos e alegremo-nos nele.", ref: "Salmos 118:24" },
-        { id: 78, text: "Nós amamos porque ele nos amou primeiro.", ref: "1 João 4:19" },
-        { id: 79, text: "Bendiga ao Senhor a minha alma! Bendiga ao Senhor todo o meu ser!", ref: "Salmos 103:1" },
-        { id: 80, text: "Pois é Deus quem efetua em vocês tanto o querer quanto o realizar.", ref: "Filipenses 2:13" },
-        { id: 81, text: "O Senhor é misericordioso e compassivo, paciente e transbordante de amor.", ref: "Salmos 103:8" },
-        { id: 82, text: "Pois o Senhor dá sabedoria; da sua boca procedem o conhecimento e o discernimento.", ref: "Provérbios 2:6" },
-        { id: 83, text: "A tua palavra é a verdade.", ref: "João 17:17" },
-        { id: 84, text: "Respondeu Jesus: 'Eu sou o pão da vida. Aquele que vem a mim nunca terá fome'.", ref: "João 6:35" },
-        { id: 85, text: "Clame a mim e eu responderei e direi a você coisas grandiosas e insondáveis.", ref: "Jeremias 33:3" },
-        { id: 86, text: "O caminho de Deus é perfeito; a palavra do Senhor é comprovadamente verdadeira.", ref: "2 Samuel 22:31" },
-        { id: 87, text: "Deus é espírito, e é necessário que os seus adoradores o adorem em espírito e em verdade.", ref: "João 4:24" },
-        { id: 88, text: "Vejam como é grande o amor que o Pai nos concedeu: sermos chamados filhos de Deus!", ref: "1 João 3:1" },
-        { id: 89, text: "Alegrem-se na esperança, sejam pacientes na tribulação, perseverem na oração.", ref: "Romanos 12:12" },
-        { id: 90, text: "Acima de tudo, guarde o seu coração, pois dele depende toda a sua vida.", ref: "Provérbios 4:23" },
-        { id: 91, text: "O Senhor é bom para todos; a sua compaixão alcança todas as suas criaturas.", ref: "Salmos 145:9" },
-        { id: 92, text: "Confie no Senhor para sempre, pois o Senhor, somente o Senhor, é a Rocha eterna.", ref: "Isaías 26:4" },
-        { id: 93, text: "Pois o salário do pecado é a morte, mas o dom gratuito de Deus é a vida eterna.", ref: "Romanos 6:23" },
-        { id: 94, text: "Busquem o Senhor enquanto é possível achá-lo; clamem por ele enquanto está perto.", ref: "Isaías 55:6" },
-        { id: 95, text: "Se confessarmos os nossos pecados, ele é fiel e justo para nos perdoar.", ref: "1 João 1:9" },
-        { id: 96, text: "O Senhor renova as minhas forças e me guia por caminhos caminhos de justiça.", ref: "Salmos 23:3" },
-        { id: 97, text: "A soberba precede a destruição, e a altivez do espírito precede a queda.", ref: "Provérbios 16:18" },
-        { id: 98, text: "Pois a palavra de Deus é viva e eficaz, e mais afiada que qualquer espada de dois gumes.", ref: "Hebreus 4:12" },
-        { id: 99, text: "Não se deixem vencer pelo mal, mas vençam o mal com o bem.", ref: "Romanos 12:21" },
-        { id: 100, text: "Deus é a nossa força e o nosso escudo.", ref: "Salmos 28:7" },
-        { id: 101, text: "A paz deixo com vocês; a minha paz lhes dou.", ref: "João 14:27" },
-        { id: 102, text: "Honra o Senhor com teus bens e com as primícias de toda a tua colheita.", ref: "Provérbios 3:9" },
-        { id: 103, text: "O Senhor é o meu auxílio; não terei medo. O que me pode fazer o homem?", ref: "Hebreus 13:6" },
-        { id: 104, text: "Sejam fortes e corajosos. Não tenham medo nem fiquem apavorados.", ref: "Deuteronômio 31:6" },
-        { id: 105, text: "O Senhor sustenta todos os que caem e levanta todos os que estão abatidos.", ref: "Salmos 145:14" },
-        { id: 106, text: "Nem só de pão viverá o homem, mas de toda palavra que procede da boca de Deus.", ref: "Mateus 4:4" },
-        { id: 107, text: "O amor nunca falha.", ref: "1 Coríntios 13:8" },
-        { id: 108, text: "Vinde a mim, todos os que estais cansados e oprimidos, e eu vos aliviarei.", ref: "Mateus 11:28" },
-        { id: 109, text: "O Senhor guarda todos os que o amam.", ref: "Salmos 145:20" },
-        { id: 110, text: "Deus é amor.", ref: "1 João 4:8" },
-        { id: 111, text: "Aquele que tem os meus mandamentos e os guarda, esse é o que me ama.", ref: "João 14:21" },
-        { id: 112, text: "A justiça engrandece a nação, mas o pecado é uma vergonha para qualquer povo.", ref: "Provérbios 14:34" },
-        { id: 113, text: "Ensina a criança no caminho em que deve andar.", ref: "Provérbios 22:6" },
-        { id: 114, text: "Sede vós também pacientes e fortalecei o vosso coração.", ref: "Tiago 5:8" },
-        { id: 115, text: "A graça de nosso Senhor Jesus Cristo seja com todos vós.", ref: "Apocalipse 22:21" },
-        { id: 116, text: "A amizade do Senhor é para os que o temem.", ref: "Salmos 25:14" },
-        { id: 117, text: "Bem-aventurados os que promovem a paz, pois serão chamados filhos de Deus.", ref: "Mateus 5:9" },
-        { id: 118, text: "O Senhor dará força ao seu povo; o Senhor abençoará o seu povo com paz.", ref: "Salmos 29:11" },
-        { id: 119, text: "Em Deus, cuja palavra eu louvo, em Deus eu confio e não temerei.", ref: "Salmos 56:4" },
-        { id: 120, text: "Tudo o que pedirem em oração, creiam que já o receberam, e assim sucederá.", ref: "Marcos 11:24" },
-        { id: 121, text: "As misericórdias do Senhor são a causa de não sermos consumidos.", ref: "Lamentações 3:22" },
-        { id: 122, text: "Escondi a tua palavra no meu coração para não pecar contra ti.", ref: "Salmos 119:11" },
-        { id: 123, text: "Quem tem ouvidos, ouça o que o Espírito diz às igrejas.", ref: "Apocalipse 2:7" },
-        { id: 124, text: "O Senhor é bom, um refúgio em tempos de angústia.", ref: "Naum 1:7" },
-        { id: 125, text: "Digno és, Senhor, de receber glória, honra e poder.", ref: "Apocalipse 4:11" },
-        { id: 126, text: "Grandes e maravilhosas são as tuas obras, Senhor Deus Todo-poderoso!", ref: "Apocalipse 15:3" },
-        { id: 127, text: "Sê fiel até à morte, e dar-te-ei a coroa da vida.", ref: "Apocalipse 2:10" },
-        { id: 128, text: "Não fomos nós que amamos a Deus, mas foi ele que nos amou.", ref: "1 João 4:10" },
-        { id: 129, text: "O que ganha almas sábio é.", ref: "Provérbios 11:30" },
-        { id: 130, text: "Filhinhos, não amemos de palavra, nem de língua, mas por obra e em verdade.", ref: "1 João 3:18" },
-        { id: 131, text: "Provai e vede que o Senhor é bom.", ref: "Salmos 34:8" },
-        { id: 132, text: "O Senhor é a porção da minha herança e o meu cálice.", ref: "Salmos 16:5" },
-        { id: 133, text: "Buscai o Senhor e a sua força; buscai a sua face continuamente.", ref: "Salmos 105:4" },
-        { id: 134, text: "Deus é o nosso refúgio e fortaleza.", ref: "Salmos 46:1" },
-        { id: 135, text: "O nome do Senhor é uma torre forte; os justos correm para ela e estão seguros.", ref: "Provérbios 18:10" },
-        { id: 136, text: "Sede agradecidos.", ref: "Colossenses 3:15" },
-        { id: 137, text: "Porque para Deus nada é impossível.", ref: "Lucas 1:37" },
-        { id: 138, text: "A palavra do Senhor permanece para sempre.", ref: "1 Pedro 1:25" },
-        { id: 139, text: "Eis que faço novas todas as coisas.", ref: "Apocalipse 21:5" },
-        { id: 140, text: "O Senhor redime a alma dos seus servos.", ref: "Salmos 34:22" },
-        { id: 141, text: "Orai sem cessar.", ref: "1 Tessalonicenses 5:17" },
-        { id: 142, text: "Em tudo dai graças.", ref: "1 Tessalonicenses 5:18" },
-        { id: 143, text: "Não apagueis o Espírito.", ref: "1 Tessalonicenses 5:19" },
-        { id: 144, text: "Retende o que é bom.", ref: "1 Tessalonicenses 5:21" },
-        { id: 145, text: "Abstende-vos de toda aparência do mal.", ref: "1 Tessalonicenses 5:22" },
-        { id: 146, text: "O Senhor é o meu auxílio; não temerei.", ref: "Salmos 118:6" },
-        { id: 147, text: "A graça de nosso Senhor Jesus Cristo seja convosco.", ref: "1 Tessalonicenses 5:28" },
-        { id: 148, text: "Combati o bom combate, acabei a carreira, guardei a fé.", ref: "2 Timóteo 4:7" },
-        { id: 149, text: "Fiel é o que vos chama, o qual também o fará.", ref: "1 Tessalonicenses 5:24" },
-        { id: 150, text: "Alegrai-vos na esperança.", ref: "Romanos 12:12" },
-        { id: 151, text: "Sede pacientes na tribulação.", ref: "Romanos 12:12" },
-        { id: 152, text: "Perseverai na oração.", ref: "Romanos 12:12" },
-        { id: 153, text: "Abençoai os que vos perseguem.", ref: "Romanos 12:14" },
-        { id: 154, text: "Alegrai-vos com os que se alegram.", ref: "Romanos 12:15" },
-        { id: 155, text: "Chorai com os que choram.", ref: "Romanos 12:15" },
-        { id: 156, text: "Não sejais sábios em vós mesmos.", ref: "Romanos 12:16" },
-        { id: 157, text: "A ninguém torneis mal por mal.", ref: "Romanos 12:17" },
-        { id: 158, text: "Tende paz com todos os homens.", ref: "Romanos 12:18" },
-        { id: 159, text: "Vence o mal com o bem.", ref: "Romanos 12:21" },
-        { id: 160, text: "A justiça de Deus se manifesta pela fé.", ref: "Romanos 1:17" },
-        { id: 161, text: "O justo viverá pela fé.", ref: "Romanos 1:17" },
-        { id: 162, text: "Fomos sepultados com ele pelo batismo.", ref: "Romanos 6:4" },
-        { id: 163, text: "O dom gratuito de Deus é a vida eterna.", ref: "Romanos 6:23" },
-        { id: 164, text: "Quem nos separará do amor de Cristo?", ref: "Romanos 8:35" },
-        { id: 165, text: "Somos mais do que vencedores.", ref: "Romanos 8:37" },
-        { id: 166, text: "Se Deus é por nós, quem será contra nós?", ref: "Romanos 8:31" },
-        { id: 167, text: "A fé vem pelo ouvir a palavra de Deus.", ref: "Romanos 10:17" },
-        { id: 168, text: "Oferecei os vossos corpos em sacrifício vivo.", ref: "Romanos 12:1" },
-        { id: 169, text: "Não vos conformeis com este mundo.", ref: "Romanos 12:2" },
-        { id: 170, text: "Transformai-vos pela renovação da vossa mente.", ref: "Romanos 12:2" },
-        { id: 171, text: "Amai-vos cordialmente uns aos outros.", ref: "Romanos 12:10" },
-        { id: 172, text: "O amor não faz mal ao próximo.", ref: "Romanos 13:10" },
-        { id: 173, text: "O cumprimento da lei é o amor.", ref: "Romanos 13:10" },
-        { id: 174, text: "Revesti-vos do Senhor Jesus Cristo.", ref: "Romanos 13:14" },
-        { id: 175, text: "Cada um de nós dará conta de si mesmo a Deus.", ref: "Romanos 14:12" },
-        { id: 176, text: "O reino de Deus é justiça, paz e alegria.", ref: "Romanos 14:17" },
-        { id: 177, text: "Sigamos as coisas que servem para a paz.", ref: "Romanos 14:19" },
-        { id: 178, text: "Tudo o que não é de fé é pecado.", ref: "Romanos 14:23" },
-        { id: 179, text: "Cristo não agradou a si mesmo.", ref: "Romanos 15:3" },
-        { id: 180, text: "Sede unânimes entre vós.", ref: "Romanos 15:5" },
-        { id: 181, text: "Recebei-vos uns aos outros.", ref: "Romanos 15:7" },
-        { id: 182, text: "O Deus de esperança vos encha de todo o gozo.", ref: "Romanos 15:13" },
-        { id: 183, text: "Abundeis em esperança pelo poder do Espírito Santo.", ref: "Romanos 15:13" },
-        { id: 184, text: "Saudai-vos uns aos outros com santo ósculo.", ref: "Romanos 16:16" },
-        { id: 185, text: "O Deus de paz esmagará em breve Satanás.", ref: "Romanos 16:20" },
-        { id: 186, text: "A Deus unicamente sábio seja dada glória.", ref: "Romanos 16:27" },
-        { id: 187, text: "Fiel é Deus, pelo qual fostes chamados.", ref: "1 Coríntios 1:9" },
-        { id: 188, text: "A palavra da cruz é poder de Deus.", ref: "1 Coríntios 1:18" },
-        { id: 189, text: "Aquele que se gloria, glorie-se no Senhor.", ref: "1 Coríntios 1:31" },
-        { id: 190, text: "A vossa fé não se apoie em sabedoria dos homens.", ref: "1 Coríntios 2:5" },
-        { id: 191, text: "As coisas que o olho não viu são as que Deus preparou.", ref: "1 Coríntios 2:9" },
-        { id: 192, text: "Ninguém pode pôr outro fundamento além de Cristo.", ref: "1 Coríntios 3:11" },
-        { id: 193, text: "Vós sois o templo de Deus.", ref: "1 Coríntios 3:16" },
-        { id: 194, text: "O Espírito de Deus habita em vós.", ref: "1 Coríntios 3:16" },
-        { id: 195, text: "A sabedoria deste mundo é loucura diante de Deus.", ref: "1 Coríntios 3:19" },
-        { id: 196, text: "Tudo é vosso, e vós de Cristo, e Cristo de Deus.", ref: "1 Coríntios 3:23" },
-        { id: 197, text: "Requer-se dos despenseiros que cada um se ache fiel.", ref: "1 Coríntios 4:2" },
-        { id: 198, text: "O reino de Deus não consiste em palavras, mas em poder.", ref: "1 Coríntios 4:20" },
-        { id: 199, text: "Fostes comprados por bom preço; glorificai, pois, a Deus.", ref: "1 Coríntios 6:20" },
-        { id: 200, text: "Tudo o que fizerdes, fazei-o para a glória de Deus.", ref: "1 Coríntios 10:31" },
-        { id: 201, text: "Sede firmes e constantes, sempre abundantes na obra do Senhor.", ref: "1 Coríntios 15:58" },
-        { id: 202, text: "Bendito seja o Deus e Pai das misericórdias.", ref: "2 Coríntios 1:3" },
-        { id: 203, text: "Ainda que o nosso homem exterior se corrompa, o interior se renova.", ref: "2 Coríntios 4:16" },
-        { id: 204, text: "Àquele que não conheceu pecado, o fez pecado por nós.", ref: "2 Coríntios 5:21" },
-        { id: 205, text: "Deus ama ao que dá com alegria.", ref: "2 Coríntios 9:7" },
-        { id: 206, text: "Estai, pois, firmes na liberdade com que Cristo nos libertou.", ref: "Gálatas 5:1" },
-        { id: 207, text: "Andai em Espírito e não cumprireis a concupiscência da carne.", ref: "Gálatas 5:16" },
-        { id: 208, text: "Se vivemos em Espírito, andemos também em Espírito.", ref: "Gálatas 5:25" },
-        { id: 209, text: "Somos feitura sua, criados em Cristo Jesus para as boas obras.", ref: "Efésios 2:10" },
-        { id: 210, text: "Irai-vos e não pequeis; não se ponha o sol sobre a vossa ira.", ref: "Efésios 4:26" },
-        { id: 211, text: "Sede, pois, imitadores de Deus, como filhos amados.", ref: "Efésios 5:1" },
-        { id: 212, text: "Dando sempre graças por tudo a nosso Deus e Pai.", ref: "Efésios 5:20" },
-        { id: 213, text: "Nada façais por contenda ou por vanglória, mas por humildade.", ref: "Filipenses 2:3" },
-        { id: 214, text: "Haja em vós o mesmo sentimento que houve em Cristo Jesus.", ref: "Filipenses 2:5" },
-        { id: 215, text: "Prossigo para o alvo, pelo prêmio da soberana vocação.", ref: "Filipenses 3:14" },
-        { id: 216, text: "Tudo o que é verdadeiro, honesto e justo, nisso pensai.", ref: "Filipenses 4:8" },
-        { id: 217, text: "Pensai nas coisas que são de cima, e não nas da terra.", ref: "Colossenses 3:2" },
-        { id: 218, text: "Tudo o que fizerdes, fazei-o em nome do Senhor Jesus.", ref: "Colossenses 3:17" },
-        { id: 219, text: "Perseverai em oração, velando nela com ação de graças.", ref: "Colossenses 4:2" },
-        { id: 220, text: "Regozijai-vos sempre.", ref: "1 Tessalonicenses 5:16" },
-        { id: 221, text: "Fiel é o Senhor, que vos confortará e guardará do maligno.", ref: "2 Tessalonicenses 3:3" },
-        { id: 222, text: "Ninguém despreze a tua mocidade; sê o exemplo dos fiéis.", ref: "1 Timóteo 4:12" },
-        { id: 223, text: "Milita a boa milícia da fé, toma posse da vida eterna.", ref: "1 Timóteo 6:12" },
-        { id: 224, text: "Deus não nos deu o espírito de temor, mas de fortaleza.", ref: "2 Timóteo 1:7" },
-        { id: 225, text: "Procura apresentar-te a Deus aprovado como obreiro.", ref: "2 Timóteo 2:15" },
-        { id: 226, text: "Toda a Escritura é divinamente inspirada e proveitosa.", ref: "2 Timóteo 3:16" },
-        { id: 227, text: "A graça de Deus se há manifestado, trazendo salvação.", ref: "Tito 2:11" },
-        { id: 228, text: "Cheguemo-nos, pois, com confiança ao trono da graça.", ref: "Hebreus 4:16" },
-        { id: 229, text: "Retenhamos firmes a confissão da nossa esperança.", ref: "Hebreus 10:23" },
-        { id: 230, text: "Corramos com paciência a carreira que nos está proposta.", ref: "Hebreus 12:1" },
-        { id: 231, text: "Olhando para Jesus, autor e consumador da fé.", ref: "Hebreus 12:2" },
-        { id: 232, text: "Não te deixarei, nem te desampararei.", ref: "Hebreus 13:5" },
-        { id: 233, text: "Jesus Cristo é o mesmo, ontem, e hoje, e eternamente.", ref: "Hebreus 13:8" },
-        { id: 234, text: "Se algum de vós tem falta de sabedoria, peça-a a Deus.", ref: "Tiago 1:5" },
-        { id: 235, text: "Toda a boa dádiva e todo o dom perfeito vem do alto.", ref: "Tiago 1:17" },
-        { id: 236, text: "Sede prontos para ouvir, tardios para falar.", ref: "Tiago 1:19" },
-        { id: 237, text: "Sede cumpridores da palavra, e não somente ouvintes.", ref: "Tiago 1:22" },
-        { id: 238, text: "Sujeitai-vos a Deus, resisti ao diabo, e ele fugirá.", ref: "Tiago 4:7" },
-        { id: 239, text: "Chegai-vos a Deus, e ele se chegará a vós.", ref: "Tiago 4:8" },
-        { id: 240, text: "A oração feita por um justo pode muito em seus efeitos.", ref: "Tiago 5:16" },
-        { id: 241, text: "Santificai a Cristo, como Senhor, em vossos corações.", ref: "1 Pedro 3:15" },
-        { id: 242, text: "Tende ardente amor uns para com os outros.", ref: "1 Pedro 4:8" },
-        { id: 243, text: "Humilhai-vos debaixo da potente mão de Deus.", ref: "1 Pedro 5:6" },
-        { id: 244, text: "Crescei na graça e conhecimento de nosso Senhor.", ref: "2 Pedro 3:18" },
-        { id: 245, text: "O sangue de Jesus Cristo nos purifica de todo pecado.", ref: "1 João 1:7" },
-        { id: 246, text: "Se alguém pecar, temos um Advogado para com o Pai.", ref: "1 João 2:1" },
-        { id: 247, text: "Não ameis o mundo, nem o que no mundo há.", ref: "1 João 2:15" },
-        { id: 248, text: "Aquele que faz a vontade de Deus permanece para sempre.", ref: "1 João 2:17" },
-        { id: 249, text: "Conhecemos o amor nisto: que ele deu a vida por nós.", ref: "1 João 3:16" },
-        { id: 250, text: "Maior é o que está em vós do que o que está no mundo.", ref: "1 João 4:4" },
-        { id: 251, text: "No amor não há temor, antes o amor lança fora o temor.", ref: "1 João 4:18" },
-        { id: 252, text: "Esta é a vitória que vence o mundo, a nossa fé.", ref: "1 João 5:4" },
-        { id: 253, text: "Se pedirmos alguma coisa segundo a sua vontade, ele ouve.", ref: "1 João 5:14" },
-        { id: 254, text: "Àquele que é poderoso para vos guardar de tropeçar.", ref: "Judas 1:24" },
-        { id: 255, text: "Eu sou o Alfa e o Ômega, o princípio e o fim.", ref: "Apocalipse 1:8" },
-        { id: 256, text: "Eis que venho sem demora; guarda o que tens.", ref: "Apocalipse 3:11" },
-        { id: 257, text: "Deus limpará de seus olhos toda a lágrima.", ref: "Apocalipse 21:4" },
-        { id: 258, text: "Em ti serão abençoadas todas as famílias da terra.", ref: "Gênesis 12:3" },
-        { id: 259, text: "Estou contigo, e te guardarei por onde quer que fores.", ref: "Gênesis 28:15" },
-        { id: 260, text: "O Senhor é a minha força e o meu cântico.", ref: "Êxodo 15:2" },
-        { id: 261, text: "Irá a minha presença contigo para te fazer descansar.", ref: "Êxodo 33:14" },
-        { id: 262, text: "Amarás o teu próximo como a ti mesmo. Eu sou o Senhor.", ref: "Levítico 19:18" },
-        { id: 263, text: "Deus não é homem para que minta nem filho do homem.", ref: "Números 23:19" },
-        { id: 264, text: "Amarás o Senhor teu Deus de todo o teu coração.", ref: "Deuteronômio 6:5" },
-        { id: 265, text: "Saberás que o Senhor teu Deus é o Deus fiel.", ref: "Deuteronômio 7:9" },
-        { id: 266, text: "O Deus eterno é a tua habitação e refúgio.", ref: "Deuteronômio 33:27" },
-        { id: 267, text: "Eu e a minha casa serviremos ao Senhor.", ref: "Josué 24:15" },
-        { id: 268, text: "O Senhor olha para o coração.", ref: "1 Samuel 16:7" },
-        { id: 269, text: "Deus é o meu rochedo, nele confiarei.", ref: "2 Samuel 22:3" },
-        { id: 270, text: "Buscai ao Senhor e a sua força continuamente.", ref: "1 Crônicas 16:11" },
-        { id: 271, text: "Louvai ao Senhor, porque a sua benignidade é eterna.", ref: "1 Crônicas 16:34" },
-        { id: 272, text: "Tua é, Senhor, a magnificência, o poder e a honra.", ref: "1 Crônicas 29:11" },
-        { id: 273, text: "Se o meu povo orar e buscar a minha face.", ref: "2 Crônicas 7:14" },
-        { id: 274, text: "Crede no Senhor vosso Deus, e estareis seguros.", ref: "2 Crônicas 20:20" },
-        { id: 275, text: "A alegria do Senhor é a vossa força.", ref: "Neemias 8:10" },
-        { id: 276, text: "Eu sei que o meu Redentor vive.", ref: "Jó 19:25" },
-        { id: 277, text: "Nenhum dos teus pensamentos pode ser impedido.", ref: "Jó 42:2" },
-        { id: 278, text: "Bem-aventurado o homem que não anda no conselho dos ímpios.", ref: "Salmos 1:1" },
-        { id: 279, text: "Eu te amarei, ó Senhor, fortaleza minha.", ref: "Salmos 18:1" },
-        { id: 280, text: "A palavra do Senhor é comprovadamente verdadeira.", ref: "Salmos 18:30" },
-        { id: 281, text: "Os céus declaram a glória de Deus.", ref: "Salmos 19:1" },
-        { id: 282, text: "Sejam agradáveis as meditações do meu coração.", ref: "Salmos 19:14" },
-        { id: 283, text: "Ensina-me, Senhor, as tuas veredas.", ref: "Salmos 25:4" },
-        { id: 284, text: "Uma coisa pedi ao Senhor e a buscarei.", ref: "Salmos 27:4" },
-        { id: 285, text: "Espera no Senhor e ele fortalecerá o teu coração.", ref: "Salmos 27:14" },
-        { id: 286, text: "Instruir-te-ei no caminho que deves seguir.", ref: "Salmos 32:8" },
-        { id: 287, text: "Bem-aventurada é a nação cujo Deus é o Senhor.", ref: "Salmos 33:12" },
-        { id: 288, text: "O seu louvor estará continuamente na minha boca.", ref: "Salmos 34:1" },
-        { id: 289, text: "O anjo do Senhor acampa-se ao redor dos que o temem.", ref: "Salmos 34:7" },
-        { id: 290, text: "Perto está o Senhor dos que têm o coração quebrantado.", ref: "Salmos 34:18" },
-        { id: 291, text: "Descansa no Senhor, e espera nele.", ref: "Salmos 37:7" },
-        { id: 292, text: "Nunca vi desamparado o justo.", ref: "Salmos 37:25" },
-        { id: 293, text: "Esperei com paciência no Senhor.", ref: "Salmos 40:1" },
-        { id: 294, text: "A minha alma suspira por ti, ó Deus.", ref: "Salmos 42:1" },
-        { id: 295, text: "Cria em mim, ó Deus, um coração puro.", ref: "Salmos 51:10" },
-        { id: 296, text: "Lança o teu cuidado sobre o Senhor.", ref: "Salmos 55:22" },
-        { id: 297, text: "No dia em que eu temer, hei de confiar em ti.", ref: "Salmos 56:3" },
-        { id: 298, text: "De Deus vem a minha salvação.", ref: "Salmos 62:1" },
-        { id: 299, text: "Confiai nele, ó povo, em todo o tempo.", ref: "Salmos 62:8" },
-        { id: 300, text: "Em Deus louvarei a sua palavra.", ref: "Salmos 56:10" },
-        { id: 301, text: "O Senhor é a minha luz e a minha salvação.", ref: "Salmos 27:1" },
-        { id: 302, text: "Aquele que habita no esconderijo do Altíssimo descansa.", ref: "Salmos 91:1" },
-        { id: 303, text: "Clama a mim, e responder-te-ei.", ref: "Jeremias 33:3" },
-        { id: 304, text: "Buscai o Senhor enquanto se pode achar.", ref: "Isaías 55:6" },
-        { id: 305, text: "O que vem a mim de maneira nenhuma o lançarei fora.", ref: "João 6:37" },
-        { id: 306, text: "Sede fortes e corajosos, não temais.", ref: "Deuteronômio 31:6" },
-        { id: 307, text: "Deus é o nosso refúgio e fortaleza.", ref: "Salmos 46:1" },
-        { id: 308, text: "Ensina-nos a contar os nossos dias.", ref: "Salmos 90:12" },
-        { id: 309, text: "A palavra do Senhor é reta.", ref: "Salmos 33:4" },
-        { id: 310, text: "O Senhor te guardará de todo o mal.", ref: "Salmos 121:7" },
-        { id: 311, text: "Grandes coisas fez o Senhor por nós.", ref: "Salmos 126:3" },
-        { id: 312, text: "Agrada-te do Senhor e ele satisfará teu coração.", ref: "Salmos 37:4" },
-        { id: 313, text: "A graça do Senhor Jesus seja com todos.", ref: "Apocalipse 22:21" },
-        { id: 314, text: "Não se turbe o vosso coração.", ref: "João 14:1" },
-        { id: 315, text: "Eis que estou convosco todos os dias.", ref: "Mateus 28:20" },
-        { id: 316, text: "A fé é a certeza do que se espera.", ref: "Hebreus 11:1" },
-        { id: 317, text: "Toda ferramenta preparada contra ti não prosperará.", ref: "Isaías 54:17" },
-        { id: 318, text: "Bem-aventurados os que choram, pois serão consolados.", ref: "Mateus 5:4" },
-        { id: 319, text: "A amizade do Senhor é para os que o temem.", ref: "Salmos 25:14" },
-        { id: 320, text: "Honra a teu pai e a tua mãe.", ref: "Êxodo 20:12" },
-        { id: 321, text: "Seja a vossa palavra sim, sim; não, não.", ref: "Mateus 5:37" },
-        { id: 322, text: "O amor é o vínculo da perfeição.", ref: "Colossenses 3:14" },
-        { id: 323, text: "Apascenta as minhas ovelhas.", ref: "João 21:17" },
-        { id: 324, text: "Bem-aventurados os misericordiosos.", ref: "Mateus 5:7" },
-        { id: 325, text: "O caminho do preguiçoso é cercado de espinhos.", ref: "Provérbios 15:19" },
-        { id: 326, text: "Deus não nos deu espírito de covardia.", ref: "2 Timóteo 1:7" },
-        { id: 327, text: "Sê o exemplo dos fiéis na palavra e no amor.", ref: "1 Timóteo 4:12" },
-        { id: 328, text: "Foge das paixões da mocidade.", ref: "2 Timóteo 2:22" },
-        { id: 329, text: "Digno é o trabalhador do seu salário.", ref: "1 Timóteo 5:18" },
-        { id: 330, text: "Combate o bom combate da fé.", ref: "1 Timóteo 6:12" },
-        { id: 331, text: "As misericórdias do Senhor não têm fim.", ref: "Lamentações 3:22" },
-        { id: 332, text: "Provai e vede que o Senhor é bom.", ref: "Salmos 34:8" },
-        { id: 333, text: "Deixai vir a mim os pequeninos.", ref: "Mateus 19:14" },
-        { id: 334, text: "Batei, e abrir-se-vos-á.", ref: "Mateus 7:7" },
-        { id: 335, text: "Onde estiver o vosso tesouro, aí estará o coração.", ref: "Mateus 6:21" },
-        { id: 336, text: "Quem perseverar até o fim será salvo.", ref: "Mateus 24:13" },
-        { id: 337, text: "Não andeis ansiosos pela vossa vida.", ref: "Mateus 6:25" },
-        { id: 338, text: "Pai nosso que estás nos céus.", ref: "Mateus 6:9" },
-        { id: 339, text: "O espírito está pronto, mas a carne é fraca.", ref: "Mateus 26:41" },
-        { id: 340, text: "Amai os vossos inimigos.", ref: "Mateus 5:44" },
-        { id: 341, text: "Vós sois o sal da terra.", ref: "Mateus 5:13" },
-        { id: 342, text: "Vós sois a luz do mundo.", ref: "Mateus 5:14" },
-        { id: 343, text: "Não julgueis, para que não sejais julgados.", ref: "Mateus 7:1" },
-        { id: 344, text: "Lázaro, vem para fora!", ref: "João 11:43" },
-        { id: 345, text: "Conhecereis a verdade, e ela vos libertará.", ref: "João 8:32" },
-        { id: 346, text: "Eu sou o bom pastor.", ref: "João 10:11" },
-        { id: 347, text: "Aquele que crê em mim nunca terá sede.", ref: "João 6:35" },
-        { id: 348, text: "Quem dentre vós não tiver pecado, atire a primeira pedra.", ref: "João 8:7" },
-        { id: 349, text: "Eu sou a ressurreição e a vida.", ref: "João 11:25" },
-        { id: 350, text: "Se me amais, guardai os meus mandamentos.", ref: "João 14:15" },
-        { id: 351, text: "Não se turbe o vosso coração, credes em Deus.", ref: "João 14:1" },
-        { id: 352, text: "Eu sou a videira verdadeira.", ref: "João 15:1" },
-        { id: 353, text: "Sem mim nada podeis fazer.", ref: "João 15:5" },
-        { id: 354, text: "Ninguém tem maior amor do que este.", ref: "João 15:13" },
-        { id: 355, text: "Vós sois meus amigos, se fazeis o que eu mando.", ref: "João 15:14" },
-        { id: 356, text: "Tenho-vos dito estas coisas para que tenhais paz.", ref: "João 16:33" },
-        { id: 357, text: "Santifica-os na verdade.", ref: "João 17:17" },
-        { id: 358, text: "Está consumado.", ref: "João 19:30" },
-        { id: 359, text: "Paz seja convosco.", ref: "João 20:19" },
-        { id: 360, text: "Senhor meu, e Deus meu!", ref: "João 20:28" },
-        { id: 361, text: "Segue-me tu.", ref: "João 21:22" },
-        { id: 362, text: "Importa antes obedecer a Deus do que aos homens.", ref: "Atos 5:29" },
-        { id: 363, text: "Crê no Senhor Jesus e serás salvo.", ref: "Atos 16:31" },
-        { id: 364, text: "Mais bem-aventurada coisa é dar do que receber.", ref: "Atos 20:35" },
-        { id: 365, text: "Não me envergonho do evangelho de Cristo.", ref: "Romanos 1:16" },
-        { id: 366, text: "O salário do pecado é a morte.", ref: "Romanos 6:23" },
-        { id: 367, text: "Se Deus é por nós, quem será contra nós?", ref: "Romanos 8:31" },
-        { id: 368, text: "Quem nos separará do amor de Cristo?", ref: "Romanos 8:35" },
-        { id: 369, text: "A fé é pelo ouvir a palavra de Deus.", ref: "Romanos 10:17" },
-        { id: 370, text: "Vence o mal com o bem.", ref: "Romanos 12:21" },
-        { id: 371, text: "Revesti-vos do Senhor Jesus Cristo.", ref: "Romanos 13:14" },
-        { id: 372, text: "Nenhum de nós vive para si.", ref: "Romanos 14:7" },
-        { id: 373, text: "O reino de Deus é justiça, paz e alegria.", ref: "Romanos 14:17" },
-        { id: 374, text: "A palavra da cruz é o poder de Deus.", ref: "1 Coríntios 1:18" },
-        { id: 375, text: "Aquele que se gloria, glorie-se no Senhor.", ref: "1 Coríntios 1:31" },
-        { id: 376, text: "Vós sois o templo de Deus.", ref: "1 Coríntios 3:16" },
-        { id: 377, text: "O Espírito de Deus habita em vós.", ref: "1 Coríntios 3:16" },
-        { id: 378, text: "Fostes comprados por bom preço.", ref: "1 Coríntios 6:20" },
-        { id: 379, text: "O conhecimento envaidece, mas o amor edifica.", ref: "1 Coríntios 8:1" },
-        { id: 380, text: "Ai de mim se não anunciar o evangelho!", ref: "1 Coríntios 9:16" },
-        { id: 381, text: "Aquele que cuida estar em pé, veja que não caia.", ref: "1 Coríntios 10:12" },
-        { id: 382, text: "Fazei tudo para a glória de Deus.", ref: "1 Coríntios 10:31" },
-        { id: 383, text: "Sede meus imitadores, como eu de Cristo.", ref: "1 Coríntios 11:1" },
-        { id: 384, text: "Fazei isto em memória de mim.", ref: "1 Coríntios 11:24" },
-        { id: 385, text: "Há diversidade de dons, mas o Espírito é o mesmo.", ref: "1 Coríntios 12:4" },
-        { id: 386, text: "Vós sois o corpo de Cristo.", ref: "1 Coríntios 12:27" },
-        { id: 387, text: "Ainda que eu falasse as línguas dos homens.", ref: "1 Coríntios 13:1" },
-        { id: 388, text: "O amor não é invejoso.", ref: "1 Coríntios 13:4" },
-        { id: 389, text: "O amor tudo sofre, tudo crê.", ref: "1 Coríntios 13:7" },
-        { id: 390, text: "Agora permanecem a fé, a esperança e o amor.", ref: "1 Coríntios 13:13" },
-        { id: 391, text: "Vigiai, estai firmes na fé.", ref: "1 Coríntios 16:13" },
-        { id: 392, text: "Todas as vossas coisas sejam feitas com amor.", ref: "1 Coríntios 16:14" },
-        { id: 393, text: "Andamos por fé, e não por vista.", ref: "2 Coríntios 5:7" },
-        { id: 394, text: "O amor de Cristo nos constrange.", ref: "2 Coríntios 5:14" },
-        { id: 395, text: "Deus ama ao que dá com alegria.", ref: "2 Coríntios 9:7" },
-        { id: 396, text: "A minha graça te basta.", ref: "2 Coríntios 12:9" },
-        { id: 397, text: "O meu poder se aperfeiçoa na fraqueza.", ref: "2 Coríntios 12:9" },
-        { id: 398, text: "Fui crucificado com Cristo.", ref: "Gálatas 2:20" },
-        { id: 399, text: "Vivo, não mais eu, mas Cristo vive em mim.", ref: "Gálatas 2:20" },
-        { id: 400, text: "Deus não se deixa escarnecer.", ref: "Gálatas 6:7" },
-        { id: 401, text: "O Senhor é bom para os que esperam por ele.", ref: "Lamentações 3:25" },
-        { id: 402, text: "Buscai ao Senhor e viveis.", ref: "Amós 5:6" },
-        { id: 403, text: "O que habita no amor habita em Deus.", ref: "1 João 4:16" },
-        { id: 404, text: "Tudo o que pedirdes, crendo, recebereis.", ref: "Mateus 21:22" },
-        { id: 405, text: "O Senhor é o meu forte e o meu escudo.", ref: "Salmos 28:7" },
-        { id: 406, text: "Deus é fiel, e não vos deixará tentas além do que podeis.", ref: "1 Coríntios 10:13" },
-        { id: 407, text: "Sede agradecidos.", ref: "Colossenses 3:15" },
-        { id: 408, text: "O Senhor dará força ao seu povo.", ref: "Salmos 29:11" },
-        { id: 409, text: "Prepara-te para te encontrares com o teu Deus.", ref: "Amós 4:12" },
-        { id: 410, text: "Andai em amor, como também Cristo vos amou.", ref: "Efésios 5:2" },
-        { id: 411, text: "Tudo o que dantes foi escrito, para nosso ensino foi escrito.", ref: "Romanos 15:4" },
-        { id: 412, text: "A palavra do Senhor é pura.", ref: "Salmos 18:30" },
-        { id: 413, text: "O Senhor resgata a alma dos seus servos.", ref: "Salmos 34:22" },
-        { id: 414, text: "Alegrai-vos sempre no Senhor.", ref: "Filipenses 4:4" },
-        { id: 415, text: "A vossa moderação seja conhecida de todos.", ref: "Filipenses 4:5" },
-        { id: 416, text: "O Senhor está perto.", ref: "Filipenses 4:5" },
-        { id: 417, text: "Não andeis ansiosos por coisa alguma.", ref: "Filipenses 4:6" },
-        { id: 418, text: "Deus suprirá todas as vossas necessidades.", ref: "Filipenses 4:19" },
-        { id: 419, text: "Ao Rei dos séculos, imortal, invisível, seja honra e glória.", ref: "1 Timóteo 1:17" },
-        { id: 420, text: "Grande é o mistério da piedade.", ref: "1 Timóteo 3:16" },
-        { id: 421, text: "O exercício corporal para pouco aproveita.", ref: "1 Timóteo 4:8" },
-        { id: 422, text: "A piedade para tudo é proveitosa.", ref: "1 Timóteo 4:8" },
-        { id: 423, text: "Persiste em ler, exortar e ensinar.", ref: "1 Timóteo 4:13" },
-        { id: 424, text: "Não desprezes o dom que há em ti.", ref: "1 Timóteo 4:14" },
-        { id: 425, text: "Tem cuidado de ti mesmo e da doutrina.", ref: "1 Timóteo 4:16" },
-        { id: 426, text: "O amor ao dinheiro é a raiz de todos os males.", ref: "1 Timóteo 6:10" },
-        { id: 427, text: "Foge destas coisas e segue a justiça.", ref: "1 Timóteo 6:11" },
-        { id: 428, text: "Guarda o depósito que te foi confiado.", ref: "1 Timóteo 6:20" },
-        { id: 429, text: "Deus não nos deu espírito de temor.", ref: "2 Timóteo 1:7" },
-        { id: 430, text: "Não te envergonhes do testemunho de nosso Senhor.", ref: "2 Timóteo 1:8" },
-        { id: 431, text: "Eu sei em quem tenho crido.", ref: "2 Timóteo 1:12" },
-        { id: 432, text: "Fortifica-te na graça que há em Cristo Jesus.", ref: "2 Timóteo 2:1" },
-        { id: 433, text: "Sofre as aflições como bom soldado.", ref: "2 Timóteo 2:3" },
-        { id: 434, text: "Se sofremos, também com ele reinaremos.", ref: "2 Timóteo 2:12" },
-        { id: 435, text: "O Senhor conhece os que são seus.", ref: "2 Timóteo 2:19" },
-        { id: 436, text: "Toda a Escritura é inspirada por Deus.", ref: "2 Timóteo 3:16" },
-        { id: 437, text: "Prega a palavra, insta a tempo e fora de tempo.", ref: "2 Timóteo 4:2" },
-        { id: 438, text: "O Senhor me livrará de toda má obra.", ref: "2 Timóteo 4:18" },
-        { id: 439, text: "Aos puros todas as coisas são puras.", ref: "Tito 1:15" },
-        { id: 440, text: "A graça de Deus se há manifestado.", ref: "Tito 2:11" },
-        { id: 441, text: "O Senhor é o meu auxílio, não temerei.", ref: "Hebreus 13:6" },
-        { id: 442, text: "Jesus Cristo é o mesmo ontem, hoje e eternamente.", ref: "Hebreus 13:8" },
-        { id: 443, text: "A oração da fé salvará o doente.", ref: "Tiago 5:15" },
-        { id: 444, text: "A oração feita por um justo pode muito.", ref: "Tiago 5:16" },
-        { id: 445, text: "Sede santos em toda a vossa maneira de viver.", ref: "1 Pedro 1:15" },
-        { id: 446, text: "Toda a carne é como a erva.", ref: "1 Pedro 1:24" },
-        { id: 447, text: "A palavra do Senhor permanece para sempre.", ref: "1 Pedro 1:25" },
-        { id: 448, text: "Desejai afetuosamente o leite espiritual.", ref: "1 Pedro 2:2" },
-        { id: 449, text: "Honrai a todos. Amai a fraternidade.", ref: "1 Pedro 2:17" },
-        { id: 450, text: "Cristo padeceu por nós, deixando-nos o exemplo.", ref: "1 Pedro 2:21" },
-        { id: 451, text: "Pelas suas feridas fostes sarados.", ref: "1 Pedro 2:24" },
-        { id: 452, text: "O temor do Senhor é o princípio da sabedoria.", ref: "Provérbios 1:7" },
-        { id: 453, text: "O Senhor dá sabedoria.", ref: "Provérbios 2:6" },
-        { id: 454, text: "Confia no Senhor de todo o teu coração.", ref: "Provérbios 3:5" },
-        { id: 455, text: "Não sejas sábio a teus próprios olhos.", ref: "Provérbios 3:7" },
-        { id: 456, text: "O caminho dos justos é como a luz da aurora.", ref: "Provérbios 4:18" },
-        { id: 457, text: "Sobre tudo o que se deve guardar, guarda o coração.", ref: "Provérbios 4:23" },
-        { id: 458, text: "Vai ter com a formiga, ó preguiçoso.", ref: "Provérbios 6:6" },
-        { id: 459, text: "O ódio excita contendas, mas o amor cobre transgressões.", ref: "Provérbios 10:12" },
-        { id: 460, text: "A bênção do Senhor é que enriquece.", ref: "Provérbios 10:22" },
-        { id: 461, text: "Na multidão de palavras não falta pecado.", ref: "Provérbios 10:19" },
-        { id: 462, text: "A esperança que se adianta adoece o coração.", ref: "Provérbios 13:12" },
-        { id: 463, text: "O que anda com os sábios ficará sábio.", ref: "Provérbios 13:20" },
-        { id: 464, text: "A resposta branda desvia o furor.", ref: "Provérbios 15:1" },
-        { id: 465, text: "Os olhos do Senhor estão em todo lugar.", ref: "Provérbios 15:3" },
-        { id: 466, text: "O coração alegre aformoseia o rosto.", ref: "Provérbios 15:13" },
-        { id: 467, text: "O espírito abatido seca os ossos.", ref: "Provérbios 17:22" },
-        { id: 468, text: "Melhor é um bocado seco e com ele a paz.", ref: "Provérbios 17:1" },
-        { id: 469, text: "O amigo ama em todo o tempo.", ref: "Provérbios 17:17" },
-        { id: 470, text: "O nome do Senhor é uma torre forte.", ref: "Provérbios 18:10" },
-        { id: 471, text: "A morte e a vida estão no poder da língua.", ref: "Provérbios 18:21" },
-        { id: 472, text: "Há amigo mais chegado do que um irmão.", ref: "Provérbios 18:24" },
-        { id: 473, text: "O que se compadece do pobre empresta ao Senhor.", ref: "Provérbios 19:17" },
-        { id: 474, text: "O coração do homem propõe o seu caminho.", ref: "Provérbios 16:9" },
-        { id: 475, text: "O Senhor dirige os passos do homem.", ref: "Provérbios 16:9" },
-        { id: 476, text: "A soberba precede a ruína.", ref: "Provérbios 16:18" },
-        { id: 477, text: "A coroa dos velhos são os filhos dos filhos.", ref: "Provérbios 17:6" },
-        { id: 478, text: "Lança o teu pão sobre as águas.", ref: "Eclesiastes 11:1" },
-        { id: 479, text: "Tudo tem o seu tempo determinado.", ref: "Eclesiastes 3:1" },
-        { id: 480, text: "Melhor é serem dois do que um.", ref: "Eclesiastes 4:9" },
-        { id: 481, text: "O cordão de três dobras não se quebra tão depressa.", ref: "Eclesiastes 4:12" },
-        { id: 482, text: "Melhor é o fim das coisas do que o princípio.", ref: "Eclesiastes 7:8" },
-        { id: 483, text: "Lembra-te do teu Criador nos dias da tua mocidade.", ref: "Eclesiastes 12:1" },
-        { id: 484, text: "De tudo o que se tem ouvido, o fim é: Teme a Deus.", ref: "Eclesiastes 12:13" },
-        { id: 485, text: "As muitas águas não podem apagar este amor.", ref: "Cantares 8:7" },
-        { id: 486, text: "Eu sou do meu amado, e o meu amado é meu.", ref: "Cantares 6:3" },
-        { id: 487, text: "O Senhor é o meu pastor, nada me faltará.", ref: "Salmos 23:1" },
-        { id: 488, text: "Deitarem-me faz em verdes pastos.", ref: "Salmos 23:2" },
-        { id: 489, text: "Guia-me mansamente a águas tranquilas.", ref: "Salmos 23:2" },
-        { id: 490, text: "Refrigera a minha alma.", ref: "Salmos 23:3" },
-        { id: 491, text: "Guia-me pelas veredas da justiça.", ref: "Salmos 23:3" },
-        { id: 492, text: "Ainda que eu andasse pelo vale da sombra da morte.", ref: "Salmos 23:4" },
-        { id: 493, text: "Não temeria mal algum, porque tu estás comigo.", ref: "Salmos 23:4" },
-        { id: 494, text: "A tua vara e o teu cajado me consolam.", ref: "Salmos 23:4" },
-        { id: 495, text: "Preparas uma mesa perante mim.", ref: "Salmos 23:5" },
-        { id: 496, text: "Unges a minha cabeça com óleo, o meu cálice transborda.", ref: "Salmos 23:5" },
-        { id: 497, text: "Certamente que a bondade e a misericórdia me seguirão.", ref: "Salmos 23:6" },
-        { id: 498, text: "Habitarei na casa do Senhor por longos dias.", ref: "Salmos 23:6" },
-        { id: 499, text: "Do Senhor é a terra e a sua plenitude.", ref: "Salmos 24:1" },
-        { id: 500, text: "Levantai, ó portas, as vossas cabeças.", ref: "Salmos 24:7" },
-        { id: 501, text: "Quem é este Rei da Glória? O Senhor forte e poderoso.", ref: "Salmos 24:8" },
-        { id: 502, text: "A ti, Senhor, levanto a minha alma.", ref: "Salmos 25:1" },
-        { id: 503, text: "Deus meu, em ti confio; não me deixes confundido.", ref: "Salmos 25:2" },
-        { id: 504, text: "Lembra-te, Senhor, das tuas misericórdias.", ref: "Salmos 25:6" },
-        { id: 505, text: "Bom e reto é o Senhor.", ref: "Salmos 25:8" },
-        { id: 506, text: "Todas as veredas do Senhor são misericórdia e verdade.", ref: "Salmos 25:10" },
-        { id: 507, text: "O Senhor é a minha luz e a minha salvação.", ref: "Salmos 27:1" },
-        { id: 508, text: "O Senhor é a força da minha vida.", ref: "Salmos 27:1" },
-        { id: 509, text: "Uma coisa pedi ao Senhor, e a buscarei.", ref: "Salmos 27:4" },
-        { id: 510, text: "No dia da adversidade me esconderá no seu pavilhão.", ref: "Salmos 27:5" },
-        { id: 511, text: "Espera no Senhor, anima-te, e ele fortalecerá o teu coração.", ref: "Salmos 27:14" },
-        { id: 512, text: "O Senhor é a minha força e o meu escudo.", ref: "Salmos 28:7" },
-        { id: 513, text: "Tributai ao Senhor a glória devida ao seu nome.", ref: "Salmos 29:2" },
-        { id: 514, text: "A voz do Senhor é poderosa.", ref: "Salmos 29:4" },
-        { id: 515, text: "O choro pode durar uma noite, mas a alegria vem pela manhã.", ref: "Salmos 30:5" },
-        { id: 516, text: "Em ti, Senhor, confio; nunca me deixes confundido.", ref: "Salmos 31:1" },
-        { id: 517, text: "Nas tuas mãos encomendo o meu espírito.", ref: "Salmos 31:5" },
-        { id: 518, text: "Os meus tempos estão nas tuas mãos.", ref: "Salmos 31:15" },
-        { id: 519, text: "Bem-aventurado aquele cuja transgressão é perdoada.", ref: "Salmos 32:1" },
-        { id: 520, text: "Tu és o lugar em que me escondo.", ref: "Salmos 32:7" },
-        { id: 521, text: "Instruir-te-ei e ensinar-te-ei o caminho que deves seguir.", ref: "Salmos 32:8" },
-        { id: 522, text: "Alegrai-vos no Senhor, e regozijai-vos, vós os justos.", ref: "Salmos 32:11" },
-        { id: 523, text: "A palavra do Senhor é reta.", ref: "Salmos 33:4" },
-        { id: 524, text: "A terra está cheia da bondade do Senhor.", ref: "Salmos 33:5" },
-        { id: 525, text: "Pela palavra do Senhor foram feitos os céus.", ref: "Salmos 33:6" },
-        { id: 526, text: "O conselho do Senhor permanece para sempre.", ref: "Salmos 33:11" },
-        { id: 527, text: "Bem-aventurada é a nação cujo Deus é o Senhor.", ref: "Salmos 33:12" },
-        { id: 528, text: "O Senhor olha dos céus e vê todos os filhos dos homens.", ref: "Salmos 33:13" },
-        { id: 529, text: "Eis que os olhos do Senhor estão sobre os que o temem.", ref: "Salmos 33:18" },
-        { id: 530, text: "A nossa alma espera no Senhor; ele é o nosso auxílio.", ref: "Salmos 33:20" },
-        { id: 531, text: "Louvarei ao Senhor em todo o tempo.", ref: "Salmos 34:1" },
-        { id: 532, text: "Engrandecei ao Senhor comigo; e juntos exaltemos o seu nome.", ref: "Salmos 34:3" },
-        { id: 533, text: "Busquei ao Senhor, e ele me respondeu.", ref: "Salmos 34:4" },
-        { id: 534, text: "O anjo do Senhor acampa-se ao redor dos que o temem.", ref: "Salmos 34:7" },
-        { id: 535, text: "Provai, e vede que o Senhor é bom.", ref: "Salmos 34:8" },
-        { id: 536, text: "Os que buscam ao Senhor de nada têm falta.", ref: "Salmos 34:10" },
-        { id: 537, text: "Aparta-te do mal, e faze o bem; busca a paz, e segue-a.", ref: "Salmos 34:14" },
-        { id: 538, text: "Perto está o Senhor dos que têm o coração quebrantado.", ref: "Salmos 34:18" },
-        { id: 539, text: "Muitas são as aflições do justo, mas o Senhor o livra.", ref: "Salmos 34:19" },
-        { id: 540, text: "O Senhor resgata a alma dos seus servos.", ref: "Salmos 34:22" },
-        { id: 541, text: "Diga a minha alma: Eu sou a tua salvação.", ref: "Salmos 35:3" },
-        { id: 542, text: "Senhor, quem é como tu?", ref: "Salmos 35:10" },
-        { id: 543, text: "A tua misericórdia, Senhor, está nos céus.", ref: "Salmos 36:5" },
-        { id: 544, text: "Quão preciosa é, ó Deus, a tua benignidade.", ref: "Salmos 36:7" },
-        { id: 545, text: "Em ti está o manancial da vida.", ref: "Salmos 36:9" },
-        { id: 546, text: "Na tua luz veremos a luz.", ref: "Salmos 36:9" },
-        { id: 547, text: "Não te indignes por causa dos malfeitores.", ref: "Salmos 37:1" },
-        { id: 548, text: "Confia no Senhor e faze o bem.", ref: "Salmos 37:3" },
-        { id: 549, text: "Agrada-te do Senhor, e ele satisfará os desejos do teu coração.", ref: "Salmos 37:4" },
-        { id: 550, text: "Entrega o teu caminho ao Senhor; confia nele, e ele agirá.", ref: "Salmos 37:5" },
-        { id: 551, text: "Descansa no Senhor, e espera nele.", ref: "Salmos 37:7" },
-        { id: 552, text: "Os mansos herdarão a terra.", ref: "Salmos 37:11" },
-        { id: 553, text: "O Senhor conhece os dias dos retos.", ref: "Salmos 37:18" },
-        { id: 554, text: "Os passos de um homem bom são confirmados pelo Senhor.", ref: "Salmos 37:23" },
-        { id: 555, text: "Fui moço, e agora sou velho; mas nunca vi desamparado o justo.", ref: "Salmos 37:25" },
-        { id: 556, text: "Aparta-te do mal e faze o bem; e terás morada para sempre.", ref: "Salmos 37:27" },
-        { id: 557, text: "Espera no Senhor, e guarda o seu caminho.", ref: "Salmos 37:34" },
-        { id: 558, text: "Observa o homem íntegro, e atenta para o reto.", ref: "Salmos 37:37" },
-        { id: 559, text: "A salvação dos justos vem do Senhor.", ref: "Salmos 37:39" },
-        { id: 560, text: "Senhor, diante de ti está todo o meu desejo.", ref: "Salmos 38:9" },
-        { id: 561, text: "Em ti, Senhor, espero; tu, Senhor meu Deus, me ouvirás.", ref: "Salmos 38:15" },
-        { id: 562, text: "Não me desampares, Senhor; meu Deus, não te ausentes de mim.", ref: "Salmos 38:21" },
-        { id: 563, text: "Faze-me conhecer, Senhor, o meu fim.", ref: "Salmos 39:4" },
-        { id: 564, text: "Na verdade, todo homem, por mais firme que esteja, é vaidade.", ref: "Salmos 39:5" },
-        { id: 565, text: "Agora, pois, Senhor, que espero eu? A minha esperança está em ti.", ref: "Salmos 39:7" },
-        { id: 566, text: "Ouve, Senhor, a minha oração, e inclina os ouvidos ao meu clamor.", ref: "Salmos 39:12" },
-        { id: 567, text: "Esperei com paciência no Senhor, e ele se inclinou para mim.", ref: "Salmos 40:1" },
-        { id: 568, text: "Pôs um novo cântico na minha boca, um hino ao nosso Deus.", ref: "Salmos 40:3" },
-        { id: 569, text: "Bem-aventurado o homem que põe no Senhor a sua confiança.", ref: "Salmos 40:4" },
-        { id: 570, text: "Muitas são, Senhor meu Deus, as tuas maravilhas.", ref: "Salmos 40:5" },
-        { id: 571, text: "Deleito-me em fazer a tua vontade, ó Deus meu.", ref: "Salmos 40:8" },
-        { id: 572, text: "A tua lei está dentro do meu coração.", ref: "Salmos 40:8" },
-        { id: 573, text: "Não retenhas de mim, Senhor, as tuas misericórdias.", ref: "Salmos 40:11" },
-        { id: 574, text: "Folguem e alegrem-se em ti todos os que te buscam.", ref: "Salmos 40:16" },
-        { id: 575, text: "O Senhor cuida de mim.", ref: "Salmos 40:17" },
-        { id: 576, text: "Tu és o meu auxílio e o meu libertador.", ref: "Salmos 40:17" },
-        { id: 577, text: "Bem-aventurado é aquele que atende ao pobre.", ref: "Salmos 41:1" },
-        { id: 578, text: "O Senhor o livrará no dia do mal.", ref: "Salmos 41:1" },
-        { id: 579, text: "O Senhor o conservará, e o manterá em vida.", ref: "Salmos 41:2" },
-        { id: 580, text: "O Senhor o sustentará no leito da enfermidade.", ref: "Salmos 41:3" },
-        { id: 581, text: "Como o cervo brama pelas correntes das águas.", ref: "Salmos 42:1" },
-        { id: 582, text: "A minha alma tem sede de Deus, do Deus vivo.", ref: "Salmos 42:2" },
-        { id: 583, text: "Por que estás abatida, ó minha alma?", ref: "Salmos 42:5" },
-        { id: 584, text: "Espera em Deus, pois ainda o louvarei.", ref: "Salmos 42:5" },
-        { id: 585, text: "Um abismo chama outro abismo.", ref: "Salmos 42:7" },
-        { id: 586, text: "O Senhor mandará a sua misericórdia de dia.", ref: "Salmos 42:8" },
-        { id: 587, text: "De noite a sua canção estará comigo.", ref: "Salmos 42:8" },
-        { id: 588, text: "Envie a tua luz e a tua verdade, para que me guiem.", ref: "Salmos 43:3" },
-        { id: 589, text: "Então irei ao altar de Deus, a Deus, que é a minha grande alegria.", ref: "Salmos 43:4" },
-        { id: 590, text: "Deus é o nosso refúgio e fortaleza.", ref: "Salmos 46:1" },
-        { id: 591, text: "Deus é socorro bem presente na angústia.", ref: "Salmos 46:1" },
-        { id: 592, text: "Portanto não temeremos, ainda que a terra se mude.", ref: "Salmos 46:2" },
-        { id: 593, text: "Há um rio cujas correntes alegram a cidade de Deus.", ref: "Salmos 46:4" },
-        { id: 594, text: "Deus está no meio dela; não será abalada.", ref: "Salmos 46:5" },
-        { id: 595, text: "Deus a ajudará, já ao romper da manhã.", ref: "Salmos 46:5" },
-        { id: 596, text: "O Senhor dos Exércitos está conosco.", ref: "Salmos 46:7" },
-        { id: 597, text: "Vinde, vede as obras do Senhor.", ref: "Salmos 46:8" },
-        { id: 598, text: "Aquietai-vos, e sabei que eu sou Deus.", ref: "Salmos 46:10" },
-        { id: 599, text: "Serei exaltado entre as nações; serei exaltado sobre a terra.", ref: "Salmos 46:10" },
-        { id: 600, text: "O Deus de Jacó é o nosso refúgio.", ref: "Salmos 46:11" },
-    { id: 601, text: "O Senhor é o que te guarda; o Senhor é a tua sombra à tua direita.", ref: "Salmos 121:5" },
-    { id: 602, text: "Grandes coisas fez o Senhor por nós, pelas quais estamos alegres.", ref: "Salmos 126:3" },
-    { id: 603, text: "Os que semeiam em lágrimas segarão com alegria.", ref: "Salmos 126:5" },
-    { id: 604, text: "Se o Senhor não edificar a casa, em vão trabalham os que a edificam.", ref: "Salmos 127:1" },
-    { id: 605, text: "Eis que os filhos são herança do Senhor.", ref: "Salmos 127:3" },
-    { id: 606, text: "Bem-aventurado aquele que teme ao Senhor e anda nos seus caminhos.", ref: "Salmos 128:1" },
-    { id: 607, text: "Do fundo do abismo clamo a ti, ó Senhor.", ref: "Salmos 130:1" },
-    { id: 608, text: "No Senhor há misericórdia, e nele há abundante redenção.", ref: "Salmos 130:7" },
-    { id: 609, text: "Oh! quão bom e quão suave é que os irmãos vivam em união!", ref: "Salmos 133:1" },
-    { id: 610, text: "Ali o Senhor ordena a bênção e a vida para sempre.", ref: "Salmos 133:3" },
-    { id: 611, text: "Louvai ao Senhor, porque o Senhor é bom.", ref: "Salmos 135:3" },
-    { id: 612, text: "Rendei graças ao Deus dos deuses; porque a sua benignidade dura para sempre.", ref: "Salmos 136:2" },
-    { id: 613, text: "Rendei graças ao Senhor dos senhores; porque a sua benignidade dura para sempre.", ref: "Salmos 136:3" },
-    { id: 614, text: "Cantaremos os cânticos do Senhor em terra estranha?", ref: "Salmos 137:4" },
-    { id: 615, text: "Eu te louvarei, de todo o meu coração.", ref: "Salmos 138:1" },
-    { id: 616, text: "O Senhor é excelso, mas atenta para o humilde.", ref: "Salmos 138:6" },
-    { id: 617, text: "O Senhor aperfeiçoará o que me toca.", ref: "Salmos 138:8" },
-    { id: 618, text: "Senhor, tu me sondaste, e me conheces.", ref: "Salmos 139:1" },
-    { id: 619, text: "Tu conheces o meu assentar e o meu levantar.", ref: "Salmos 139:2" },
-    { id: 620, text: "Para onde me irei do teu espírito, ou para onde fugirei da tua face?", ref: "Salmos 139:7" },
-    { id: 621, text: "Se tomar as asas da alva, se habitar nas extremidades do mar.", ref: "Salmos 139:9" },
-    { id: 622, text: "Até ali a tua mão me guiará e a tua destra me susterá.", ref: "Salmos 139:10" },
-    { id: 623, text: "Eu te louvarei, porque de um modo assombroso, e tão maravilhoso fui feito.", ref: "Salmos 139:14" },
-    { id: 624, text: "Sonda-me, ó Deus, e conhece o meu coração.", ref: "Salmos 139:23" },
-    { id: 625, text: "Prova-me, e conhece os meus pensamentos.", ref: "Salmos 139:23" },
-    { id: 626, text: "Vê se há em mim algum caminho mau, e guia-me pelo caminho eterno.", ref: "Salmos 139:24" },
-    { id: 627, text: "Põe, ó Senhor, uma guarda à minha boca; guarda a porta dos meus lábios.", ref: "Salmos 141:3" },
-    { id: 628, text: "Os meus olhos estão voltados para ti, ó Deus, o Senhor.", ref: "Salmos 141:8" },
-    { id: 629, text: "Com a minha voz clamei ao Senhor.", ref: "Salmos 142:1" },
-    { id: 630, text: "Tu és o meu refúgio e a minha porção na terra dos viventes.", ref: "Salmos 142:5" },
-    { id: 631, text: "Ouve a minha oração, ó Senhor, dá ouvidos às minhas súplicas.", ref: "Salmos 143:1" },
-    { id: 632, text: "Ensina-me a fazer a tua vontade, pois és o meu Deus.", ref: "Salmos 143:10" },
-    { id: 633, text: "O teu espírito é bom; guie-me por terra plana.", ref: "Salmos 143:10" },
-    { id: 634, text: "Bendito seja o Senhor, minha rocha.", ref: "Salmos 144:1" },
-    { id: 635, text: "Senhor, que é o homem, para que o conheças?", ref: "Salmos 144:3" },
-    { id: 636, text: "Bem-aventurado o povo cujo Deus é o Senhor.", ref: "Salmos 144:15" },
-    { id: 637, text: "Exaltar-te-ei, ó Deus meu, rei, e bendirei o teu nome.", ref: "Salmos 145:1" },
-    { id: 638, text: "Cada dia te bendirei, e louvarei o teu nome para sempre.", ref: "Salmos 145:2" },
-    { id: 639, text: "Grande é o Senhor, e muito digno de louvor.", ref: "Salmos 145:3" },
-    { id: 640, text: "Uma geração louvará as tuas obras à outra geração.", ref: "Salmos 145:4" },
-    { id: 641, text: "O Senhor é piedoso e benigno, tardio em irar-se e de grande misericórdia.", ref: "Salmos 145:8" },
-    { id: 642, text: "O Senhor é bom para todos, e as suas misericórdias são sobre todas as suas obras.", ref: "Salmos 145:9" },
-    { id: 643, text: "O teu reino é um reino eterno; o teu domínio dura de geração em geração.", ref: "Salmos 145:13" },
-    { id: 644, text: "O Senhor sustenta a todos os que caem.", ref: "Salmos 145:14" },
-    { id: 645, text: "Levanta a todos os abatidos.", ref: "Salmos 145:14" },
-    { id: 646, text: "Os olhos de todos esperam em ti, e tu lhes dás o seu mantimento.", ref: "Salmos 145:15" },
-    { id: 647, text: "Abres a tua mão, e fartas os desejos de todos os viventes.", ref: "Salmos 145:16" },
-    { id: 648, text: "Justo é o Senhor em todos os seus caminhos, e santo em todas as suas obras.", ref: "Salmos 145:17" },
-    { id: 649, text: "Perto está o Senhor de todos os que o invocam.", ref: "Salmos 145:18" },
-    { id: 650, text: "De todos os que o invocam em verdade.", ref: "Salmos 145:18" },
-    { id: 651, text: "Ele cumprirá o desejo dos que o temem; ouvirá o seu clamor, e os salvará.", ref: "Salmos 145:19" },
-    { id: 652, text: "O Senhor guarda a todos os que o amam.", ref: "Salmos 145:20" },
-    { id: 653, text: "A minha boca falará o louvor do Senhor.", ref: "Salmos 145:21" },
-    { id: 654, text: "Louva, ó minha alma, ao Senhor.", ref: "Salmos 146:1" },
-    { id: 655, text: "Louvarei ao Senhor em toda a minha vida.", ref: "Salmos 146:2" },
-    { id: 656, text: "Bem-aventurado aquele que tem o Deus de Jacó por seu auxílio.", ref: "Salmos 146:5" },
-    { id: 657, text: "Cuja esperança está posta no Senhor seu Deus.", ref: "Salmos 146:5" },
-    { id: 658, text: "O que faz o céu e a terra, o mar e tudo quanto neles há.", ref: "Salmos 146:6" },
-    { id: 659, text: "O Senhor liberta os encarcerados.", ref: "Salmos 146:7" },
-    { id: 660, text: "O Senhor abre os olhos aos cegos.", ref: "Salmos 146:8" },
-    { id: 661, text: "O Senhor levanta os abatidos; o Senhor ama os justos.", ref: "Salmos 146:8" },
-    { id: 662, text: "O Senhor guarda os estrangeiros; ampara o órfão e a viúva.", ref: "Salmos 146:9" },
-    { id: 663, text: "Louvai ao Senhor, porque é bom cantar louvores ao nosso Deus.", ref: "Salmos 147:1" },
-    { id: 664, text: "O Senhor edifica a Jerusalém, congrega os dispersos de Israel.", ref: "Salmos 147:2" },
-    { id: 665, text: "Sara os quebrantados de coração, e lhes ata as suas feridas.", ref: "Salmos 147:3" },
-    { id: 666, text: "Conta o número das estrelas, chama-as a todas pelos seus nomes.", ref: "Salmos 147:4" },
-    { id: 667, text: "Grande é o nosso Senhor, e de grande poder.", ref: "Salmos 147:5" },
-    { id: 668, text: "O seu entendimento é infinito.", ref: "Salmos 147:5" },
-    { id: 669, text: "O Senhor eleva os humildes, e abate os ímpios até à terra.", ref: "Salmos 147:6" },
-    { id: 670, text: "O Senhor agrada-se dos que o temem e dos que esperam na sua misericórdia.", ref: "Salmos 147:11" },
-    { id: 671, text: "Louvai ao Senhor desde os céus, louvai-o nas alturas.", ref: "Salmos 148:1" },
-    { id: 672, text: "Louvai-o, todos os seus anjos; louvai-o, todos os seus exércitos.", ref: "Salmos 148:2" },
-    { id: 673, text: "Louvai-o, sol e lua; louvai-o, todas as estrelas luzentes.", ref: "Salmos 148:3" },
-    { id: 674, text: "Louvai ao Senhor desde a terra: vós, monstros marinhos, e todos os abismos.", ref: "Salmos 148:7" },
-    { id: 675, text: "Louvem o nome do Senhor, pois só o seu nome é exaltado.", ref: "Salmos 148:13" },
-    { id: 676, text: "Cantai ao Senhor um cântico novo.", ref: "Salmos 149:1" },
-    { id: 677, text: "O Senhor se agrada do seu povo; ornamentará os mansos com a salvação.", ref: "Salmos 149:4" },
-    { id: 678, text: "Louvai a Deus no seu santuário.", ref: "Salmos 150:1" },
-    { id: 679, text: "Louvai-o no firmamento do seu poder.", ref: "Salmos 150:1" },
-    { id: 680, text: "Louvai-o pelos seus atos poderosos.", ref: "Salmos 150:2" },
-    { id: 681, text: "Louvai-o conforme a excelência da sua grandeza.", ref: "Salmos 150:2" },
-    { id: 682, text: "Tudo quanto tem fôlego louve ao Senhor. Louvai ao Senhor.", ref: "Salmos 150:6" },
-    { id: 683, text: "O filho sábio alegra a seu pai, mas o filho insensato é a tristeza de sua mãe.", ref: "Provérbios 10:1" },
-    { id: 684, text: "Tesouros de impiedade de nada aproveitam.", ref: "Provérbios 10:2" },
-    { id: 685, text: "A justiça livra da morte.", ref: "Provérbios 10:2" },
-    { id: 686, text: "A mão dos diligentes domina.", ref: "Provérbios 12:24" },
-    { id: 687, text: "A memória do justo é abençoada.", ref: "Provérbios 10:7" },
-    { id: 688, text: "O que anda em integridade anda seguro.", ref: "Provérbios 10:9" },
-    { id: 689, text: "A boca do justo é manancial de vida.", ref: "Provérbios 10:11" },
-    { id: 690, text: "O amor cobre todas as transgressões.", ref: "Provérbios 10:12" },
-    { id: 691, text: "Nas mãos dos diligentes se acha a riqueza.", ref: "Provérbios 10:4" },
-    { id: 692, text: "A bênção do Senhor é que enriquece; e não traz consigo dores.", ref: "Provérbios 10:22" },
-    { id: 693, text: "Como o desejo dos justos, Deus lhes dará o bem.", ref: "Provérbios 10:24" },
-    { id: 694, text: "A esperança dos justos é alegria.", ref: "Provérbios 10:28" },
-    { id: 695, text: "O caminho do Senhor é fortaleza para os íntegros.", ref: "Provérbios 10:29" },
-    { id: 696, text: "A integridade dos retos os guiará.", ref: "Provérbios 11:3" },
-    { id: 697, text: "Na multidão de conselheiros há segurança.", ref: "Provérbios 11:14" },
-    { id: 698, text: "A mulher graciosa guarda a honra.", ref: "Provérbios 11:16" },
-    { id: 699, text: "O que espalha generosamente, ainda mais se lhe acrescenta.", ref: "Provérbios 11:24" },
-    { id: 700, text: "A alma generosa prosperará.", ref: "Provérbios 11:25" },
-    { id: 701, text: "O que busca o bem diligentemente busca favor.", ref: "Provérbios 11:27" },
-    { id: 702, text: "O fruto do justo é árvore de vida.", ref: "Provérbios 11:30" },
-    { id: 703, text: "O que ama a instrução ama o conhecimento.", ref: "Provérbios 12:1" },
-    { id: 704, text: "O homem de bem alcança favor do Senhor.", ref: "Provérbios 12:2" },
-    { id: 705, text: "A mulher virtuosa é a coroa do seu marido.", ref: "Provérbios 12:4" },
-    { id: 706, text: "O lábio veraz permanece para sempre.", ref: "Provérbios 12:19" },
-    { id: 707, text: "A ansiedade no coração do homem o abate, mas a boa palavra o alegra.", ref: "Provérbios 12:25" },
-    { id: 708, text: "Na vereda da justiça está a vida.", ref: "Provérbios 12:28" },
-    { id: 709, text: "O filho sábio ouve a instrução do pai.", ref: "Provérbios 13:1" },
-    { id: 710, text: "O que guarda a sua boca preserva a sua vida.", ref: "Provérbios 13:3" },
-    { id: 711, text: "A luz dos justos alegra.", ref: "Provérbios 13:9" },
-    { id: 712, text: "Da soberba só provém a contenda.", ref: "Provérbios 13:10" },
-    { id: 713, text: "A esperança adiada faz adoecer o coração.", ref: "Provérbios 13:12" },
-    { id: 714, text: "Desejo que se cumpre é doce para a alma.", ref: "Provérbios 13:19" },
-    { id: 715, text: "O que anda com os sábios ficará sábio.", ref: "Provérbios 13:20" },
-    { id: 716, text: "O homem de bem deixa herança aos filhos de seus filhos.", ref: "Provérbios 13:22" },
-    { id: 717, text: "O que retém a vara aborrece a seu filho.", ref: "Provérbios 13:24" },
-    { id: 718, text: "O que ama o filho, cedo o castiga.", ref: "Provérbios 13:24" },
-    { id: 719, text: "Toda mulher sábia edifica a sua casa.", ref: "Provérbios 14:1" },
-    { id: 720, text: "O que anda na sua retidão teme ao Senhor.", ref: "Provérbios 14:2" },
-    { id: 721, text: "O coração conhece a sua própria amargura.", ref: "Provérbios 14:10" },
-    { id: 722, text: "Há caminho que ao homem parece direito, mas o fim dele são os caminhos da morte.", ref: "Provérbios 14:12" },
-    { id: 723, text: "O homem prudente atenta para os seus passos.", ref: "Provérbios 14:15" },
-    { id: 724, text: "O que é tardio em irar-se é grande em entendimento.", ref: "Provérbios 14:29" },
-    { id: 725, text: "O coração com saúde é a vida da carne.", ref: "Provérbios 14:30" },
-    { id: 726, text: "A justiça exalta as nações.", ref: "Provérbios 14:34" },
-    { id: 727, text: "A resposta branda desvia o furor.", ref: "Provérbios 15:1" },
-    { id: 728, text: "A língua dos sábios adorna o conhecimento.", ref: "Provérbios 15:2" },
-    { id: 729, text: "Os olhos do Senhor estão em todo lugar, contemplando os maus e os bons.", ref: "Provérbios 15:3" },
-    { id: 730, text: "A oração dos retos é o seu contentamento.", ref: "Provérbios 15:8" },
-    { id: 731, text: "O coração alegre aformoseia o rosto.", ref: "Provérbios 15:13" },
-    { id: 732, text: "Todos os dias do aflito são maus, mas o de coração alegre tem um banquete contínuo.", ref: "Provérbios 15:15" },
-    { id: 733, text: "Melhor é o pouco com o temor do Senhor, do que um grande tesouro onde há inquietação.", ref: "Provérbios 15:16" },
-    { id: 734, text: "O homem se alegra em responder bem.", ref: "Provérbios 15:23" },
-    { id: 735, text: "A palavra a seu tempo, quão boa é!", ref: "Provérbios 15:23" },
-    { id: 736, text: "O coração do justo medita o que há de responder.", ref: "Provérbios 15:28" },
-    { id: 737, text: "O Senhor está longe dos ímpios, mas ouve a oração dos justos.", ref: "Provérbios 15:29" },
-    { id: 738, text: "O temor do Senhor é a instrução da sabedoria.", ref: "Provérbios 15:33" },
-    { id: 739, text: "Antes da honra vai a humildade.", ref: "Provérbios 15:33" },
-    { id: 740, text: "Do homem são as preparações do coração, mas do Senhor a resposta da boca.", ref: "Provérbios 16:1" },
-    { id: 741, text: "Confia ao Senhor as tuas obras, e teus pensamentos serão estabelecidos.", ref: "Provérbios 16:3" },
-    { id: 742, text: "Sendo os caminhos do homem agradáveis ao Senhor, este faz que até os seus inimigos tenham paz com ele.", ref: "Provérbios 16:7" },
-    { id: 743, text: "Melhor é o pouco com justiça, do que a abundância de bens com injustiça.", ref: "Provérbios 16:8" },
-    { id: 744, text: "O coração do homem planeja o seu caminho, mas o Senhor lhe dirige os passos.", ref: "Provérbios 16:9" },
-    { id: 745, text: "Abominação é aos reis o praticarem a impiedade.", ref: "Provérbios 16:12" },
-    { id: 746, text: "O trono se estabelece pela justiça.", ref: "Provérbios 16:12" },
-    { id: 747, text: "Quão melhor é adquirir a sabedoria do que o ouro!", ref: "Provérbios 16:16" },
-    { id: 748, text: "A soberba precede a destruição, e a altivez do espírito precede a queda.", ref: "Provérbios 16:18" },
-    { id: 749, text: "O que atenta prudentemente para a palavra achará o bem.", ref: "Provérbios 16:20" },
-    { id: 750, text: "O que confia no Senhor será bem-aventurado.", ref: "Provérbios 16:20" },
-    { id: 751, text: "O entendimento, para aquele que o possui, é uma fonte de vida.", ref: "Provérbios 16:22" },
-    { id: 752, text: "Palavras suaves são favos de mel, doces para a alma, e saúde para os ossos.", ref: "Provérbios 16:24" },
-    { id: 753, text: "Melhor é o que tarda em irar-se do que o poderoso.", ref: "Provérbios 16:32" },
-    { id: 754, text: "O que domina o seu espírito é melhor do que o que toma uma cidade.", ref: "Provérbios 16:32" },
-    { id: 755, text: "Melhor é um bocado seco, e com ele a paz, do que casa cheia de iguarias com contenda.", ref: "Provérbios 17:1" },
-    { id: 756, text: "O crisol é para a prata, e o forno para o ouro; mas o Senhor prova os corações.", ref: "Provérbios 17:3" },
-    { id: 757, text: "O que encobre a transgressão busca a amizade.", ref: "Provérbios 17:9" },
-    { id: 758, text: "O amigo ama em todo o tempo; e para a angústia nasce um irmão.", ref: "Provérbios 17:17" },
-    { id: 759, text: "O coração alegre é bom remédio.", ref: "Provérbios 17:22" },
-    { id: 760, text: "O espírito abatido seca os ossos.", ref: "Provérbios 17:22" },
-    { id: 761, text: "Até o tolo, quando se cala, é reputado por sábio.", ref: "Provérbios 17:28" },
-    { id: 762, text: "O nome do Senhor é uma torre forte; corre para ela o justo, e está seguro.", ref: "Provérbios 18:10" },
-    { id: 763, text: "Antes da ruína eleva-se o coração do homem.", ref: "Provérbios 18:12" },
-    { id: 764, text: "Responder antes de ouvir é estultícia e vergonha.", ref: "Provérbios 18:13" },
-    { id: 765, text: "A morte e a vida estão no poder da língua.", ref: "Provérbios 18:21" },
-    { id: 766, text: "O que acha uma mulher acha uma coisa boa.", ref: "Provérbios 18:22" },
-    { id: 767, text: "Alcançou a benevolência do Senhor.", ref: "Provérbios 18:22" },
-    { id: 768, text: "Há amigo mais chegado do que um irmão.", ref: "Provérbios 18:24" },
-    { id: 769, text: "Muitos são os planos no coração do homem, mas o propósito do Senhor prevalecerá.", ref: "Provérbios 19:21" },
-    { id: 770, text: "O temor do Senhor conduz à vida.", ref: "Provérbios 19:23" },
-    { id: 771, text: "O que teme ao Senhor ficará satisfeito.", ref: "Provérbios 19:23" },
-    { id: 772, text: "Como águas profundas é o conselho no coração do homem.", ref: "Provérbios 20:5" },
-    { id: 773, text: "O justo anda na sua integridade; bem-aventurados serão os seus filhos depois dele.", ref: "Provérbios 20:7" },
-    { id: 774, text: "Os passos do homem são dirigidos pelo Senhor.", ref: "Provérbios 20:24" },
-    { id: 775, text: "Como ribeiros de águas assim é o coração do rei na mão do Senhor.", ref: "Provérbios 21:1" },
-    { id: 776, text: "Fazer justiça e juízo é mais aceitável ao Senhor do que sacrifício.", ref: "Provérbios 21:3" },
-    { id: 777, text: "O que guarda a sua boca e a sua língua guarda a sua alma de angústias.", ref: "Provérbios 21:23" },
-    { id: 778, text: "Não há sabedoria, nem inteligência, nem conselho contra o Senhor.", ref: "Provérbios 21:30" },
-    { id: 779, text: "Prepara-se o cavalo para o dia da batalha, mas do Senhor vem a vitória.", ref: "Provérbios 21:31" },
-    { id: 780, text: "Mais vale o bom nome do que as muitas riquezas.", ref: "Provérbios 22:1" },
-    { id: 781, text: "O rico e o pobre se encontram; a todos o Senhor os fez.", ref: "Provérbios 22:2" },
-    { id: 782, text: "O galardão da humildade e o temor do Senhor são riquezas, honra e vida.", ref: "Provérbios 22:4" },
-    { id: 783, text: "Educa a criança no caminho em que deve andar; e até quando envelhecer não se desviará dele.", ref: "Provérbios 22:6" },
-    { id: 784, text: "Não removas os limites antigos que teus pais fixaram.", ref: "Provérbios 22:28" },
-    { id: 785, text: "Viste o homem diligente na sua obra? Perante reis será posto.", ref: "Provérbios 22:29" },
-    { id: 786, text: "Não te fatigues para seres rico; e não apliques nisso a tua inteligência.", ref: "Provérbios 23:4" },
-    { id: 787, text: "Dá-me, filho meu, o teu coração, e os teus olhos observem os meus caminhos.", ref: "Provérbios 23:26" },
-    { id: 788, text: "Compra a verdade, e não a vendas.", ref: "Provérbios 23:23" },
-    { id: 789, text: "Com sabedoria se edifica a casa, e com inteligência ela se firma.", ref: "Provérbios 24:3" },
-    { id: 790, text: "Se te mostrares frouxo no dia da angústia, a tua força será pequena.", ref: "Provérbios 24:10" },
-    { id: 791, text: "Porque sete vezes cairá o justo, e se levantará.", ref: "Provérbios 24:16" },
-    { id: 792, text: "Como a maçã de ouro em salvas de prata, assim é a palavra dita a seu tempo.", ref: "Provérbios 25:11" },
-    { id: 793, text: "Como o frio da neve no tempo da sega, assim é o mensageiro fiel para com os que o enviam.", ref: "Provérbios 25:13" },
-    { id: 794, text: "Se o teu inimigo tiver fome, dá-lhe pão para comer.", ref: "Provérbios 25:21" },
-    { id: 795, text: "Como a cidade derrubada, sem muro, assim é o homem que não pode conter o seu espírito.", ref: "Provérbios 25:28" },
-    { id: 796, text: "Fiel é a ferida feita pelo que ama, mas os beijos do que aborrece são enganosos.", ref: "Provérbios 27:6" },
-    { id: 797, text: "O óleo e o perfume alegram o coração; assim a doce amizade do próximo.", ref: "Provérbios 27:9" },
-    { id: 798, text: "Como o ferro com o ferro se aguça, assim o homem aguca o rosto do seu amigo.", ref: "Provérbios 27:17" },
-    { id: 799, text: "O que confia no seu próprio coração é insensato, mas o que anda sabiamente escapará.", ref: "Provérbios 28:26" },
-    { id: 800, text: "O temor do homem armará laços, mas o que confia no Senhor será exaltado.", ref: "Provérbios 29:25" },
-    { id: 801, text: "Conheçamos e prossigamos em conhecer ao Senhor.", ref: "Oseias 6:3" },
-    { id: 802, text: "Porque eu quero a misericórdia, e não o sacrifício.", ref: "Oseias 6:6" },
-    { id: 803, text: "Semeai para vós em justiça, ceifai segundo a misericórdia.", ref: "Oseias 10:12" },
-    { id: 804, text: "Quem é sábio, para que entenda estas coisas?", ref: "Oseias 14:9" },
-    { id: 805, text: "Convertei-vos a mim de todo o vosso coração.", ref: "Joel 2:12" },
-    { id: 806, text: "Rasgai o vosso coração, e não as vossas vestes.", ref: "Joel 2:13" },
-    { id: 807, text: "Derramarei o meu Espírito sobre toda a carne.", ref: "Joel 2:28" },
-    { id: 808, text: "Buscai o bem, e não o mal, para que vivais.", ref: "Amós 5:14" },
-    { id: 809, text: "Corra o juízo como as águas, e a justiça como o ribeiro impetuoso.", ref: "Amós 5:24" },
-    { id: 810, text: "A salvação vem do Senhor.", ref: "Jonas 2:9" },
-    { id: 811, text: "O que o Senhor pede de ti, senão que pratiques a justiça, e ames a misericórdia?", ref: "Miqueias 6:8" },
-    { id: 812, text: "Eu, porém, olharei para o Senhor; esperarei no Deus da minha salvação.", ref: "Miqueias 7:7" },
-    { id: 813, text: "Quem é Deus semelhante a ti, que perdoa a iniquidade?", ref: "Miqueias 7:18" },
-    { id: 814, text: "O Senhor é tardio em irar-se, mas grande em poder.", ref: "Naum 1:3" },
-    { id: 815, text: "O justo viverá pela sua fé.", ref: "Habacuque 2:4" },
-    { id: 816, text: "Ainda que a figueira não floresça, nem haja fruto na vide.", ref: "Habacuque 3:17" },
-    { id: 817, text: "Todavia eu me alegrarei no Senhor; exultarei no Deus da minha salvação.", ref: "Habacuque 3:18" },
-    { id: 818, text: "O Senhor Deus é a minha força, e fará os meus pés como os das cervas.", ref: "Habacuque 3:19" },
-    { id: 819, text: "O Senhor teu Deus está no meio de ti, poderoso para te salvar.", ref: "Sofonias 3:17" },
-    { id: 820, text: "Esforçai-vos, todo o povo da terra, diz o Senhor, e trabalhai.", ref: "Ageu 2:4" },
-    { id: 821, text: "Não por força nem por violência, mas sim pelo meu Espírito.", ref: "Zacarias 4:6" },
-    { id: 822, text: "Voltai à fortaleza, ó presos de esperança.", ref: "Zacarias 9:12" },
-    { id: 823, text: "Eis que eu envio o meu mensageiro, que preparará o caminho diante de mim.", ref: "Malaquias 3:1" },
-    { id: 824, text: "Trazei todos os dízimos à casa do tesouro, para que haja mantimento na minha casa.", ref: "Malaquias 3:10" },
-    { id: 825, text: "Para vós, os que temeis o meu nome, nascerá o sol da justiça.", ref: "Malaquias 4:2" },
-    { id: 826, text: "Seja bendito o nome de Deus de eternidade a eternidade.", ref: "Daniel 2:20" },
-    { id: 827, text: "Ele revela o profundo e o escondido; conhece o que está em trevas.", ref: "Daniel 2:22" },
-    { id: 828, text: "Eis que o nosso Deus, a quem nós servimos, é que nos pode livrar.", ref: "Daniel 3:17" },
-    { id: 829, text: "O seu reino é um reino eterno, e o seu domínio de geração em geração.", ref: "Daniel 6:26" },
-    { id: 830, text: "Os sábios resplandecerão como o fulgor do firmamento.", ref: "Daniel 12:3" },
-    { id: 831, text: "Dar-lhes-ei um só coração, e um espírito novo porei dentro deles.", ref: "Ezequiel 11:19" },
-    { id: 832, text: "Não tenho prazer na morte de ninguém, diz o Senhor Deus.", ref: "Ezequiel 18:32" },
-    { id: 833, text: "Eis que eu mesmo procurarei as minhas ovelhas, e as buscarei.", ref: "Ezequiel 34:11" },
-    { id: 834, text: "Dar-vos-ei um coração novo, e porei dentro de vós um espírito novo.", ref: "Ezequiel 36:26" },
-    { id: 835, text: "Porei dentro de vós o meu Espírito, e farei que andeis nos meus estatutos.", ref: "Ezequiel 36:27" },
-    { id: 836, text: "Disse-me: Filho do homem, poderão viver estes ossos?", ref: "Ezequiel 37:3" },
-    { id: 837, text: "Eis que farei entrar em vós o espírito, e vivereis.", ref: "Ezequiel 37:5" },
-    { id: 838, text: "Ainda que os vossos pecados sejam como a escarlata, eles se tornarão brancos como a neve.", ref: "Isaías 1:18" },
-    { id: 839, text: "Depois disto ouvi a voz do Senhor, que dizia: A quem enviarei, e quem há de ir por nós?", ref: "Isaías 6:8" },
-    { id: 840, text: "Eis que a virgem conceberá, e dará à luz um filho, e chamará o seu nome Emanuel.", ref: "Isaías 7:14" },
-    { id: 841, text: "O povo que andava em trevas, viu uma grande luz.", ref: "Isaías 9:2" },
-    { id: 842, text: "Porque um menino nos nasceu, um filho se nos deu.", ref: "Isaías 9:6" },
-    { id: 843, text: "Eis que Deus é a minha salvação; nele confiarei, e não temerei.", ref: "Isaías 12:2" },
-    { id: 844, text: "Ó Senhor, tu és o meu Deus; exaltar-te-ei, e louvarei o teu nome.", ref: "Isaías 25:1" },
-    { id: 845, text: "Eis que este é o nosso Deus, a quem aguardávamos, e ele nos salvará.", ref: "Isaías 25:9" },
-    { id: 846, text: "Tu conservarás em paz aquele cujo pensamento é firme em ti.", ref: "Isaías 26:3" },
-    { id: 847, text: "Em vos converterdes e em repousardes estaria a vossa salvação.", ref: "Isaías 30:15" },
-    { id: 848, text: "Este é o caminho, andai nele, sem vos desviardes nem para a direita nem para a esquerda.", ref: "Isaías 30:21" },
-    { id: 849, text: "O efeito da justiça será paz, e o fruto da justiça, repouso e segurança para sempre.", ref: "Isaías 32:17" },
-    { id: 850, text: "Senhor, tem misericórdia de nós, por ti aguardamos.", ref: "Isaías 33:2" },
-    { id: 851, text: "Dizei aos turbados de coração: Sede fortes, não temais.", ref: "Isaías 35:4" },
-    { id: 852, text: "Seca-se a erva, e cai a flor, porém a palavra de nosso Deus subsiste eternamente.", ref: "Isaías 40:8" },
-    { id: 853, text: "Não sabes, não ouviste que o eterno Deus, o Senhor, é o Criador?", ref: "Isaías 40:28" },
-    { id: 854, text: "Dá força ao cansado, e multiplica as forças ao que não tem nenhum vigor.", ref: "Isaías 40:29" },
-    { id: 855, text: "Porque eu, o Senhor teu Deus, te tomo pela tua mão direita.", ref: "Isaías 41:13" },
-    { id: 856, text: "Não esmagará a cana quebrada, nem apagará o pavio que fumega.", ref: "Isaías 42:3" },
-    { id: 857, text: "Não temas, porque eu te remi; chamei-te pelo teu nome, tu és meu.", ref: "Isaías 43:1" },
-    { id: 858, text: "Quando passares pelas águas estarei contigo.", ref: "Isaías 43:2" },
-    { id: 859, text: "Ainda antes que houvesse dia, eu sou; e ninguém há que possa fazer escapar das minhas mãos.", ref: "Isaías 43:13" },
-    { id: 860, text: "Eis que faço uma coisa nova, agora sairá à luz.", ref: "Isaías 43:19" },
-    { id: 861, text: "Porque derramarei água sobre o sedento, e rios sobre a terra seca.", ref: "Isaías 44:3" },
-    { id: 862, text: "Desfiz as tuas transgressões como a névoa, e os teus pecados como a nuvem.", ref: "Isaías 44:22" },
-    { id: 863, text: "Olhai para mim, e sereis salvos, vós, todos os termos da terra.", ref: "Isaías 45:22" },
-    { id: 864, text: "Até à vossa velhice eu sou o mesmo, e ainda até às cãs eu vos carregarei.", ref: "Isaías 46:4" },
-    { id: 865, text: "Eu sou o Senhor teu Deus, que te ensina o que é útil.", ref: "Isaías 48:17" },
-    { id: 866, text: "Pode uma mulher esquecer-se tanto de seu filho que cria, que não se compadeça dele?", ref: "Isaías 49:15" },
-    { id: 867, text: "Eis que nas palmas das minhas mãos eu te gravei.", ref: "Isaías 49:16" },
-    { id: 868, text: "Quão suaves são sobre os montes os pés do que anuncia as boas novas.", ref: "Isaías 52:7" },
-    { id: 869, text: "Verdadeiramente ele tomou sobre si as nossas enfermidades.", ref: "Isaías 53:4" },
-    { id: 870, text: "Ele foi ferido por causa das nossas transgressões, e moído pelas nossas iniquidades.", ref: "Isaías 53:5" },
-    { id: 871, text: "As minhas misericórdias não se apartarão de ti.", ref: "Isaías 54:10" },
-    { id: 872, text: "Ó vós, todos os que tendes sede, vinde às águas.", ref: "Isaías 55:1" },
-    { id: 873, text: "Inclinai os vossos ouvidos, e vinde a mim; ouvi, e a vossa alma viverá.", ref: "Isaías 55:3" },
-    { id: 874, text: "Deixe o ímpio o seu caminho, e o homem maligno os seus pensamentos.", ref: "Isaías 55:7" },
-    { id: 875, text: "Porque os meus pensamentos não são os vossos pensamentos.", ref: "Isaías 55:8" },
-    { id: 876, text: "Porque, assim como os céus são mais altos do que a terra, assim são os meus caminhos.", ref: "Isaías 55:9" },
-    { id: 877, text: "A minha palavra não voltará para mim vazia.", ref: "Isaías 55:11" },
-    { id: 878, text: "Habito no alto e santo lugar, e também com o contrito e humilde de espírito.", ref: "Isaías 57:15" },
-    { id: 879, text: "Porventura não é este o jejum que escolhi, que soltes as ligaduras da impiedade?", ref: "Isaías 58:6" },
-    { id: 880, text: "O Senhor te guiará continuamente, e fartará a tua alma em lugares áridos.", ref: "Isaías 58:11" },
-    { id: 881, text: "Eis que a mão do Senhor não está encolhida, para que não possa salvar.", ref: "Isaías 59:1" },
-    { id: 882, text: "Levanta-te, resplandece, porque vem a tua luz, e a glória do Senhor vai nascendo sobre ti.", ref: "Isaías 60:1" },
-    { id: 883, text: "O Espírito do Senhor Deus está sobre mim; porque o Senhor me ungiu.", ref: "Isaías 61:1" },
-    { id: 884, text: "A dar-lhes uma grinalda em vez de cinzas, óleo de gozo em vez de pranto.", ref: "Isaías 61:3" },
-    { id: 885, text: "O olho não viu, e o ouvido não ouviu o que Deus preparou para os que o esperam.", ref: "Isaías 64:4" },
-    { id: 886, text: "Antes que te formasse no ventre te conheci.", ref: "Jeremias 1:5" },
-    { id: 887, text: "Pelejarão contra ti, mas não prevalecerão; porque eu sou contigo.", ref: "Jeremias 1:19" },
-    { id: 888, text: "Achando-se as tuas palavras, logo as comi, e a tua palavra foi para mim gozo.", ref: "Jeremias 15:16" },
-    { id: 889, text: "Bendito o homem que confia no Senhor, e cuja confiança é o Senhor.", ref: "Jeremias 17:7" },
-    { id: 890, text: "Porque será como a árvore plantada junto às águas.", ref: "Jeremias 17:8" },
-    { id: 891, text: "Cura-me, Senhor, e serei curado; salva-me, e serei salvo.", ref: "Jeremias 17:14" },
-    { id: 892, text: "Sou eu apenas Deus de perto, diz o Senhor, e não também Deus de longe?", ref: "Jeremias 23:23" },
-    { id: 893, text: "Não é a minha palavra como fogo, diz o Senhor, e como um martelo que esmiúça a penha?", ref: "Jeremias 23:29" },
-    { id: 894, text: "Com amor eterno te amei, também com benignidade te atraí.", ref: "Jeremias 31:3" },
-    { id: 895, text: "Porei a minha lei no seu interior, e a escreverei no seu coração.", ref: "Jeremias 31:33" },
-    { id: 896, text: "Ah Senhor Deus! Eis que tu fizeste os céus e a terra com o teu grande poder.", ref: "Jeremias 32:17" },
-    { id: 897, text: "Eis que eu sou o Senhor, o Deus de toda a carne; acaso haveria alguma coisa difícil para mim?", ref: "Jeremias 32:27" },
-    { id: 898, text: "Pois não me envergonho do evangelho, porque é o poder de Deus para a salvação.", ref: "Romanos 1:16" },
-    { id: 899, text: "Ou desprezas tu as riquezas da sua benignidade, e paciência e longanimidade?", ref: "Romanos 2:4" },
-    { id: 900, text: "Porque todos pecaram e destituídos estão da glória de Deus.", ref: "Romanos 3:23" },
-    { id: 901, text: "Sendo justificados gratuitamente pela sua graça, pela redenção que há em Cristo Jesus.", ref: "Romanos 3:24" },
-    { id: 902, text: "O qual por nossos pecados foi entregue, e ressuscitou para nossa justificação.", ref: "Romanos 4:25" },
-    { id: 903, text: "E não somente isto, mas também nos gloriamos nas tribulações.", ref: "Romanos 5:3" },
-    { id: 904, text: "E a esperança não traz confusão, porquanto o amor de Deus está derramado em nossos corações.", ref: "Romanos 5:5" },
-    { id: 905, text: "Mas Deus prova o seu amor para conosco, em que Cristo morreu por nós, sendo nós ainda pecadores.", ref: "Romanos 5:8" },
-    { id: 906, text: "Onde o pecado abundou, superabundou a graça.", ref: "Romanos 5:20" },
-    { id: 907, text: "Portanto, agora nenhuma condenação há para os que estão em Cristo Jesus.", ref: "Romanos 8:1" },
-    { id: 908, text: "Porque todos os que são guiados pelo Espírito de Deus esses são filhos de Deus.", ref: "Romanos 8:14" },
-    { id: 909, text: "Recebestes o Espírito de adoção de filhos, pelo qual clamamos: Aba, Pai.", ref: "Romanos 8:15" },
-    { id: 910, text: "O mesmo Espírito testifica com o nosso espírito que somos filhos de Deus.", ref: "Romanos 8:16" },
-    { id: 911, text: "E, se nós somos filhos, somos logo herdeiros também.", ref: "Romanos 8:17" },
-    { id: 912, text: "Tenho por certo que as aflições deste tempo presente não são para comparar com a glória.", ref: "Romanos 8:18" },
-    { id: 913, text: "E da mesma maneira também o Espírito ajuda as nossas fraquezas.", ref: "Romanos 8:26" },
-    { id: 914, text: "Aquele que nem mesmo a seu próprio Filho poupou, antes o entregou por todos nós.", ref: "Romanos 8:32" },
-    { id: 915, text: "Quem intentará acusação contra os escolhidos de Deus? É Deus quem os justifica.", ref: "Romanos 8:33" },
-    { id: 916, text: "Quem é que condena? Pois é Cristo quem morreu, ou antes quem ressuscitou.", ref: "Romanos 8:34" },
-    { id: 917, text: "Porque estou certo de que, nem a morte, nem a vida... nos poderá separar do amor de Deus.", ref: "Romanos 8:38" },
-    { id: 918, text: "Que está em Cristo Jesus nosso Senhor.", ref: "Romanos 8:39" },
-    { id: 919, text: "Se com a tua boca confessares ao Senhor Jesus... serás salvo.", ref: "Romanos 10:9" },
-    { id: 920, text: "Visto que com o coração se crê para a justiça, e com a boca se confessa para a salvação.", ref: "Romanos 10:10" },
-    { id: 921, text: "Porque todo aquele que invocar o nome do Senhor será salvo.", ref: "Romanos 10:13" },
-    { id: 922, text: "Ó profundidade das riquezas, tanto da sabedoria, como da ciência de Deus!", ref: "Romanos 11:33" },
-    { id: 923, text: "Porque dele e por ele, e para ele, são todas as coisas; glória, pois, a ele eternamente.", ref: "Romanos 11:36" },
-    { id: 924, text: "Digo... a cada um dentre vós, que não pense de si mesmo além do que convém.", ref: "Romanos 12:3" },
-    { id: 925, text: "O amor seja não fingido. Aborrecei o mal e apegai-vos ao bem.", ref: "Romanos 12:9" },
-    { id: 926, text: "Não sejais vagarosos no cuidado; sede fervorosos no espírito, servindo ao Senhor.", ref: "Romanos 12:11" },
-    { id: 927, text: "A ninguém devais coisa alguma, a não ser o amor com que vos ameis uns aos outros.", ref: "Romanos 13:8" },
-    { id: 928, text: "E isto digo, conhecendo o tempo, que já é hora de despertarmos do sono.", ref: "Romanos 13:11" },
-    { id: 929, text: "Porque, se vivemos, para o Senhor vivemos; se morremos, para o Senhor morremos.", ref: "Romanos 14:8" },
-    { id: 930, text: "Porque a palavra da cruz é loucura para os que perecem.", ref: "1 Coríntios 1:18" },
-    { id: 931, text: "Porque a loucura de Deus é mais sábia do que os homens.", ref: "1 Coríntios 1:25" },
-    { id: 932, text: "Mas Deus escolheu as coisas loucas deste mundo para confundir as sábias.", ref: "1 Coríntios 1:27" },
-    { id: 933, text: "Ora, o homem natural não compreende as coisas do Espírito de Deus.", ref: "1 Coríntios 2:14" },
-    { id: 934, text: "Eu plantei, Apolo regou; mas Deus deu o crescimento.", ref: "1 Coríntios 3:6" },
-    { id: 935, text: "Por isso, nem o que planta é alguma coisa, nem o que rega, mas Deus, que dá o crescimento.", ref: "1 Coríntios 3:7" },
-    { id: 936, text: "Ou não sabeis que o vosso corpo é o templo do Espírito Santo?", ref: "1 Coríntios 6:19" },
-    { id: 937, text: "Ainda que eu falasse as línguas dos homens e dos anjos, e não tivesse amor.", ref: "1 Coríntios 13:1" },
-    { id: 938, text: "E ainda que tivesse o dom de profecia... e não tivesse amor, nada seria.", ref: "1 Coríntios 13:2" },
-    { id: 939, text: "E ainda que distribuísse toda a minha fortuna... e não tivesse amor, nada disso me aproveitaria.", ref: "1 Coríntios 13:3" },
-    { id: 940, text: "Mas pela graça de Deus sou o que sou; e a sua graça para comigo não foi vã.", ref: "1 Coríntios 15:10" },
-    { id: 941, text: "Não vos enganeis: as más conversações corrompem os bons costumes.", ref: "1 Coríntios 15:33" },
-    { id: 942, text: "Onde está, ó morte, o teu aguilhão? Onde está, ó inferno, a tua vitória?", ref: "1 Coríntios 15:55" },
-    { id: 943, text: "Mas graças a Deus que nos dá a vitória por nosso Senhor Jesus Cristo.", ref: "1 Coríntios 15:57" },
-    { id: 944, text: "Que nos consola em toda a nossa tribulação.", ref: "2 Coríntios 1:4" },
-    { id: 945, text: "Porque todas quantas promessas há de Deus, são nele sim, e por ele o Amém.", ref: "2 Coríntios 1:20" },
-    { id: 946, text: "Ora, o Senhor é o Espírito; e onde está o Espírito do Senhor, aí há liberdade.", ref: "2 Coríntios 3:17" },
-    { id: 947, text: "Temos, porém, este tesouro em vasos de barro.", ref: "2 Coríntios 4:7" },
-    { id: 948, text: "Porque a nossa leve e momentânea tribulação produz para nós um peso eterno de glória.", ref: "2 Coríntios 4:17" },
-    { id: 949, text: "Não atentando nós nas coisas que se veem, mas nas que se não veem.", ref: "2 Coríntios 4:18" },
-    { id: 950, text: "Porque sabemos que, se a nossa casa terrestre deste tabernáculo se desfizer, temos de Deus um edifício.", ref: "2 Coríntios 5:1" },
-    { id: 951, text: "Porque, busco eu agora o favor dos homens ou o de Deus?", ref: "Gálatas 1:10" },
-    { id: 952, text: "Nisto não há judeu nem grego... porque todos vós sois um em Cristo Jesus.", ref: "Gálatas 3:28" },
-    { id: 953, text: "Porque vós, irmãos, fostes chamados à liberdade. Não useis então da liberdade para dar ocasião à carne.", ref: "Gálatas 5:13" },
-    { id: 954, text: "Levai as cargas uns dos outros, e assim cumprireis a lei de Cristo.", ref: "Gálatas 6:2" },
-    { id: 955, text: "E não nos cansemos de fazer bem, porque a seu tempo ceifaremos, se não houvermos desfalecido.", ref: "Gálatas 6:9" },
-    { id: 956, text: "Bendito seja o Deus e Pai de nosso Senhor Jesus Cristo, o qual nos abençoou com todas as bênçãos espirituais.", ref: "Efésios 1:3" },
-    { id: 957, text: "Mas Deus, que é riquíssimo em misericórdia, pelo seu muito amor com que nos amou.", ref: "Efésios 2:4" },
-    { id: 958, text: "Estando nós ainda mortos em nossas ofensas, nos vivificou juntamente com Cristo.", ref: "Efésios 2:5" },
-    { id: 959, text: "Mas agora em Cristo Jesus, vós, que antes estáveis longe, já pelo sangue de Cristo chegastes perto.", ref: "Efésios 2:13" },
-    { id: 960, text: "Assim que já não sois estrangeiros, nem forasteiros, mas concidadãos dos santos, e da família de Deus.", ref: "Efésios 2:19" },
-    { id: 961, text: "Para que... vos conceda que sejais corroborados com poder pelo seu Espírito no homem interior.", ref: "Efésios 3:16" },
-    { id: 962, text: "Para que Cristo habite pela fé nos vossos corações.", ref: "Efésios 3:17" },
-    { id: 963, text: "Ora, àquele que é poderoso para fazer tudo muito mais abundantemente além daquilo que pedimos.", ref: "Efésios 3:20" },
-    { id: 964, text: "Rogo-vos, pois, eu... que andeis como é digno da vocação com que fostes chamados.", ref: "Efésios 4:1" },
-    { id: 965, text: "Com toda a humildade e mansidão, com longanimidade, suportando-vos uns aos outros em amor.", ref: "Efésios 4:2" },
-    { id: 966, text: "Antes sede uns para com os outros benignos, misericordiosos, perdoando-vos uns aos outros.", ref: "Efésios 4:32" },
-    { id: 967, text: "Sede, pois, imitadores de Deus, como filhos amados.", ref: "Efésios 5:1" },
-    { id: 968, text: "Porque noutro tempo éreis trevas, mas agora sois luz no Senhor; andai como filhos da luz.", ref: "Efésios 5:8" },
-    { id: 969, text: "Portanto, vede prudentemente como andais, não como néscios, mas como sábios.", ref: "Efésios 5:15" },
-    { id: 970, text: "Remindo o tempo; porquanto os dias são maus.", ref: "Efésios 5:16" },
-    { id: 971, text: "No demais, irmãos meus, fortalecei-vos no Senhor e na força do seu poder.", ref: "Efésios 6:10" },
-    { id: 972, text: "Revesti-vos de toda a armadura de Deus, para que possais estar firmes contra as astutas ciladas do diabo.", ref: "Efésios 6:11" },
-    { id: 973, text: "Porque não temos que lutar contra a carne e o sangue.", ref: "Efésios 6:12" },
-    { id: 974, text: "Portanto, tomai toda a armadura de Deus, para que possais resistir no dia mau.", ref: "Efésios 6:13" },
-    { id: 975, text: "Estai, pois, firmes, tendo cingidos os vossos lombos com a verdade.", ref: "Efésios 6:14" },
-    { id: 976, text: "Porque para mim o viver é Cristo, e o morrer é ganho.", ref: "Filipenses 1:21" },
-    { id: 977, text: "Nada façais por contenda ou por vanglória, mas por humildade; cada um considere os outros superiores a si mesmo.", ref: "Filipenses 2:3" },
-    { id: 978, text: "Não atente cada um somente para o que é seu, mas cada qual também para o que é dos outros.", ref: "Filipenses 2:4" },
-    { id: 979, text: "Por isso, também Deus o exaltou soberanamente, e lhe deu um nome que é sobre todo o nome.", ref: "Filipenses 2:9" },
-    { id: 980, text: "Para que ao nome de Jesus se dobre todo o joelho dos que estão nos céus, e na terra, e debaixo da terra.", ref: "Filipenses 2:10" },
-    { id: 981, text: "E toda a língua confesse que Jesus Cristo é o Senhor, para glória de Deus Pai.", ref: "Filipenses 2:11" },
-    { id: 982, text: "Fazei todas as coisas sem murmurações nem contendas.", ref: "Filipenses 2:14" },
-    { id: 983, text: "Para conhecê-lo, e à virtude da sua ressurreição, e à comunicação das suas aflições.", ref: "Filipenses 3:10" },
-    { id: 984, text: "Esquecendo-me das coisas que atrás ficam, e avançando para as que estão diante de mim.", ref: "Filipenses 3:13" },
-    { id: 985, text: "O qual nos tirou do poder das trevas, e nos transportou para o reino do Filho do seu amor.", ref: "Colossenses 1:13" },
-    { id: 986, text: "Porque nele foram criadas todas as coisas que há nos céus e na terra.", ref: "Colossenses 1:16" },
-    { id: 987, text: "E ele é antes de todas as coisas, e todas as coisas subsistem por ele.", ref: "Colossenses 1:17" },
-    { id: 988, text: "E ele é a cabeça do corpo, da igreja.", ref: "Colossenses 1:18" },
-    { id: 989, text: "Aos quais Deus quis fazer conhecer quais são as riquezas da glória deste mistério... que é Cristo em vós, esperança da glória.", ref: "Colossenses 1:27" },
-    { id: 990, text: "Como, pois, recebestes o Senhor Jesus Cristo, assim também andai nele.", ref: "Colossenses 2:6" },
-    { id: 991, text: "Arraigados e edificados nele, e confirmados na fé.", ref: "Colossenses 2:7" },
-    { id: 992, text: "Portanto, se já ressuscitastes com Cristo, buscai as coisas que são de cima.", ref: "Colossenses 3:1" },
-    { id: 993, text: "Revesti-vos, pois, como eleitos de Deus, santos e amados, de entranhas de misericórdia.", ref: "Colossenses 3:12" },
-    { id: 994, text: "Suportando-vos uns aos outros, e perdoando-vos uns aos outros.", ref: "Colossenses 3:13" },
-    { id: 995, text: "A palavra de Cristo habite em vós abundantemente, em toda a sabedoria.", ref: "Colossenses 3:16" },
-    { id: 996, text: "E, tudo quanto fizerdes, fazei-o de todo o coração, como ao Senhor, e não aos homens.", ref: "Colossenses 3:23" },
-    { id: 997, text: "Andai com sabedoria para com os que estão de fora, remindo o tempo.", ref: "Colossenses 4:5" },
-    { id: 998, text: "A vossa palavra seja sempre agradável, temperada com sal.", ref: "Colossenses 4:6" },
-    { id: 999, text: "Eu sou o Alfa e o Ômega, o princípio e o fim. A quem quer que tiver sede, de graça lhe darei da fonte da água da vida.", ref: "Apocalipse 21:6" },
-    { id: 1000, text: "Certamente cedo venho. Amém. Ora vem, Senhor Jesus.", ref: "Apocalipse 22:20" }
-];
+        { id: 3, text: "Tudo posso naquele que me fortalece.", ref: "Filipenses 4:13" }
+    ];
 
-    function triggerNatureEffect() {
-        const bird = document.getElementById('nature-effect');
-        bird.classList.remove('hidden');
-        bird.classList.add('fly-animation');
-        setTimeout(() => { bird.classList.add('hidden'); bird.classList.remove('fly-animation'); }, 4600);
-    }
-
-    window.shareVerse = () => {
-        const text = document.getElementById('verse-text').innerText;
-        const ref = document.getElementById('verse-ref').innerText;
-        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}`;
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
-    };
-
-    async function saveCompletedStudy(explanation) {
-        await addDoc(collection(db, "users", auth.currentUser.uid, "completed_studies"), {
-            verse: document.getElementById('verse-text').innerText,
-            ref: document.getElementById('verse-ref').innerText,
-            explanation, date: new Date().toISOString()
-        });
-    }
-
-    window.loadLibrary = async () => {
-        const list = document.getElementById('library-list');
-        list.innerHTML = "<p>Abrindo baú de estudos...</p>";
-        const q = query(collection(db, "users", auth.currentUser.uid, "completed_studies"), orderBy("date", "desc"));
-        const snap = await getDocs(q);
-        list.innerHTML = snap.empty ? "<p>Nenhum estudo concluído ainda.</p>" : "";
-        snap.forEach(d => {
-            const s = d.data();
-            list.innerHTML += `<div class="library-card"><small>${new Date(s.date).toLocaleDateString()}</small><br><b>${s.ref}</b><p>${s.explanation}</p></div>`;
-        });
-    };
-
-    window.resetPasswordFromSettings = async () => {
-        try { await sendPasswordResetEmail(auth, auth.currentUser.email); alert("E-mail enviado!"); } 
-        catch (e) { alert("Erro: " + e.message); }
-    };
-
-    window.updateUserEmail = async () => {
-        const newEmail = document.getElementById('new-email').value;
-        if (!newEmail) return alert("Digite o novo endereço de e-mail!");
-        try {
-            await verifyBeforeUpdateEmail(auth.currentUser, newEmail);
-            alert("E-mail de verificação enviado!");
-        } catch (e) { alert("Erro ao atualizar: " + e.message); }
-    };
-
-    window.togglePassword = (id) => {
-        const input = document.getElementById(id);
-        input.type = input.type === "password" ? "text" : "password";
-    };
-
-    window.resetPassword = async () => {
-        const email = document.getElementById('login-email').value;
-        if (!email) return alert("Digite seu e-mail no login primeiro!");
-        try { await sendPasswordResetEmail(auth, email); alert("E-mail enviado!"); } catch (e) { alert("Erro."); }
-    };
-
-    async function loadUserData(uid) {
-        const userRef = doc(db, "users", uid);
-        const s = await getDoc(userRef);
-        if(s.exists()) {
-            const d = s.data();
-            const today = new Date().toISOString().split('T')[0];
-            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0];
-            let updates = {};
-
-            if (d.lastXPUpdateDate !== today) { updates.dailyXP = 0; updates.lastXPUpdateDate = today; }
-            if (d.lastLoginDate !== today) {
-                let newStreak = d.streak || 1;
-                if (d.lastLoginDate === yesterdayStr) { newStreak++; triggerNatureEffect(); } else { newStreak = 1; }
-                updates.streak = newStreak; updates.lastLoginDate = today;
-            }
-            if (Object.keys(updates).length > 0) { await updateDoc(userRef, updates); return; }
-
-            document.getElementById('xp-val').innerText = d.xp || 0;
-            document.getElementById('streak-val').innerText = d.streak || 1;
-            document.getElementById('level-display').innerText = d.streak || 1;
-            document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
-        }
-    }
-
-    async function checkAnswer(c, btn) {
-        document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
-        const userRef = doc(db, "users", auth.currentUser.uid);
-        const points = (c === correctAnswer) ? 25 : 5;
-        const today = new Date().toISOString().split('T')[0];
-        
-        await updateDoc(userRef, { 
-            xp: increment(points), 
-            dailyXP: increment(points),
-            lastXPUpdateDate: today 
-        });
-
-        if(c === correctAnswer) { 
-            btn.style.background = "#d7ffb8"; 
-            btn.style.borderColor = "#58cc02";
-            await saveCompletedStudy(document.getElementById('ai-response').innerText);
-            alert(`+${points} XP! Estudo salvo na biblioteca 📚`); 
-        } 
-        else { btn.style.background = "#ffd7d7"; btn.style.borderColor = "#ff4b4b"; alert(`Era ${correctAnswer}. +${points} XP.`); }
-        setTimeout(() => location.reload(), 1500);
-    }
-
-    window.loadRanking = async (type = 'users') => {
-        const list = document.getElementById('ranking-list');
-        list.innerHTML = "<p style='text-align:center; padding:20px;'>Buscando os melhores... ⏳</p>";
-        document.getElementById('rank-users-btn').classList.toggle('active', type === 'users');
-        document.getElementById('rank-church-btn').classList.toggle('active', type === 'churches');
-        const today = new Date().toISOString().split('T')[0];
-        let q;
-        try {
-            if (type === 'users') {
-                q = query(collection(db, "users"), where("lastXPUpdateDate", "==", today), orderBy("dailyXP", "desc"), limit(50));
-            } else {
-                q = query(collection(db, "users"), orderBy("xp", "desc"), limit(100));
-            }
-            const snapshot = await getDocs(q);
-            list.innerHTML = "";
-            if (snapshot.empty) {
-                const msg = type === 'users' ? "Ninguém pontuou ainda. 🔥" : "Nenhum dado.";
-                list.innerHTML = `<p style='text-align:center; padding:20px;'>${msg}</p>`;
-                return;
-            }
-            if (type === 'users') {
-                snapshot.docs.forEach((docSnap, i) => {
-                    const d = docSnap.data();
-                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i + 1}º</span><div class="rank-info"><span class="rank-xp">${d.dailyXP || 0} XP HOJE</span><b class="rank-name">${(d.name || "Viajante").toUpperCase()}</b><span class="rank-church-tag">${d.church || 'Independente'}</span></div></div>`;
-                });
-            } else {
-                const churches = {};
-                snapshot.docs.forEach(docSnap => {
-                    const d = docSnap.data();
-                    const c = d.church || "Independente";
-                    churches[c] = (churches[c] || 0) + (d.xp || 0);
-                });
-                const sortedChurches = Object.entries(churches).sort((a, b) => b[1] - a[1]);
-                sortedChurches.forEach((item, i) => {
-                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i + 1}º</span><div class="rank-info"><span class="rank-xp">${item[1]} XP TOTAL</span><b class="rank-name">${item[0].toUpperCase()}</b></div></div>`;
-                });
-            }
-        } catch (e) {
-            console.error("ERRO NO RANKING:", e);
-            list.innerHTML = "<p style='text-align:center; padding:20px;'>Erro ao carregar.</p>";
-        }
-    };
-
-    window.handleAuth = async (m) => {
-        try {
-            if(m === 'signup') {
-                const user = document.getElementById('signup-user').value;
-                const email = document.getElementById('signup-email-new').value; 
-                const p = document.getElementById('signup-pass-new').value;      
-                const church = document.getElementById('signup-church').value || "Independente";
-                const today = new Date().toISOString().split('T')[0];
-                const r = await createUserWithEmailAndPassword(auth, email, p);
-                await setDoc(doc(db, "users", r.user.uid), { xp: 0, dailyXP: 0, name: user, church, streak: 1, lastLoginDate: today, lastXPUpdateDate: today });
-            } else { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-pass').value); }
-        } catch(e) { alert("Erro no login."); }
-    };
-
-    window.sendSuggestion = async () => {
-        const text = document.getElementById('app-suggestion').value;
-        if(!text) return alert("Escreva algo!");
-        await addDoc(collection(db, "suggestions"), { text: text, user: auth.currentUser.email, date: new Date().toISOString() });
-        alert("Valeu!"); document.getElementById('app-suggestion').value = "";
-    };
-
-    window.switchAuth = (m) => {
-        document.getElementById('form-login').classList.toggle('hidden', m !== 'login');
-        document.getElementById('form-signup').classList.toggle('hidden', m !== 'signup');
-        document.getElementById('tab-login-btn').classList.toggle('active', m === 'login');
-        document.getElementById('tab-signup-btn').classList.toggle('active', m === 'signup');
-    };
-
-    // FUNÇÃO PARA ALTERNAR CONTEÚDO DENTRO DO DIÁRIO
-    window.switchDiaryContent = (type) => {
-        document.getElementById('diary-notes-container').classList.toggle('hidden', type !== 'notes');
-        document.getElementById('diary-studies-container').classList.toggle('hidden', type !== 'studies');
-        document.getElementById('diary-notes-btn').classList.toggle('active', type === 'notes');
-        document.getElementById('diary-studies-btn').classList.toggle('active', type === 'studies');
-        if(type === 'notes') loadUserNotes();
-        if(type === 'studies') loadLibrary();
+    // NAVEGAÇÃO PRINCIPAL
+    window.showTab = (t) => {
+        ['home', 'notes', 'rank', 'config'].forEach(tab => {
+            document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t);
+            const nav = document.getElementById(`nav-${tab}`);
+            if(nav) nav.classList.toggle('nav-active', tab === t);
+        });
+        if(t === 'notes') switchDiaryTab('notes');
+        if(t === 'rank') loadRanking();
     };
 
-    window.showTab = (t) => {
-        ['home', 'notes', 'rank', 'config'].forEach(tab => {
-            const el = document.getElementById(`tab-${tab}`);
-            if(el) el.classList.toggle('hidden', tab !== t);
+    // NAVEGAÇÃO INTERNA DO DIÁRIO
+    window.switchDiaryTab = (mode) => {
+        document.getElementById('diary-notes-content').classList.toggle('hidden', mode !== 'notes');
+        document.getElementById('diary-studies-content').classList.toggle('hidden', mode !== 'studies');
+        document.getElementById('sub-notes-btn').classList.toggle('active', mode === 'notes');
+        document.getElementById('sub-studies-btn').classList.toggle('active', mode === 'studies');
+        if(mode === 'notes') loadUserNotes();
+        if(mode === 'studies') loadLibrary();
+    };
+
+    // CARREGAR NOTAS
+    window.loadUserNotes = async () => {
+        const list = document.getElementById('notes-list');
+        list.innerHTML = "Carregando...";
+        const q = query(collection(db, "users", auth.currentUser.uid, "notes"), orderBy("date", "desc"));
+        const snap = await getDocs(q);
+        list.innerHTML = snap.empty ? "Nenhuma nota encontrada." : "";
+        snap.forEach(d => {
+            const n = d.data();
+            list.innerHTML += `<div class="note-card"><small>${new Date(n.date).toLocaleDateString()}</small><br>${n.text}</div>`;
         });
-        ['home', 'notes', 'rank', 'config'].forEach(nav => {
-            const el = document.getElementById(`nav-${nav}`); if(el) el.classList.toggle('nav-active', nav === t);
-        });
-        if(t === 'rank') loadRanking('users'); 
-        if(t === 'notes') switchDiaryContent('notes'); // Sempre abre em anotações por padrão
-    };
+    };
 
-    onAuthStateChanged(auth, u => {
-        document.getElementById('auth-screen').classList.toggle('hidden', !!u);
-        document.getElementById('main-screen').classList.toggle('hidden', !u);
-        document.getElementById('nav').classList.toggle('hidden', !u);
-        if(u) { loadUserData(u.uid); fetchVerse(); }
-    });
+    // CARREGAR ESTUDOS IA
+    window.loadLibrary = async () => {
+        const list = document.getElementById('library-list');
+        list.innerHTML = "Buscando estudos...";
+        const q = query(collection(db, "users", auth.currentUser.uid, "completed_studies"), orderBy("date", "desc"));
+        const snap = await getDocs(q);
+        list.innerHTML = snap.empty ? "Nenhum estudo realizado." : "";
+        snap.forEach(d => {
+            const s = d.data();
+            list.innerHTML += `<div class="library-card"><b>${s.ref}</b><p>${s.explanation}</p></div>`;
+        });
+    };
 
-    function fetchVerse() {
-        const selected = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)];
-        document.getElementById('verse-text').innerText = `"${selected.text}"`;
-        document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
-    }
+    // AUTH
+    window.switchAuth = (m) => {
+        document.getElementById('form-login').classList.toggle('hidden', m !== 'login');
+        document.getElementById('form-signup').classList.toggle('hidden', m !== 'signup');
+        document.getElementById('tab-login-btn').classList.toggle('active', m === 'login');
+        document.getElementById('tab-signup-btn').classList.toggle('active', m === 'signup');
+    };
 
-    window.generateStudy = async () => {
-        const btn = document.getElementById('btn-study'); 
-        const vText = document.getElementById('verse-text').innerText;
-        btn.innerText = "ANALISANDO..."; 
-        btn.disabled = true;
-        try {
-            const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse: vText }) });
-            const data = await response.json();
-            if (data.error) throw new Error(data.error);
-            const fullText = data.choices[0].message.content;
-            const startIdx = fullText.search(/EXPLICAÇÃO:/i);
-            const cleanText = fullText.substring(startIdx);
-            const parts = cleanText.split(/PERGUNTA:|Pergunta:/i); 
-            const explanation = parts[0].replace(/EXPLICAÇÃO:|Explicação:/i, "").trim();
-            const quizPart = parts[1].trim();
-            const correctMatch = fullText.match(/CORRETA:\s*([A-D])/i);
-            correctAnswer = correctMatch ? correctMatch[1].toUpperCase() : "";
-            document.getElementById('ai-response').innerText = explanation; 
-            document.getElementById('quiz-question').innerText = quizPart.split(/[A-D]\)/)[0].trim();
-            const opts = quizPart.match(/[A-D]\) .+/g); 
-            const quizDiv = document.getElementById('quiz-options'); 
-            quizDiv.innerHTML = "";
-            opts.forEach(o => { 
-                const b = document.createElement('button'); b.className = "quiz-option"; b.innerText = o; 
-                b.onclick = () => checkAnswer(o[0].toUpperCase(), b); quizDiv.appendChild(b); 
-            });
-            document.getElementById('study-area').classList.remove('hidden'); 
-            btn.innerText = "ESTUDO PRONTO";
-        } catch (err) { 
-            console.error("ERRO DETALHADO:", err);
-            btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE";
-            alert(`Erro: ${err.message}`);
-        }
-    };
+    window.handleAuth = async (m) => {
+        const email = m === 'login' ? document.getElementById('login-email').value : document.getElementById('signup-email-new').value;
+        const pass = m === 'login' ? document.getElementById('login-pass').value : document.getElementById('signup-pass-new').value;
+        try {
+            if(m === 'signup') {
+                const name = document.getElementById('signup-user').value;
+                const church = document.getElementById('signup-church').value;
+                const r = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "users", r.user.uid), { name, church, xp: 0, streak: 1, lastLogin: new Date().toISOString() });
+            } else {
+                await signInWithEmailAndPassword(auth, email, pass);
+            }
+        } catch(e) { alert("Erro na autenticação."); }
+    };
 
-    window.saveNotes = async () => {
-        const text = document.getElementById('study-notes').value; const vRef = document.getElementById('verse-ref').innerText;
-        if(!text) return alert("Escreva algo!");
-        await addDoc(collection(db, "users", auth.currentUser.uid, "notes"), { text, verse: vRef, date: new Date().toISOString() });
-        alert("Nota salva!"); document.getElementById('study-notes').value = "";
-    };
+    onAuthStateChanged(auth, u => {
+        document.getElementById('auth-screen').classList.toggle('hidden', !!u);
+        document.getElementById('main-screen').classList.toggle('hidden', !u);
+        document.getElementById('nav').classList.toggle('hidden', !u);
+        if(u) fetchVerse();
+    });
 
-    window.loadUserNotes = async () => {
-        const list = document.getElementById('notes-list'); list.innerHTML = "<p>Carregando...</p>";
-        const q = query(collection(db, "users", auth.currentUser.uid, "notes"), orderBy("date", "desc"));
-        const snap = await getDocs(q); list.innerHTML = snap.empty ? "<p>Vazio.</p>" : "";
-        snap.forEach(d => { const n = d.data(); list.innerHTML += `<div class="note-card"><div class="note-meta"><span>${new Date(n.date).toLocaleDateString()}</span><span style="color:var(--primary)">${n.verse}</span></div><div>${n.text}</div></div>`; });
-    };
+    function fetchVerse() {
+        const selected = BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)];
+        document.getElementById('verse-text').innerText = `"${selected.text}"`;
+        document.getElementById('verse-ref').innerText = selected.ref.toUpperCase();
+    }
 
-    window.askProfessor = async () => {
-        const doubt = document.getElementById('study-doubt').value; const verse = document.getElementById('verse-text').innerText;
-        const resBox = document.getElementById('ai-doubt-res'); if(!doubt) return alert("Dúvida?"); resBox.innerText = "Pensando...";
-        try { const r = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ verse, question: doubt }) }); const d = await r.json(); resBox.innerText = d.choices[0].message.content; } catch(e) { resBox.innerText = "Erro."; }
-    };
-
-    window.logout = () => signOut(auth).then(() => location.reload());
-    window.resetVerses = () => { localStorage.removeItem("seen_verses"); location.reload(); };
+    window.logout = () => signOut(auth).then(() => location.reload());
 </script>
 </body>
 </html>
