@@ -285,22 +285,11 @@
         </div>
 
         <div id="nav" class="nav-bar hidden">
-            <div class="nav-item nav-active" id="nav-home" onclick="showTab('home')">
-                <span>📖</span>
-                <span>JORNADA</span>
-            </div>
-            <div class="nav-item" id="nav-notes" onclick="showTab('notes')">
-                <span>✍️</span>
-                <span>DIÁRIO</span>
-            </div>
-            <div class="nav-item" id="nav-rank" onclick="showTab('rank')">
-                <span>🏆</span>
-                <span>RANKING</span>
-            </div>
-            <div class="nav-item" id="nav-config" onclick="showTab('config')">
-                <span>⚙️</span>
-                <span>AJUSTE</span>
-            </div>
+            <div class="nav-item nav-active" id="nav-home" onclick="showTab('home')"><span>📖</span><span>JORNADA</span></div>
+            <div class="nav-item" id="nav-notes" onclick="showTab('notes')"><span>✍️</span><span>DIÁRIO</span></div>
+            <div class="nav-item" id="nav-library" onclick="showTab('library')"><span>📚</span><span>ESTUDOS</span></div>
+            <div class="nav-item" id="nav-rank" onclick="showTab('rank')"><span>🏆</span><span>RANKING</span></div>
+            <div class="nav-item" id="nav-config" onclick="showTab('config')"><span>⚙️</span><span>AJUSTE</span></div>
         </div>
     </div>
 </div>
@@ -327,7 +316,6 @@
         { id: 8, text: "Deem graças ao Senhor, porque ele é bom; o seu amor dura para sempre.", ref: "Salmos 136:1" },
         { id: 9, text: "Seja forte e corajoso! Não desanime nem tenha medo.", ref: "Josué 1:9" },
         { id: 10, text: "Eu sou o caminho, e a verdade, e a vida.", ref: "João 14:6" }
-        // ... (resto da base de dados mantida)
     ];
 
     function triggerNatureEffect() {
@@ -508,11 +496,16 @@
     };
 
     window.showTab = (t) => {
-        ['home', 'notes', 'library', 'rank', 'config'].forEach(tab => document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t));
-        ['home', 'notes', 'library', 'rank', 'config'].forEach(nav => {
-            const el = document.getElementById(`nav-${nav}`); if(el) el.classList.toggle('nav-active', nav === t);
+        ['home', 'notes', 'library', 'rank', 'config'].forEach(tab => {
+            document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t);
         });
-        if(t === 'rank') loadRanking('users'); if(t === 'notes') loadUserNotes(); if(t === 'library') loadLibrary();
+        ['home', 'notes', 'library', 'rank', 'config'].forEach(nav => {
+            const el = document.getElementById(`nav-${nav}`);
+            if(el) el.classList.toggle('nav-active', nav === t);
+        });
+        if(t === 'notes') loadUserNotes();
+        if(t === 'library') loadLibrary(); 
+        if(t === 'rank') loadRanking('users');
     };
 
     onAuthStateChanged(auth, u => {
