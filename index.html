@@ -132,7 +132,7 @@
 </head>
 <body>
 
-<div id="nature-effect" class="bird-container hidden">🐦</div>
+<div id="nature-effect" class="bird-container hidden"></div>
 
 <div id="app">
     <div id="auth-screen">
@@ -197,7 +197,7 @@
             </div>
             <div style="text-align:right; font-size: 1.1rem;">
                 <span>🔥 <b id="streak-val">0</b></span>
-                <span style="color:var(--primary); margin-left:10px;">💎 <b id="xp-val">0</b></span>
+                <span style="color:var(--primary); margin-left:10px;">💎<b id="xp-val">0</b></span>
                 <div onclick="logout()" style="color:var(--error); font-size:0.8rem; font-weight:900; cursor:pointer; margin-top:5px;">SAIR</div>
             </div>
         </div>
@@ -1326,7 +1326,7 @@
         const text = document.getElementById('verse-text').innerText;
         const ref = document.getElementById('verse-ref').innerText;
         const appLink = window.location.href; 
-        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!\n👇🏻 ${appLink}`;
+        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!\n👉🏻 ${appLink}`;
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
     };
 
