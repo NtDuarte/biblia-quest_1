@@ -2073,13 +2073,133 @@ const BIBLE_DATABASE = [
     }
 
     
-  window.shareVerse = () => {
-        const text = document.getElementById('verse-text').innerText;
-        const ref = document.getElementById('verse-ref').innerText;
-        const appLink = window.location.href; 
-        const message = `🌿 *Trilha VIVA* 🌿\n\n${text}\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!\n👉🏻 ${appLink}`;
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
-    };
+  // --- NOVA FUNÇÃO PARA GERAR A IMAGEM ---
+function generateShareableImage(verseText, verseRef, appLink) {
+    // 1. Criar um canvas invisível de alta resolução (quadrado)
+    const canvas = document.createElement('canvas');
+    const size = 1080; // Tamanho bom para redes sociais
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // 2. Pintar o Fundo (Usando as cores do seu CSS)
+    // Criar um gradiente suave do bege para um laranja bem clarinho
+    const gradient = ctx.createLinearGradient(0, 0, 0, size);
+    gradient.addColorStop(0, '#fdf5e6'); // var(--bg)
+    gradient.addColorStop(1, '#fffaf0');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+
+    // Adicionar uma borda laranja
+    ctx.strokeStyle = '#e67e22'; // var(--primary)
+    ctx.lineWidth = 20;
+    ctx.strokeRect(0, 0, size, size);
+
+    // 3. Configurar Texto Principal (Versículo)
+    ctx.fillStyle = '#4e342e'; // var(--text)
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Ajuste dinâmico de fonte (diminui se o texto for muito longo)
+    let fontSize = 60;
+    if (verseText.length > 200) fontSize = 45;
+    if (verseText.length > 350) fontSize = 35;
+    ctx.font = `bold ${fontSize}px 'Nunito', sans-serif`;
+
+    // Lógica para quebrar linhas (Canvas não faz isso nativamente)
+    const words = verseText.split(' ');
+    let line = '';
+    let lines = [];
+    const maxWidth = size - 160; // Margem lateral
+
+    for (let n = 0; n < words.length; n++) {
+        let testLine = line + words[n] + ' ';
+        let metrics = ctx.measureText(testLine);
+        let testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+            lines.push(line);
+            line = words[n] + ' ';
+        } else {
+            line = testLine;
+        }
+    }
+    lines.push(line);
+
+    // Desenhar as linhas do versículo centralizadas
+    let yPos = (size / 2) - ((lines.length * (fontSize * 1.2)) / 2);
+    for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], size / 2, yPos);
+        yPos += fontSize * 1.2; // Espaçamento entre linhas
+    }
+
+    // 4. Desenhar a Referência (Mais abaixo)
+    ctx.fillStyle = '#e67e22'; // var(--primary)
+    ctx.font = '900 40px Nunito';
+    ctx.fillText(verseRef.toUpperCase(), size / 2, yPos + 40);
+
+    // 5. Desenhar o Rodapé com o Link/Nome do App
+    ctx.fillStyle = '#8d6e63'; // var(--gray)
+    ctx.font = 'bold 30px Nunito';
+    // Desenhamos o nome do app e o link na parte inferior
+    ctx.fillText("TRILHA VIVA", size / 2, size - 100);
+    ctx.fillStyle = '#e67e22';
+    ctx.font = 'bold 25px Nunito';
+    ctx.fillText(appLink.replace('https://', ''), size / 2, size - 60);
+
+    // 6. Converter o canvas em uma imagem (Data URL)
+    return canvas.toDataURL('image/png');
+}
+
+// --- ATUALIZE SUA FUNÇÃO shareVerse EXISTENTE ---
+window.shareVerse = async () => {
+    const btn = document.querySelector('.btn-whatsapp');
+    const originalText = btn.innerText;
+    btn.innerText = "Gerando imagem...";
+    btn.disabled = true;
+
+    const text = document.getElementById('verse-text').innerText.replace(/"/g, ''); // Remove aspas extras
+    const ref = document.getElementById('verse-ref').innerText;
+    const appLink = window.location.origin; // Pega o link atual do seu site
+
+    try {
+        // 1. Gera a imagem localmente
+        const imageDataUrl = generateShareableImage(text, ref, appLink);
+
+        // NOTA IMPORTANTE SOBRE WHATSAPP WEB:
+        // O WhatsApp Web não permite anexar uma imagem via link programaticamente (ele só envia texto).
+        // Para enviar a imagem real, o usuário teria que salvar a imagem gerada e anexar manualmente.
+        // Em um aplicativo nativo (React Native/Flutter) isso é fácil. Na web, é limitado.
+
+        // SOLUÇÃO PARA WEB:
+        // Vamos mostrar a imagem para o usuário e dar a instrução.
+
+        // Cria um modal ou área temporária para mostrar a imagem gerada
+        let imagePreviewArea = document.getElementById('share-preview');
+        if (!imagePreviewArea) {
+             imagePreviewArea = document.createElement('div');
+             imagePreviewArea.id = 'share-preview';
+             imagePreviewArea.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;";
+             imagePreviewArea.innerHTML = `
+                <h3 style="color:white; text-align:center;">Segure na imagem para salvar/copiar!</h3>
+                <img id="gen-img" style="max-width:100%; max-height:60vh; border-radius:15px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <button onclick="document.getElementById('share-preview').remove()" class="btn-duo btn-primary" style="margin-top:20px; width:auto; padding: 10px 30px;">Fechar</button>
+             `;
+             document.body.appendChild(imagePreviewArea);
+        }
+        
+        document.getElementById('gen-img').src = imageDataUrl;
+
+        // Mantemos o compartilhamento de texto como fallback
+        // const message = `🌿 *Trilha VIVA* 🌿\n\n"${text}"\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!\n👉🏻 ${appLink}`;
+        // window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+
+    } catch (e) {
+        alert("Erro ao gerar imagem: " + e.message);
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+};
 
     async function saveCompletedStudy(explanation) {
         await addDoc(collection(db, "users", auth.currentUser.uid, "completed_studies"), {
