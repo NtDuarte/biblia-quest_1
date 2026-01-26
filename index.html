@@ -2073,86 +2073,100 @@ const BIBLE_DATABASE = [
     }
 function generateShareableImage(verseText, verseRef, appLink) {
     const canvas = document.createElement('canvas');
-    const size = 1080; // Resolução padrão Instagram/WhatsApp
+    const size = 1080; 
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext('2d');
 
-    // 1. FUNDO COM GRADIENTE SUAVE
-    const gradient = ctx.createLinearGradient(0, 0, size, size);
-    gradient.addColorStop(0, '#fdf5e6'); // var(--bg)
-    gradient.addColorStop(1, '#ffffff');
+    // 1. FUNDO PREMIUM (Gradiente Suave)
+    const gradient = ctx.createRadialGradient(size/2, size/2, 100, size/2, size/2, 800);
+    gradient.addColorStop(0, '#ffffff'); 
+    gradient.addColorStop(1, '#fdf5e6'); 
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, size, size);
 
-    // 2. BORDA DECORATIVA (ESTILO QUADRO)
-    ctx.strokeStyle = '#e67e22'; // var(--primary)
-    ctx.lineWidth = 15;
+    // 2. MOLDURA DECORATIVA
+    ctx.strokeStyle = '#e67e22'; 
+    ctx.lineWidth = 14;
     ctx.strokeRect(40, 40, size - 80, size - 80);
     
-    ctx.strokeStyle = '#b38a42'; // var(--gold)
+    ctx.strokeStyle = '#b38a42'; 
     ctx.lineWidth = 2;
     ctx.strokeRect(60, 60, size - 120, size - 120);
 
-    // 3. ASPAS DECORATIVAS GIGANTES (ELEGÂNCIA)
-    ctx.fillStyle = 'rgba(230, 126, 34, 0.1)'; 
-    ctx.font = '900 400px Georgia, serif';
-    ctx.fillText('“', 100, 400);
+    // 3. ASPAS DECORATIVAS (Background)
+    ctx.fillStyle = 'rgba(230, 126, 34, 0.08)'; 
+    ctx.font = '900 500px Georgia';
+    ctx.textAlign = 'center';
+    ctx.fillText('“', size / 2, 550);
 
-    // 4. CONFIGURAÇÃO DO TEXTO DO VERSÍCULO
-    ctx.fillStyle = '#4e342e'; // var(--text)
+    // 4. CONFIGURAÇÃO DE TEXTO E QUEBRA DE LINHA
+    const maxWidth = size - 280; 
+    let fontSize = 62;
+    
+    // Ajuste fino de tamanho baseado no volume de texto
+    if (verseText.length > 150) fontSize = 54;
+    if (verseText.length > 250) fontSize = 46;
+    if (verseText.length > 400) fontSize = 38;
+
+    ctx.font = `700 ${fontSize}px 'Nunito', sans-serif`;
+    ctx.fillStyle = '#4e342e';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    
-    // Ajuste de fonte dinâmico
-    let fontSize = verseText.length > 250 ? 42 : 58;
-    ctx.font = `700 ${fontSize}px 'Nunito', sans-serif`;
 
+    // Função interna para processar as linhas
     const words = verseText.split(' ');
-    let line = '';
     let lines = [];
-    const maxWidth = size - 300; 
+    let currentLine = '';
 
     for (let n = 0; n < words.length; n++) {
-        let testLine = line + words[n] + ' ';
-        if (ctx.measureText(testLine).width > maxWidth && n > 0) {
-            lines.push(line);
-            line = words[n] + ' ';
+        let testLine = currentLine + words[n] + ' ';
+        let metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+            lines.push(currentLine.trim());
+            currentLine = words[n] + ' ';
         } else {
-            line = testLine;
+            currentLine = testLine;
         }
     }
-    lines.push(line);
+    lines.push(currentLine.trim());
 
-    // Desenhar linhas centralizadas
-    let lineHeight = fontSize * 1.3;
-    let yPos = (size / 2) - ((lines.length * lineHeight) / 2) - 20;
+    // 5. DISTRIBUIÇÃO VERTICAL (Cálculo de Bloco)
+    const lineHeight = fontSize * 1.45; // Espaçamento entre linhas (Leading)
+    const totalTextHeight = lines.length * lineHeight;
+    let yPos = (size / 2) - (totalTextHeight / 2) + (lineHeight / 2);
+
+    // Desenhar as linhas com leve sombra para profundidade
+    ctx.shadowColor = "rgba(0,0,0,0.05)";
+    ctx.shadowBlur = 5;
     
-    lines.forEach(l => {
-        ctx.fillText(l.trim(), size / 2, yPos);
+    lines.forEach(line => {
+        ctx.fillText(line, size / 2, yPos);
         yPos += lineHeight;
     });
 
-    // 5. REFERÊNCIA (Destaque em Ouro)
+    // 6. REFERÊNCIA (Abaixo do bloco de texto)
+    ctx.shadowBlur = 0; // Remove sombra para detalhes pequenos
     ctx.fillStyle = '#b38a42';
-    ctx.font = '900 45px Nunito';
-    ctx.fillText(verseRef.toUpperCase(), size / 2, yPos + 60);
+    ctx.font = `900 ${Math.max(fontSize * 0.7, 30)}px 'Nunito'`;
+    ctx.fillText(verseRef.toUpperCase(), size / 2, yPos + 40);
 
-    // 6. RODAPÉ (BRANDING)
-    // Divisor
+    // 7. RODAPÉ (Assinatura do App)
+    // Linha Divisora
+    ctx.strokeStyle = 'rgba(141, 110, 99, 0.2)';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(400, size - 150);
-    ctx.lineTo(680, size - 150);
-    ctx.strokeStyle = 'rgba(141, 110, 99, 0.3)';
+    ctx.moveTo(size/2 - 100, size - 140);
+    ctx.lineTo(size/2 + 100, size - 140);
     ctx.stroke();
 
     ctx.fillStyle = '#e67e22';
-    ctx.font = '900 35px Nunito';
+    ctx.font = '900 32px Nunito';
     ctx.fillText('TRILHA VIVA', size / 2, size - 100);
     
     ctx.fillStyle = '#8d6e63';
-    ctx.font = '700 24px Nunito';
-    ctx.fillText(appLink.replace('https://', ''), size / 2, size - 60);
+    ctx.font = '700 22px Nunito';
+    ctx.fillText(appLink.toLowerCase(), size / 2, size - 65);
 
     return canvas.toDataURL('image/png');
 }
