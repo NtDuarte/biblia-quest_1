@@ -2073,100 +2073,108 @@ const BIBLE_DATABASE = [
     }
 function generateShareableImage(verseText, verseRef, appLink) {
     const canvas = document.createElement('canvas');
-    const size = 1080; 
-    canvas.width = size;
-    canvas.height = size;
+    // Proporção de tela de celular (Stories/Status)
+    canvas.width = 1080;
+    canvas.height = 1920;
     const ctx = canvas.getContext('2d');
 
-    // 1. FUNDO PREMIUM (Gradiente Suave)
-    const gradient = ctx.createRadialGradient(size/2, size/2, 100, size/2, size/2, 800);
-    gradient.addColorStop(0, '#ffffff'); 
-    gradient.addColorStop(1, '#fdf5e6'); 
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
+    const w = canvas.width;
+    const h = canvas.height;
 
-    // 2. MOLDURA DECORATIVA
+    // --- 1. FUNDO VERTICAL PREMIUM ---
+    const gradient = ctx.createLinearGradient(0, 0, 0, h);
+    gradient.addColorStop(0, '#ffffff'); 
+    gradient.addColorStop(0.5, '#fdf5e6'); // var(--bg) no centro
+    gradient.addColorStop(1, '#fff3e0'); 
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, w, h);
+
+    // Moldura elegante acompanhando o formato longo
     ctx.strokeStyle = '#e67e22'; 
-    ctx.lineWidth = 14;
-    ctx.strokeRect(40, 40, size - 80, size - 80);
+    ctx.lineWidth = 12;
+    ctx.strokeRect(30, 30, w - 60, h - 60);
     
     ctx.strokeStyle = '#b38a42'; 
-    ctx.lineWidth = 2;
-    ctx.strokeRect(60, 60, size - 120, size - 120);
+    ctx.lineWidth = 3;
+    ctx.strokeRect(50, 50, w - 100, h - 100);
 
-    // 3. ASPAS DECORATIVAS (Background)
-    ctx.fillStyle = 'rgba(230, 126, 34, 0.08)'; 
-    ctx.font = '900 500px Georgia';
+    // --- 2. ASPAS DECORATIVAS GIGANTES ---
+    ctx.fillStyle = 'rgba(230, 126, 34, 0.05)'; 
+    ctx.font = '900 800px Georgia';
     ctx.textAlign = 'center';
-    ctx.fillText('“', size / 2, 550);
+    ctx.fillText('“', w / 2, h / 2 + 200);
 
-    // 4. CONFIGURAÇÃO DE TEXTO E QUEBRA DE LINHA
-    const maxWidth = size - 280; 
-    let fontSize = 62;
+    // --- 3. CONFIGURAÇÃO DE TEXTO ---
+    const maxWidth = w - 200; // Margens laterais generosas
+    let fontSize = 85; 
     
-    // Ajuste fino de tamanho baseado no volume de texto
-    if (verseText.length > 150) fontSize = 54;
-    if (verseText.length > 250) fontSize = 46;
-    if (verseText.length > 400) fontSize = 38;
+    // Ajuste dinâmico para o texto preencher bem a altura
+    if (verseText.length > 150) fontSize = 70;
+    if (verseText.length > 300) fontSize = 55;
+    if (verseText.length > 500) fontSize = 45;
 
-    ctx.font = `700 ${fontSize}px 'Nunito', sans-serif`;
-    ctx.fillStyle = '#4e342e';
+    ctx.font = `800 ${fontSize}px 'Nunito', sans-serif`;
+    ctx.fillStyle = '#3e2723';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // Função interna para processar as linhas
+    // Quebra de linha
     const words = verseText.split(' ');
     let lines = [];
-    let currentLine = '';
+    let currentLine = words[0];
 
-    for (let n = 0; n < words.length; n++) {
-        let testLine = currentLine + words[n] + ' ';
-        let metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && n > 0) {
-            lines.push(currentLine.trim());
-            currentLine = words[n] + ' ';
+    for (let i = 1; i < words.length; i++) {
+        const width = ctx.measureText(currentLine + " " + words[i]).width;
+        if (width < maxWidth) {
+            currentLine += " " + words[i];
         } else {
-            currentLine = testLine;
+            lines.push(currentLine);
+            currentLine = words[i];
         }
     }
-    lines.push(currentLine.trim());
+    lines.push(currentLine);
 
-    // 5. DISTRIBUIÇÃO VERTICAL (Cálculo de Bloco)
-    const lineHeight = fontSize * 1.45; // Espaçamento entre linhas (Leading)
-    const totalTextHeight = lines.length * lineHeight;
-    let yPos = (size / 2) - (totalTextHeight / 2) + (lineHeight / 2);
+    // --- 4. DISTRIBUIÇÃO E RENDERIZAÇÃO ---
+    const lineHeight = fontSize * 1.5;
+    const totalBlockHeight = lines.length * lineHeight;
+    
+    // Centralizamos o bloco de texto levemente acima do meio real
+    let yPos = (h / 2) - (totalBlockHeight / 2);
 
-    // Desenhar as linhas com leve sombra para profundidade
-    ctx.shadowColor = "rgba(0,0,0,0.05)";
-    ctx.shadowBlur = 5;
+    // Sombra para leitura em alta definição
+    ctx.shadowColor = "rgba(78, 52, 46, 0.15)";
+    ctx.shadowBlur = 10;
     
     lines.forEach(line => {
-        ctx.fillText(line, size / 2, yPos);
+        ctx.fillText(line.trim(), w / 2, yPos);
         yPos += lineHeight;
     });
 
-    // 6. REFERÊNCIA (Abaixo do bloco de texto)
-    ctx.shadowBlur = 0; // Remove sombra para detalhes pequenos
-    ctx.fillStyle = '#b38a42';
-    ctx.font = `900 ${Math.max(fontSize * 0.7, 30)}px 'Nunito'`;
-    ctx.fillText(verseRef.toUpperCase(), size / 2, yPos + 40);
+    // --- 5. REFERÊNCIA EM DESTAQUE ---
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#d35400';
+    ctx.font = `900 ${fontSize * 0.7}px 'Nunito'`;
+    ctx.fillText(verseRef.toUpperCase(), w / 2, yPos + 60);
 
-    // 7. RODAPÉ (Assinatura do App)
-    // Linha Divisora
+    // --- 6. RODAPÉ (IDENTIDADE VISUAL) ---
+    const footerY = h - 150;
+    
+    // Linha divisória sutil
     ctx.strokeStyle = 'rgba(141, 110, 99, 0.2)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(size/2 - 100, size - 140);
-    ctx.lineTo(size/2 + 100, size - 140);
+    ctx.moveTo(w/2 - 150, footerY - 50);
+    ctx.lineTo(w/2 + 150, footerY - 50);
     ctx.stroke();
 
     ctx.fillStyle = '#e67e22';
-    ctx.font = '900 32px Nunito';
-    ctx.fillText('', size / 2, size - 100);
+    ctx.font = '900 45px Nunito';
+    ctx.fillText('TRILHA VIVA', w / 2, footerY);
     
+    const cleanLink = appLink.replace(/(^\w+:|^)\/\//, '').toLowerCase();
     ctx.fillStyle = '#8d6e63';
-    ctx.font = '700 22px Nunito';
-    ctx.fillText(appLink.toLowerCase(), size / 2, size - 65);
+    ctx.font = '700 30px Nunito';
+    ctx.fillText(cleanLink, w / 2, footerY + 55);
 
     return canvas.toDataURL('image/png');
 }
