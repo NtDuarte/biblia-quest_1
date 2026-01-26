@@ -8,16 +8,25 @@
     <style>
         /* PALETA ACONCHEGANTE: Laranja, Bege e Marrom */
         :root { 
-            --primary: #e67e22;    /* Laranja Pôr do Sol */
-            --secondary: #d35400;  /* Laranja mais escuro para bordas */
-            --blue: #8d6e63;       /* Marrom Médio */
-            --bg: #fdf5e6;         /* Bege Suave (Old Lace) */
-            --card-bg: #ffffff; 
-            --text: #4e342e;       /* Marrom Café Profundo */
-            --error: #c0392b; 
-            --gold: #b38a42; 
-            --gray: #a1887f;        
-        }
+* Natureza e Vida */
+    --primary: #2d5a27;    /* Verde Musgo Profundo (Equilíbrio e Crescimento) */
+    --secondary: #1e3d1a;  /* Verde Floresta Fechado (Raízes e Firmeza) */
+    
+    /* Paz e Céu */
+    --blue: #5d7a8c;       /* Azul Sereno Mudo (Paz e Espiritualidade) */
+    
+    /* Fundo e Leveza */
+    --bg: #f8f5f0;         /* Off-white Areia (Simplicidade e Clareza) */
+    --card-bg: #ffffff;    /* Branco Puro para contraste limpo */
+    
+    /* Terra e Leitura */
+    --text: #2c241a;       /* Marrom Barro (Solidez e Conexão com a Terra) */
+    --gray: #8e8d8a;       /* Cinza Pedra (Neutralidade) */
+    
+    /* Alertas e Divino */
+    --error: #a64439;      /* Vermelho Argila (Aviso sem ser agressivo) */
+    --gold: #c5a059;       /* Dourado Envelhecido (Luz de Cristo e Sabedoria) */
+}
 
         body { font-family: 'Nunito', sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; color: var(--text); overflow-x: hidden; }
         #app { width: 100%; max-width: 480px; background: var(--card-bg); min-height: 100vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; padding-bottom: 120px; position: relative; box-shadow: 0 4px 20px rgba(78, 52, 46, 0.1); }
@@ -216,14 +225,14 @@
             <div id="study-area" class="hidden">
                 <div class="card" id="ai-response"></div>
                 <div class="card" style="border-color: var(--blue);">
-                    <h4 style="color:var(--blue); margin:0 0 10px 0; font-size: 1.2rem;">🤔 DÚVIDA?</h4>
+                    <h4 style="color:var(--blue); margin:0 0 10px 0; font-size: 1.2rem;">🤔 DÚVIDAS?</h4>
                     <textarea id="study-doubt" placeholder="Pergunte ao Professor..."></textarea>
                     <button class="btn-duo btn-secondary" style="padding:12px; font-size:16px;" onclick="askProfessor()">Perguntar</button>
                     <p id="ai-doubt-res" style="font-size:1.1rem; font-style:italic; margin-top:10px;"></p>
                 </div>
                 <div class="card" style="border-color: var(--gold);">
                     <h4 style="color:var(--gold); margin:0 0 10px 0; font-size: 1.2rem;">✍️ ANOTAÇÕES</h4>
-                    <textarea id="study-notes" placeholder="O que você aprendeu hoje?"></textarea>
+                    <textarea id="study-notes" placeholder="O que você aprendeu com essa mensagem?"></textarea>
                     <button class="btn-duo" style="padding:12px; font-size:16px; background:var(--gold); border-bottom-color: #8d6e1d;" onclick="saveNotes()">Salvar Nota</button>
                 </div>
                 <div id="quiz-container" class="card" style="border-color: var(--primary);">
