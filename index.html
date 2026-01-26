@@ -2071,52 +2071,51 @@ const BIBLE_DATABASE = [
         bird.classList.add('fly-animation');
         setTimeout(() => { bird.classList.add('hidden'); bird.classList.remove('fly-animation'); }, 4600);
     }
-
-    
-  // --- NOVA FUNÇÃO PARA GERAR A IMAGEM ---
 function generateShareableImage(verseText, verseRef, appLink) {
-    // 1. Criar um canvas invisível de alta resolução (quadrado)
     const canvas = document.createElement('canvas');
-    const size = 1080; // Tamanho bom para redes sociais
+    const size = 1080; // Resolução padrão Instagram/WhatsApp
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext('2d');
 
-    // 2. Pintar o Fundo (Usando as cores do seu CSS)
-    // Criar um gradiente suave do bege para um laranja bem clarinho
-    const gradient = ctx.createLinearGradient(0, 0, 0, size);
+    // 1. FUNDO COM GRADIENTE SUAVE
+    const gradient = ctx.createLinearGradient(0, 0, size, size);
     gradient.addColorStop(0, '#fdf5e6'); // var(--bg)
-    gradient.addColorStop(1, '#fffaf0');
+    gradient.addColorStop(1, '#ffffff');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, size, size);
 
-    // Adicionar uma borda laranja
+    // 2. BORDA DECORATIVA (ESTILO QUADRO)
     ctx.strokeStyle = '#e67e22'; // var(--primary)
-    ctx.lineWidth = 20;
-    ctx.strokeRect(0, 0, size, size);
+    ctx.lineWidth = 15;
+    ctx.strokeRect(40, 40, size - 80, size - 80);
+    
+    ctx.strokeStyle = '#b38a42'; // var(--gold)
+    ctx.lineWidth = 2;
+    ctx.strokeRect(60, 60, size - 120, size - 120);
 
-    // 3. Configurar Texto Principal (Versículo)
+    // 3. ASPAS DECORATIVAS GIGANTES (ELEGÂNCIA)
+    ctx.fillStyle = 'rgba(230, 126, 34, 0.1)'; 
+    ctx.font = '900 400px Georgia, serif';
+    ctx.fillText('“', 100, 400);
+
+    // 4. CONFIGURAÇÃO DO TEXTO DO VERSÍCULO
     ctx.fillStyle = '#4e342e'; // var(--text)
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
-    // Ajuste dinâmico de fonte (diminui se o texto for muito longo)
-    let fontSize = 60;
-    if (verseText.length > 200) fontSize = 45;
-    if (verseText.length > 350) fontSize = 35;
-    ctx.font = `bold ${fontSize}px 'Nunito', sans-serif`;
+    // Ajuste de fonte dinâmico
+    let fontSize = verseText.length > 250 ? 42 : 58;
+    ctx.font = `700 ${fontSize}px 'Nunito', sans-serif`;
 
-    // Lógica para quebrar linhas (Canvas não faz isso nativamente)
     const words = verseText.split(' ');
     let line = '';
     let lines = [];
-    const maxWidth = size - 160; // Margem lateral
+    const maxWidth = size - 300; 
 
     for (let n = 0; n < words.length; n++) {
         let testLine = line + words[n] + ' ';
-        let metrics = ctx.measureText(testLine);
-        let testWidth = metrics.width;
-        if (testWidth > maxWidth && n > 0) {
+        if (ctx.measureText(testLine).width > maxWidth && n > 0) {
             lines.push(line);
             line = words[n] + ' ';
         } else {
@@ -2125,79 +2124,71 @@ function generateShareableImage(verseText, verseRef, appLink) {
     }
     lines.push(line);
 
-    // Desenhar as linhas do versículo centralizadas
-    let yPos = (size / 2) - ((lines.length * (fontSize * 1.2)) / 2);
-    for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], size / 2, yPos);
-        yPos += fontSize * 1.2; // Espaçamento entre linhas
-    }
+    // Desenhar linhas centralizadas
+    let lineHeight = fontSize * 1.3;
+    let yPos = (size / 2) - ((lines.length * lineHeight) / 2) - 20;
+    
+    lines.forEach(l => {
+        ctx.fillText(l.trim(), size / 2, yPos);
+        yPos += lineHeight;
+    });
 
-    // 4. Desenhar a Referência (Mais abaixo)
-    ctx.fillStyle = '#e67e22'; // var(--primary)
-    ctx.font = '900 40px Nunito';
-    ctx.fillText(verseRef.toUpperCase(), size / 2, yPos + 40);
+    // 5. REFERÊNCIA (Destaque em Ouro)
+    ctx.fillStyle = '#b38a42';
+    ctx.font = '900 45px Nunito';
+    ctx.fillText(verseRef.toUpperCase(), size / 2, yPos + 60);
 
-    // 5. Desenhar o Rodapé com o Link/Nome do App
-    ctx.fillStyle = '#8d6e63'; // var(--gray)
-    ctx.font = 'bold 30px Nunito';
-    // Desenhamos o nome do app e o link na parte inferior
-    ctx.fillText("TRILHA VIVA", size / 2, size - 100);
+    // 6. RODAPÉ (BRANDING)
+    // Divisor
+    ctx.beginPath();
+    ctx.moveTo(400, size - 150);
+    ctx.lineTo(680, size - 150);
+    ctx.strokeStyle = 'rgba(141, 110, 99, 0.3)';
+    ctx.stroke();
+
     ctx.fillStyle = '#e67e22';
-    ctx.font = 'bold 25px Nunito';
+    ctx.font = '900 35px Nunito';
+    ctx.fillText('TRILHA VIVA', size / 2, size - 100);
+    
+    ctx.fillStyle = '#8d6e63';
+    ctx.font = '700 24px Nunito';
     ctx.fillText(appLink.replace('https://', ''), size / 2, size - 60);
 
-    // 6. Converter o canvas em uma imagem (Data URL)
     return canvas.toDataURL('image/png');
 }
-
-// --- ATUALIZE SUA FUNÇÃO shareVerse EXISTENTE ---
-window.shareVerse = async () => {
+ window.shareVerse = async () => {
     const btn = document.querySelector('.btn-whatsapp');
-    const originalText = btn.innerText;
-    btn.innerText = "Gerando imagem...";
-    btn.disabled = true;
-
-    const text = document.getElementById('verse-text').innerText.replace(/"/g, ''); // Remove aspas extras
+    const originalContent = btn.innerHTML;
+    
+    const text = document.getElementById('verse-text').innerText.replace(/"/g, '');
     const ref = document.getElementById('verse-ref').innerText;
-    const appLink = window.location.origin; // Pega o link atual do seu site
+    const appLink = "trilhaviva.app"; // Seu domínio
 
     try {
-        // 1. Gera a imagem localmente
-        const imageDataUrl = generateShareableImage(text, ref, appLink);
-
-        // NOTA IMPORTANTE SOBRE WHATSAPP WEB:
-        // O WhatsApp Web não permite anexar uma imagem via link programaticamente (ele só envia texto).
-        // Para enviar a imagem real, o usuário teria que salvar a imagem gerada e anexar manualmente.
-        // Em um aplicativo nativo (React Native/Flutter) isso é fácil. Na web, é limitado.
-
-        // SOLUÇÃO PARA WEB:
-        // Vamos mostrar a imagem para o usuário e dar a instrução.
-
-        // Cria um modal ou área temporária para mostrar a imagem gerada
-        let imagePreviewArea = document.getElementById('share-preview');
-        if (!imagePreviewArea) {
-             imagePreviewArea = document.createElement('div');
-             imagePreviewArea.id = 'share-preview';
-             imagePreviewArea.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;";
-             imagePreviewArea.innerHTML = `
-                <h3 style="color:white; text-align:center;">Segure na imagem para salvar/copiar!</h3>
-                <img id="gen-img" style="max-width:100%; max-height:60vh; border-radius:15px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                <button onclick="document.getElementById('share-preview').remove()" class="btn-duo btn-primary" style="margin-top:20px; width:auto; padding: 10px 30px;">Fechar</button>
-             `;
-             document.body.appendChild(imagePreviewArea);
-        }
+        btn.innerText = "Preparando Imagem... ⏳";
+        const dataUrl = generateShareableImage(text, ref, appLink);
         
-        document.getElementById('gen-img').src = imageDataUrl;
+        // Converter DataURL para um arquivo real (Blob)
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], 'versiculo-trilha-viva.png', { type: 'image/png' });
 
-        // Mantemos o compartilhamento de texto como fallback
-        // const message = `🌿 *Trilha VIVA* 🌿\n\n"${text}"\n📖 ${ref}\n\nVenha caminhar comigo na trilha da fé!\n👉🏻 ${appLink}`;
-        // window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
-
-    } catch (e) {
-        alert("Erro ao gerar imagem: " + e.message);
+        // Verificar se o navegador suporta compartilhamento de arquivos (Web Share API)
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: 'Trilha VIVA',
+                text: `🌿 Olhe esse versículo que estudei hoje na Trilha VIVA!\n\n"${text}"\n📖 ${ref}`,
+                files: [file]
+            });
+        } else {
+            // Fallback para quem está no PC ou navegador antigo
+            const message = `🌿 *Trilha VIVA* 🌿\n\n"${text}"\n📖 ${ref}\n\n👉🏻 ${appLink}`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+        }
+    } catch (err) {
+        console.error("Erro ao compartilhar:", err);
+        alert("Ops! Não consegui abrir o menu de compartilhamento.");
     } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
+        btn.innerHTML = originalContent;
     }
 };
 
