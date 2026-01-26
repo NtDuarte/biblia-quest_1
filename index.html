@@ -2162,7 +2162,7 @@ function generateShareableImage(verseText, verseRef, appLink) {
 
     ctx.fillStyle = '#e67e22';
     ctx.font = '900 32px Nunito';
-    ctx.fillText('TRILHA VIVA', size / 2, size - 100);
+    ctx.fillText('', size / 2, size - 100);
     
     ctx.fillStyle = '#8d6e63';
     ctx.font = '700 22px Nunito';
@@ -2190,7 +2190,7 @@ function generateShareableImage(verseText, verseRef, appLink) {
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
                 title: 'Trilha VIVA',
-                text: `🌿 Olhe esse versículo que estudei hoje na Trilha VIVA!\n\n"${text}"\n📖 ${ref}`,
+                text: `🌿 Olhe esse versículo que estudei hoje na Trilha VIVA!\n📖\n\n👉🏻 ${appLink}`,
                 files: [file]
             });
         } else {
