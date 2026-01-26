@@ -258,17 +258,24 @@
             <div id="ranking-list" class="card" style="padding:0"></div>
         </div>
 
-        <div id="tab-config" class="hidden">
-            <h2 style="text-align:center; color: var(--primary);">⚙️ AJUSTES</h2>
-            <div class="card" style="border-color: var(--blue);">
-                <h4 style="color:var(--blue); margin:0 0 10px 0;">👤 MINHA CONTA</h4>
-                <p style="font-size: 1rem; margin-bottom: 10px;">Gerencie seu acesso com segurança.</p>
-                <button class="btn-duo btn-secondary" style="padding:10px; font-size:14px; margin-bottom: 15px;" onclick="resetPasswordFromSettings()">Redefinir Senha via E-mail</button>
-                <div style="border-top: 1px solid #3e5c46; padding-top: 15px;">
-                    <input type="email" id="new-email" placeholder="Novo e-mail" style="margin-bottom: 8px; padding: 12px;">
-                    <button class="btn-duo btn-primary" style="padding:10px; font-size:14px; background-color: var(--primary);" onclick="updateUserEmail()">Alterar E-mail</button>
-                </div>
-            </div>
+       <div id="tab-config" class="hidden">
+    <h2 style="text-align:center; color: var(--primary);">⚙️ AJUSTES</h2>
+    <div class="card" style="border: 2px solid var(--primary); border-radius: 12px; padding: 20px;">
+        <h4 style="color:var(--primary); margin:0 0 10px 0;">👤 MINHA CONTA</h4>
+        <p style="font-size: 1rem; margin-bottom: 15px;">Gerencie seu acesso com segurança.</p>
+        
+        <button class="btn-duo btn-secondary" style="padding:10px; font-size:14px; margin-bottom: 15px;" onclick="resetPasswordFromSettings()">
+            Redefinir Senha via E-mail
+        </button>
+
+        <div style="border-top: 1px solid var(--primary); padding-top: 15px;">
+            <input type="email" id="new-email" placeholder="Novo e-mail" style="margin-bottom: 12px; padding: 12px; border: 1px solid var(--gray); border-radius: 8px; width: 100%;">
+            <button class="btn-duo btn-primary" style="padding:12px; font-size:14px; background-color: var(--primary); width: 100%; color: white; border: none; border-radius: 8px; cursor: pointer;" onclick="updateUserEmail()">
+                ALTERAR E-MAIL
+            </button>
+        </div>
+    </div>
+</div>
 
             <div class="card" style="border-color: var(--gold);">
                 <h4 style="color:var(--gold); margin:0 0 10px 0;">💡 SUGESTÃO</h4>
