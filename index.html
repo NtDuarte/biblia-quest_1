@@ -176,9 +176,24 @@
                 <span class="toggle-password" onclick="togglePassword('signup-pass-repeat')">👁️</span>
             </div>
             <label style="color: var(--primary); font-weight: 900; font-size: 0.9rem; display: block; text-align: center; margin-top: 10px;">JÁ É CRISTÃO? DIGITE SUA IGREJA:</label>
-<input type="text" id="signup-church" placeholder="MINHA IGREJA" list="churches-list">
 
-<datalist id="churches-list"></datalist>
+<div class="input-group" style="position: relative;">
+    <input type="text" id="signup-church" placeholder="MINHA IGREJA" autocomplete="off" oninput="filterChurches()">
+    
+    <div id="church-results" class="hidden" style="
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 2px solid var(--primary);
+        border-radius: 0 0 18px 18px;
+        z-index: 1000;
+        max-height: 200px;
+        overflow-y: auto;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    "></div>
+</div>
             <button class="btn-duo btn-secondary" onclick="handleAuth('signup')">Criar minha Conta</button>
         </div>
     </div>
@@ -2560,33 +2575,65 @@ function generateShareableImage(verseText, verseRef, appLink) {
     }
 }
 
-    // Função para buscar igrejas existentes e preencher as sugestões
+let allChurches = []; // Array global para guardar as igrejas
+
+// 1. Busca as igrejas do Firebase uma única vez
 async function loadAvailableChurches() {
-    const datalist = document.getElementById('churches-list');
     try {
-        // Busca todos os usuários para extrair os nomes das igrejas
         const q = query(collection(db, "users"));
         const snapshot = await getDocs(q);
-        
-        const churches = new Set(); // O Set evita nomes duplicados
+        const churchesSet = new Set();
         snapshot.forEach(doc => {
             const data = doc.data();
-            if (data.church) {
-                churches.add(data.church);
-            }
+            if (data.church) churchesSet.add(data.church.toUpperCase());
         });
-
-        // Limpa e preenche o datalist com as igrejas encontradas
-        datalist.innerHTML = "";
-        churches.forEach(churchName => {
-            const option = document.createElement('option');
-            option.value = churchName;
-            datalist.appendChild(option);
-        });
+        allChurches = Array.from(churchesSet);
     } catch (e) {
-        console.error("Erro ao carregar lista de igrejas:", e);
+        console.error("Erro ao carregar igrejas:", e);
     }
 }
+
+// 2. Filtra e exibe os resultados na tela
+window.filterChurches = () => {
+    const input = document.getElementById('signup-church').value.toUpperCase();
+    const resultsDiv = document.getElementById('church-results');
+    
+    if (input.length < 2) {
+        resultsDiv.classList.add('hidden');
+        return;
+    }
+
+    const filtered = allChurches.filter(c => c.includes(input));
+
+    if (filtered.length > 0) {
+        resultsDiv.innerHTML = "";
+        filtered.forEach(churchName => {
+            const item = document.createElement('div');
+            item.style.padding = "12px 16px";
+            item.style.cursor = "pointer";
+            item.style.borderBottom = "1px solid #efebe9";
+            item.style.fontWeight = "700";
+            item.innerText = churchName;
+            
+            // Quando clica na opção, preenche o input
+            item.onclick = () => {
+                document.getElementById('signup-church').value = churchName;
+                resultsDiv.classList.add('hidden');
+            };
+            resultsDiv.appendChild(item);
+        });
+        resultsDiv.classList.remove('hidden');
+    } else {
+        resultsDiv.classList.add('hidden');
+    }
+};
+
+// Fecha a lista se clicar fora dela
+document.addEventListener('click', (e) => {
+    if (e.target.id !== 'signup-church') {
+        document.getElementById('church-results').classList.add('hidden');
+    }
+});
     
     async function checkAnswer(c, btn) {
     document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
