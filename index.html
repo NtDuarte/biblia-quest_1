@@ -249,8 +249,9 @@
         <div id="tab-rank" class="hidden">
             <h2 style="text-align:center; color: var(--primary);">🏆 RANKING</h2>
             <div class="auth-tabs" style="margin-bottom:15px;">
-                <div class="auth-tab active" id="rank-users-btn" onclick="loadRanking('users')">DIÁRIO (HOJE)</div>
-                <div class="auth-tab" id="rank-church-btn" onclick="loadRanking('churches')">IGREJAS (TOTAL)</div>
+                <div class="auth-tab active" id="rank-users-btn" onclick="loadRanking('users')">DIÁRIO </div>
+                <div class="auth-tab" id="rank-global-btn" onclick="loadRanking('global')">GLOBAL </div>
+                <div class="auth-tab" id="rank-church-btn" onclick="loadRanking('churches')">IGREJAS </div>
             </div>
             <div id="ranking-list" class="card" style="padding:0"></div>
         </div>
@@ -2557,48 +2558,77 @@ function generateShareableImage(verseText, verseRef, appLink) {
         setTimeout(() => location.reload(), 1500);
     }
 
-    window.loadRanking = async (type = 'users') => {
-        const list = document.getElementById('ranking-list');
-        list.innerHTML = "<p style='text-align:center; padding:20px;'>Buscando os melhores... ⏳</p>";
-        document.getElementById('rank-users-btn').classList.toggle('active', type === 'users');
-        document.getElementById('rank-church-btn').classList.toggle('active', type === 'churches');
-        const today = new Date().toISOString().split('T')[0];
-        let q;
-        try {
-            if (type === 'users') {
-                q = query(collection(db, "users"), where("lastXPUpdateDate", "==", today), orderBy("dailyXP", "desc"), limit(50));
-            } else {
-                q = query(collection(db, "users"), orderBy("xp", "desc"), limit(100));
-            }
-            const snapshot = await getDocs(q);
-            list.innerHTML = "";
-            if (snapshot.empty) {
-                const msg = type === 'users' ? "Ninguém pontuou ainda. 🔥" : "Nenhum dado.";
-                list.innerHTML = `<p style='text-align:center; padding:20px;'>${msg}</p>`;
-                return;
-            }
-            if (type === 'users') {
-                snapshot.docs.forEach((docSnap, i) => {
-                    const d = docSnap.data();
-                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i + 1}º</span><div class="rank-info"><span class="rank-xp">${d.dailyXP || 0} XP HOJE</span><b class="rank-name">${(d.name || "Viajante").toUpperCase()}</b><span class="rank-church-tag">${d.church || 'Independente'}</span></div></div>`;
-                });
-            } else {
-                const churches = {};
-                snapshot.docs.forEach(docSnap => {
-                    const d = docSnap.data();
-                    const c = d.church || "Independente";
-                    churches[c] = (churches[c] || 0) + (d.xp || 0);
-                });
-                const sortedChurches = Object.entries(churches).sort((a, b) => b[1] - a[1]);
-                sortedChurches.forEach((item, i) => {
-                    list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i + 1}º</span><div class="rank-info"><span class="rank-xp">${item[1]} XP TOTAL</span><b class="rank-name">${item[0].toUpperCase()}</b></div></div>`;
-                });
-            }
-        } catch (e) {
-            console.error("ERRO NO RANKING:", e);
-            list.innerHTML = "<p style='text-align:center; padding:20px;'>Erro ao carregar.</p>";
+   window.loadRanking = async (type = 'users') => {
+    const list = document.getElementById('ranking-list');
+    list.innerHTML = "<p style='text-align:center; padding:20px;'>Buscando os melhores... ⏳</p>";
+    
+    // Atualiza os estados visuais dos botões (agora são 3)
+    document.getElementById('rank-users-btn').classList.toggle('active', type === 'users');
+    document.getElementById('rank-church-btn').classList.toggle('active', type === 'churches');
+    // Se você adicionou o botão global, essa linha abaixo ativa ele:
+    if(document.getElementById('rank-global-btn')) {
+        document.getElementById('rank-global-btn').classList.toggle('active', type === 'global');
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    let q;
+    
+    try {
+        if (type === 'users') {
+            // Ranking Diário (Só quem pontuou hoje)
+            q = query(collection(db, "users"), where("lastXPUpdateDate", "==", today), orderBy("dailyXP", "desc"), limit(50));
+        } else if (type === 'global') {
+            // NOVO: Ranking de todos os tempos (Total de XP)
+            q = query(collection(db, "users"), orderBy("xp", "desc"), limit(50));
+        } else {
+            // Ranking por Igrejas
+            q = query(collection(db, "users"), orderBy("xp", "desc"), limit(100));
         }
-    };
+
+        const snapshot = await getDocs(q);
+        list.innerHTML = "";
+
+        if (snapshot.empty) {
+            const msg = type === 'users' ? "Ninguém pontuou ainda hoje. 🔥" : "Nenhum dado encontrado.";
+            list.innerHTML = `<p style='text-align:center; padding:20px;'>${msg}</p>`;
+            return;
+        }
+
+        if (type === 'users' || type === 'global') {
+            // Renderiza o ranking individual (serve para o diário e para o global)
+            snapshot.docs.forEach((docSnap, i) => {
+                const d = docSnap.data();
+                const xpExibido = type === 'global' ? (d.xp || 0) : (d.dailyXP || 0);
+                const sufixoXP = type === 'global' ? "XP TOTAL" : "XP HOJE";
+                
+                list.innerHTML += `
+                    <div class="rank-item">
+                        <span class="rank-pos">${i + 1}º</span>
+                        <div class="rank-info">
+                            <span class="rank-xp">${xpExibido} ${sufixoXP}</span>
+                            <b class="rank-name">${(d.name || "Viajante").toUpperCase()}</b>
+                            <span class="rank-church-tag">${d.church || 'Independente'}</span>
+                        </div>
+                    </div>`;
+            });
+        } else {
+            // Mantém sua lógica de igrejas intacta
+            const churches = {};
+            snapshot.docs.forEach(docSnap => {
+                const d = docSnap.data();
+                const c = d.church || "Independente";
+                churches[c] = (churches[c] || 0) + (d.xp || 0);
+            });
+            const sortedChurches = Object.entries(churches).sort((a, b) => b[1] - a[1]);
+            sortedChurches.forEach((item, i) => {
+                list.innerHTML += `<div class="rank-item"><span class="rank-pos">${i + 1}º</span><div class="rank-info"><span class="rank-xp">${item[1]} XP TOTAL</span><b class="rank-name">${item[0].toUpperCase()}</b></div></div>`;
+            });
+        }
+    } catch (e) {
+        console.error("ERRO NO RANKING:", e);
+        list.innerHTML = "<p style='text-align:center; padding:20px;'>Erro ao carregar ranking. Verifique o console.</p>";
+    }
+};
 
     window.handleAuth = async (m) => {
         try {
