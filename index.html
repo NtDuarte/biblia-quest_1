@@ -176,7 +176,9 @@
                 <span class="toggle-password" onclick="togglePassword('signup-pass-repeat')">👁️</span>
             </div>
             <label style="color: var(--primary); font-weight: 900; font-size: 0.9rem; display: block; text-align: center; margin-top: 10px;">JÁ É CRISTÃO? DIGITE SUA IGREJA:</label>
-            <input type="text" id="signup-church" placeholder="MINHA IGREJA">
+<input type="text" id="signup-church" placeholder="MINHA IGREJA" list="churches-list">
+
+<datalist id="churches-list"></datalist>
             <button class="btn-duo btn-secondary" onclick="handleAuth('signup')">Criar minha Conta</button>
         </div>
     </div>
@@ -2558,6 +2560,34 @@ function generateShareableImage(verseText, verseRef, appLink) {
     }
 }
 
+    // Função para buscar igrejas existentes e preencher as sugestões
+async function loadAvailableChurches() {
+    const datalist = document.getElementById('churches-list');
+    try {
+        // Busca todos os usuários para extrair os nomes das igrejas
+        const q = query(collection(db, "users"));
+        const snapshot = await getDocs(q);
+        
+        const churches = new Set(); // O Set evita nomes duplicados
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.church) {
+                churches.add(data.church);
+            }
+        });
+
+        // Limpa e preenche o datalist com as igrejas encontradas
+        datalist.innerHTML = "";
+        churches.forEach(churchName => {
+            const option = document.createElement('option');
+            option.value = churchName;
+            datalist.appendChild(option);
+        });
+    } catch (e) {
+        console.error("Erro ao carregar lista de igrejas:", e);
+    }
+}
+    
     async function checkAnswer(c, btn) {
     document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
     const userRef = doc(db, "users", auth.currentUser.uid);
@@ -2716,12 +2746,16 @@ function generateShareableImage(verseText, verseRef, appLink) {
     };
 
     window.switchAuth = (m) => {
-        document.getElementById('form-login').classList.toggle('hidden', m !== 'login');
-        document.getElementById('form-signup').classList.toggle('hidden', m !== 'signup');
-        document.getElementById('tab-login-btn').classList.toggle('active', m === 'login');
-        document.getElementById('tab-signup-btn').classList.toggle('active', m === 'signup');
-    };
+    document.getElementById('form-login').classList.toggle('hidden', m !== 'login');
+    document.getElementById('form-signup').classList.toggle('hidden', m !== 'signup');
+    document.getElementById('tab-login-btn').classList.toggle('active', m === 'login');
+    document.getElementById('tab-signup-btn').classList.toggle('active', m === 'signup');
 
+    // Se o usuário clicar em "CRIAR CONTA", carregamos as sugestões de igrejas
+    if (m === 'signup') {
+        loadAvailableChurches();
+    }
+};
     window.showTab = (t) => {
         ['home', 'notes', 'library', 'rank', 'config'].forEach(tab => {
             document.getElementById(`tab-${tab}`).classList.toggle('hidden', tab !== t);
