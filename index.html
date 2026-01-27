@@ -2635,7 +2635,7 @@ document.addEventListener('click', (e) => {
     }
 });
     
-    async function checkAnswer(c, btn) {
+   async function checkAnswer(c, btn) {
     document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
     const userRef = doc(db, "users", auth.currentUser.uid);
     const userSnap = await getDoc(userRef);
@@ -2645,17 +2645,14 @@ document.addEventListener('click', (e) => {
     let currentDailyStudies = userData.dailyStudiesCount || 0;
     let isCorrect = (c === correctAnswer);
     
-    // Define o multiplicador atual baseado na sequência (0-4=X1, 5-9=X2, ..., 20+=X5)
     const multiplier = Math.min(Math.floor(currentCorrectStreak / 5) + 1, 5);
-    
-    // Cálculo de pontos: Acerto ganha (25 * multiplicador atual) | Erro ganha 5
     let points = isCorrect ? (25 * multiplier) : 5;
     
     if (isCorrect) {
         currentCorrectStreak++;
-        currentDailyStudies++; // Incrementa livremente para a barra reiniciar a cada 5
+        currentDailyStudies++;
     } else {
-        currentCorrectStreak = 0; // Erro reseta o multiplicador para X1
+        currentCorrectStreak = 0;
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -2674,7 +2671,6 @@ document.addEventListener('click', (e) => {
         await saveCompletedStudy(document.getElementById('ai-response').innerText);
         
         let msg = `+${points} XP!`;
-        // Avisa quando o multiplicador sobe de nível
         if (isCorrect && currentCorrectStreak > 0 && currentCorrectStreak % 5 === 0 && multiplier < 5) {
             msg += ` 🔥 MULTIPLICADOR X${multiplier + 1} ATIVADO!`;
         }
@@ -2686,7 +2682,26 @@ document.addEventListener('click', (e) => {
         alert(`Era ${correctAnswer}. Multiplicador resetado! +${points} XP.`); 
     }
     
-    setTimeout(() => location.reload(), 1500);
+    // --- O PULO DO GATO ESTÁ AQUI ---
+    setTimeout(() => {
+        // 1. Esconde a área de estudo e volta o botão ao normal sem dar refresh
+        document.getElementById('study-area').classList.add('hidden');
+        const btnStudy = document.getElementById('btn-study');
+        btnStudy.innerText = "INICIAR ESTUDO";
+        btnStudy.disabled = false;
+
+        // 2. Limpa os campos de texto para o próximo estudo
+        document.getElementById('study-doubt').value = "";
+        document.getElementById('study-notes').value = "";
+        document.getElementById('ai-doubt-res').innerText = "";
+        
+        // 3. Atualiza os números (XP, barra, multiplicador) chamando a função que você já tem
+        loadUserData(auth.currentUser.uid);
+        
+        // 4. Sorteia um novo versículo para a jornada continuar
+        fetchVerse();
+
+    }, 2000); 
 }
 
    window.loadRanking = async (type = 'users') => {
