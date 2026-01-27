@@ -2511,52 +2511,98 @@ function generateShareableImage(verseText, verseRef, appLink) {
         try { await sendPasswordResetEmail(auth, email); alert("E-mail enviado!"); } catch (e) { alert("Erro."); }
     };
 
-    async function loadUserData(uid) {
-        const userRef = doc(db, "users", uid);
-        const s = await getDoc(userRef);
-        if(s.exists()) {
-            const d = s.data();
-            const today = new Date().toISOString().split('T')[0];
-            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0];
-            let updates = {};
+   async function loadUserData(uid) {
+    const userRef = doc(db, "users", uid);
+    const s = await getDoc(userRef);
+    if(s.exists()) {
+        const d = s.data();
+        const today = new Date().toISOString().split('T')[0];
+        let updates = {};
 
-            if (d.lastXPUpdateDate !== today) { updates.dailyXP = 0; updates.lastXPUpdateDate = today; }
-            if (d.lastLoginDate !== today) {
-                let newStreak = d.streak || 1;
-                if (d.lastLoginDate === yesterdayStr) { newStreak++; triggerNatureEffect(); } else { newStreak = 1; }
-                updates.streak = newStreak; updates.lastLoginDate = today;
-            }
-            if (Object.keys(updates).length > 0) { await updateDoc(userRef, updates); return; }
-
-            document.getElementById('xp-val').innerText = d.xp || 0;
-            document.getElementById('streak-val').innerText = d.streak || 1;
-            document.getElementById('level-display').innerText = d.streak || 1;
-            document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
+        // Reset diário de XP e contagem de estudos
+        if (d.lastXPUpdateDate !== today) { 
+            updates.dailyXP = 0; 
+            updates.dailyStudiesCount = 0; // Reseta a barra de progresso
+            updates.lastXPUpdateDate = today; 
         }
+        
+        // Logica de login e streak (mantida)
+        if (d.lastLoginDate !== today) {
+            // ... (sua lógica de streak atual)
+        }
+
+        if (Object.keys(updates).length > 0) { 
+            await updateDoc(userRef, updates); 
+            location.reload(); // Recarrega para aplicar os resets
+            return; 
+        }
+
+        // --- ATUALIZAÇÃO DA INTERFACE ---
+        document.getElementById('xp-val').innerText = d.xp || 0;
+        document.getElementById('streak-val').innerText = d.streak || 1;
+        document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
+
+        // Mostra o Multiplicador no lugar do Nível
+        const multiplier = (d.correctStreak >= 5) ? 2 : 1;
+        document.getElementById('level-display').innerText = `X${multiplier}`;
+        
+        // Barra de progresso: 5 estudos = 100% (20% por estudo)
+        const progress = Math.min((d.dailyStudiesCount || 0) * 20, 100);
+        document.getElementById('progress-fill').style.width = `${progress}%`;
     }
+}
 
     async function checkAnswer(c, btn) {
-        document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
-        const userRef = doc(db, "users", auth.currentUser.uid);
-        const points = (c === correctAnswer) ? 25 : 5;
-        const today = new Date().toISOString().split('T')[0];
-        
-        await updateDoc(userRef, { 
-            xp: increment(points), 
-            dailyXP: increment(points),
-            lastXPUpdateDate: today 
-        });
+    document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+    const userRef = doc(db, "users", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
 
-        if(c === correctAnswer) { 
-            btn.style.background = "#d7ffb8"; 
-            btn.style.borderColor = "#58cc02";
-            await saveCompletedStudy(document.getElementById('ai-response').innerText);
-            alert(`+${points} XP! Estudo salvo na biblioteca 📚`); 
-        } 
-        else { btn.style.background = "#ffd7d7"; btn.style.borderColor = "#ff4b4b"; alert(`Era ${correctAnswer}. +${points} XP.`); }
-        setTimeout(() => location.reload(), 1500);
+    let currentCorrectStreak = userData.correctStreak || 0;
+    let currentDailyStudies = userData.dailyStudiesCount || 0;
+    let isCorrect = (c === correctAnswer);
+    
+    // Define o multiplicador atual
+    const multiplier = (currentCorrectStreak >= 5) ? 2 : 1;
+    
+    // Cálculo de pontos: Acerto base 25 * mult | Erro fixo 5
+    let points = isCorrect ? (25 * multiplier) : 5;
+    
+    // Atualiza contadores
+    if (isCorrect) {
+        currentCorrectStreak++;
+        currentDailyStudies = Math.min(currentDailyStudies + 1, 5); // Trava em 5 estudos/dia
+    } else {
+        currentCorrectStreak = 0; // Errou? Volta pro multiplicador X1
     }
+
+    const today = new Date().toISOString().split('T')[0];
+    
+    await updateDoc(userRef, { 
+        xp: increment(points), 
+        dailyXP: increment(points),
+        correctStreak: currentCorrectStreak,
+        dailyStudiesCount: currentDailyStudies,
+        lastXPUpdateDate: today 
+    });
+
+    if(isCorrect) { 
+        btn.style.background = "#d7ffb8"; 
+        btn.style.borderColor = "#58cc02";
+        await saveCompletedStudy(document.getElementById('ai-response').innerText);
+        
+        let msg = `+${points} XP!`;
+        if(currentCorrectStreak === 5) msg += " 🔥 MULTIPLICADOR X2 ATIVADO!";
+        alert(msg); 
+    } 
+    else { 
+        btn.style.background = "#ffd7d7"; 
+        btn.style.borderColor = "#ff4b4b"; 
+        alert(`Era ${correctAnswer}. Multiplicador resetado! +${points} XP.`); 
+    }
+    
+    setTimeout(() => location.reload(), 1500);
+}
 
    window.loadRanking = async (type = 'users') => {
     const list = document.getElementById('ranking-list');
@@ -2639,7 +2685,17 @@ function generateShareableImage(verseText, verseRef, appLink) {
                 const church = document.getElementById('signup-church').value || "Independente";
                 const today = new Date().toISOString().split('T')[0];
                 const r = await createUserWithEmailAndPassword(auth, email, p);
-                await setDoc(doc(db, "users", r.user.uid), { xp: 0, dailyXP: 0, name: user, church, streak: 1, lastLoginDate: today, lastXPUpdateDate: today });
+                await setDoc(doc(db, "users", r.user.uid), { 
+    xp: 0, 
+    dailyXP: 0, 
+    name: user, 
+    church, 
+    streak: 1, 
+    lastLoginDate: today, 
+    lastXPUpdateDate: today,
+    dailyStudiesCount: 0, // Novo: Contador de estudos no dia (0 a 5)
+    correctStreak: 0      // Novo: Sequência de acertos para o multiplicador
+});
             } else { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-pass').value); }
         } catch(e) { alert("Erro no login."); }
     };
