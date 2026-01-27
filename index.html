@@ -2542,13 +2542,19 @@ function generateShareableImage(verseText, verseRef, appLink) {
         document.getElementById('streak-val').innerText = d.streak || 1;
         document.getElementById('user-display').innerText = (d.name || "USUÁRIO").toUpperCase();
 
-        // Mostra o Multiplicador no lugar do Nível
-        const multiplier = (d.correctStreak >= 5) ? 2 : 1;
+        // 1. Multiplicador: Sobe 1 nível a cada 5 acertos seguidos (Máximo 5X)
+        // Lógica: 0-4 acertos = X1 | 5-9 = X2 | 10-14 = X3 | 15-19 = X4 | 20+ = X5
+        const currentCorrectStreak = d.correctStreak || 0;
+        const multiplier = Math.min(Math.floor(currentCorrectStreak / 5) + 1, 5);
         document.getElementById('level-display').innerText = `X${multiplier}`;
         
-        // Barra de progresso: 5 estudos = 100% (20% por estudo)
-        const progress = Math.min((d.dailyStudiesCount || 0) * 20, 100);
-        document.getElementById('progress-fill').style.width = `${progress}%`;
+        // 2. Barra de progresso: Reinicia a cada 5 estudos concluídos
+        // Usamos o operador de resto (%) para a barra 'voltar' após o 5º estudo
+        const studiesCount = d.dailyStudiesCount || 0;
+        const progressInCycle = (studiesCount % 5) * 20; 
+        
+        // Se studiesCount for 5, 10, 15... o resto é 0 (barra volta ao início)
+        document.getElementById('progress-fill').style.width = `${progressInCycle}%`;
     }
 }
 
@@ -2562,18 +2568,17 @@ function generateShareableImage(verseText, verseRef, appLink) {
     let currentDailyStudies = userData.dailyStudiesCount || 0;
     let isCorrect = (c === correctAnswer);
     
-    // Define o multiplicador atual
-    const multiplier = (currentCorrectStreak >= 5) ? 2 : 1;
+    // Define o multiplicador atual baseado na sequência (0-4=X1, 5-9=X2, ..., 20+=X5)
+    const multiplier = Math.min(Math.floor(currentCorrectStreak / 5) + 1, 5);
     
-    // Cálculo de pontos: Acerto base 25 * mult | Erro fixo 5
+    // Cálculo de pontos: Acerto ganha (25 * multiplicador atual) | Erro ganha 5
     let points = isCorrect ? (25 * multiplier) : 5;
     
-    // Atualiza contadores
     if (isCorrect) {
         currentCorrectStreak++;
-        currentDailyStudies = Math.min(currentDailyStudies + 1, 5); // Trava em 5 estudos/dia
+        currentDailyStudies++; // Incrementa livremente para a barra reiniciar a cada 5
     } else {
-        currentCorrectStreak = 0; // Errou? Volta pro multiplicador X1
+        currentCorrectStreak = 0; // Erro reseta o multiplicador para X1
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -2592,7 +2597,10 @@ function generateShareableImage(verseText, verseRef, appLink) {
         await saveCompletedStudy(document.getElementById('ai-response').innerText);
         
         let msg = `+${points} XP!`;
-        if(currentCorrectStreak === 5) msg += " 🔥 MULTIPLICADOR X2 ATIVADO!";
+        // Avisa quando o multiplicador sobe de nível
+        if (isCorrect && currentCorrectStreak > 0 && currentCorrectStreak % 5 === 0 && multiplier < 5) {
+            msg += ` 🔥 MULTIPLICADOR X${multiplier + 1} ATIVADO!`;
+        }
         alert(msg); 
     } 
     else { 
