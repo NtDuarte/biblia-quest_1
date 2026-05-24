@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['xp','dailyXP','name','church','streak','lastLoginDate','lastXPUpdateDate','dailyStudiesCount','correctStreak','createdAt'])
+        && request.resource.data.xp == 0
+        && request.resource.data.dailyXP == 0;
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['xp','dailyXP','name','church','streak','lastLoginDate','lastXPUpdateDate','dailyStudiesCount','correctStreak']);
+
+      match /notes/{noteId} {
+        allow read, create: if isOwner(uid)
+          && request.resource.data.text is string
+          && request.resource.data.text.size() <= 1200;
+      }
+
+      match /completed_studies/{studyId} {
+        allow read, create: if isOwner(uid)
+          && request.resource.data.explanation is string
+          && request.resource.data.explanation.size() <= 1200;
+      }
+    }
+
+    match /suggestions/{id} {
+      allow create: if signedIn()
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 1200;
+      allow read, update, delete: if false;
+    }
+  }
+}
